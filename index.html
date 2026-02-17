@@ -1180,34 +1180,29 @@ function initCanvas4(){
     // Light beam path via gravitational simulation — photon curves around mass
     beamScreen=[];
     {
-      // Photon follows the grid's own curvature — deflected by the gradient of depress()
-      const dt=0.02;
-      const MAX_STEPS=40000;
-      const PHOTON_SPEED=2.0;
-      const DEFLECT_STRENGTH=0.35; // how strongly the surface slope deflects the photon
-      const IMPACT_PARAM=GRID_EXTENT*0.25;
+      // Photon deflected by gravity with capped force — enters, bends, exits
+      const dt=0.005;
+      const MAX_STEPS=200000;
+      const PHOTON_SPEED=2.5;
+      const GM=150;
+      const MIN_DIST=80; // caps force to prevent spiral-in
+      const IMPACT_PARAM=140;
       let px=IMPACT_PARAM, pz=-GRID_EXTENT*1.8;
       let vx=0, vz=PHOTON_SPEED;
       for(let i=0;i<MAX_STEPS;i++){
-        // Compute gradient of depress() at current position (slope of the grid surface)
-        const eps=0.1;
-        const dHere=depress(px,pz);
-        const dRight=depress(px+eps,pz);
-        const dFwd=depress(px,pz+eps);
-        const gradX=(dRight-dHere)/eps; // slope in X direction
-        const gradZ=(dFwd-dHere)/eps;   // slope in Z direction
-        // Deflect photon velocity toward the downhill direction (into the dip)
-        vx+=gradX*DEFLECT_STRENGTH;
-        vz+=gradZ*DEFLECT_STRENGTH;
-        // Renormalize to constant speed
+        const dx=sunX3-px, dz=sunZ3-pz;
+        const d=Math.sqrt(dx*dx+dz*dz);
+        const ed=Math.max(d, MIN_DIST);
+        const accel=GM/(ed*ed);
+        vx+=dx/d*accel*dt;
+        vz+=dz/d*accel*dt;
         const ns=Math.sqrt(vx*vx+vz*vz);
         vx=vx/ns*PHOTON_SPEED;
         vz=vz/ns*PHOTON_SPEED;
         px+=vx*dt;
         pz+=vz*dt;
         if(Math.abs(px)>GRID_EXTENT*5||pz>GRID_EXTENT*5) break;
-        // Save every 20th point
-        if(i%20===0){
+        if(i%40===0){
           const py=depress(px,pz);
           beamScreen.push(project(px,py,pz));
         }
