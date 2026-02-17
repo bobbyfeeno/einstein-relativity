@@ -1166,17 +1166,21 @@ function initCanvas4(){
   let time=0;
   function animate(){
     time+=.016;
-    // Black background
-    ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+    // Deep purple-black background matching app aesthetic
+    ctx.fillStyle='#12051f';ctx.fillRect(0,0,W,H);
+    // Subtle purple atmospheric depth
+    const atmo=ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,W*.6);
+    atmo.addColorStop(0,'rgba(60,30,90,0.15)');atmo.addColorStop(.5,'rgba(30,15,60,0.08)');atmo.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=atmo;ctx.fillRect(0,0,W,H);
     // Stars with twinkle
     for(let i=0;i<stars.length;i++){
       const s=stars[i];
-      const alpha=.4+.6*(.5+.5*Math.sin(time*s.speed+s.phase));
+      const alpha=.3+.5*(.5+.5*Math.sin(time*s.speed+s.phase));
       ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.283);
-      ctx.fillStyle=`rgba(255,255,255,${alpha})`;ctx.fill();
+      ctx.fillStyle=`rgba(220,210,255,${alpha})`;ctx.fill();
     }
-    // Warped grid — horizontal lines
-    ctx.lineWidth=.8;ctx.strokeStyle='rgba(200,210,220,0.18)';
+    // Warped grid — horizontal lines (soft blue-purple like Ch2)
+    ctx.lineWidth=.8;ctx.strokeStyle='rgba(140,150,220,0.22)';
     for(let i=0;i<gridH.length;i++){
       const row=gridH[i];ctx.beginPath();ctx.moveTo(row[0].x,row[0].y);
       for(let j=1;j<row.length;j++)ctx.lineTo(row[j].x,row[j].y);
@@ -1189,13 +1193,13 @@ function initCanvas4(){
       ctx.stroke();
     }
     // Light beam trails + photons
-    const beamColor='#c8e040';
+    const beamColor='#e8c840';
     for(let b=0;b<beamPaths.length;b++){
       const path=beamPaths[b];const len=path.length;
       // Draw full faint beam path
       ctx.beginPath();ctx.moveTo(path[0].x,path[0].y);
       for(let i=1;i<len;i++)ctx.lineTo(path[i].x,path[i].y);
-      ctx.strokeStyle=`rgba(200,224,64,${0.08+b*0.02})`;ctx.lineWidth=3-b*.6;ctx.stroke();
+      ctx.strokeStyle=`rgba(232,200,64,${0.07+b*0.02})`;ctx.lineWidth=3-b*.6;ctx.stroke();
       // Animated photon position (loop)
       const speed=.18+b*.04;
       const photonT=((time*speed+b*.33)%1);
@@ -1205,28 +1209,28 @@ function initCanvas4(){
       const trailLen=50;const trailStart=Math.max(0,idx-trailLen);
       ctx.beginPath();ctx.moveTo(path[trailStart].x,path[trailStart].y);
       for(let i=trailStart+1;i<=idx;i++)ctx.lineTo(path[i].x,path[i].y);
-      ctx.strokeStyle=`rgba(200,224,64,0.5)`;ctx.lineWidth=2.5-b*.5;
+      ctx.strokeStyle='rgba(255,215,80,0.45)';ctx.lineWidth=2.5-b*.5;
       ctx.shadowColor=beamColor;ctx.shadowBlur=12;ctx.stroke();ctx.shadowBlur=0;
       // Photon dot
       ctx.beginPath();ctx.arc(px,py,4-b*.8,0,6.283);
-      ctx.fillStyle='#eeffaa';ctx.shadowColor=beamColor;ctx.shadowBlur=20;ctx.fill();ctx.shadowBlur=0;
+      ctx.fillStyle='#fff0c0';ctx.shadowColor=beamColor;ctx.shadowBlur=20;ctx.fill();ctx.shadowBlur=0;
     }
     // Massive glowing star — center-left
     const pulse=1+.06*Math.sin(time*1.5);
     const outerR=70*pulse;
     // Corona / halo
     const cg=ctx.createRadialGradient(mx,my,5,mx,my,outerR);
-    cg.addColorStop(0,'rgba(255,255,240,0.95)');
-    cg.addColorStop(.15,'rgba(255,240,180,0.7)');
-    cg.addColorStop(.4,'rgba(255,200,100,0.25)');
-    cg.addColorStop(.7,'rgba(255,160,60,0.08)');
-    cg.addColorStop(1,'rgba(255,120,40,0)');
+    cg.addColorStop(0,'rgba(255,248,220,0.95)');
+    cg.addColorStop(.15,'rgba(255,215,0,0.6)');
+    cg.addColorStop(.4,'rgba(255,180,60,0.2)');
+    cg.addColorStop(.7,'rgba(200,120,60,0.06)');
+    cg.addColorStop(1,'rgba(120,60,40,0)');
     ctx.beginPath();ctx.arc(mx,my,outerR,0,6.283);ctx.fillStyle=cg;ctx.fill();
-    // Bright core
+    // Bright gold core
     const core=ctx.createRadialGradient(mx,my,0,mx,my,12*pulse);
-    core.addColorStop(0,'#fffff8');core.addColorStop(.5,'#ffe8a0');core.addColorStop(1,'#ffcc66');
+    core.addColorStop(0,'#fffef0');core.addColorStop(.5,'#ffd700');core.addColorStop(1,'#e8a830');
     ctx.beginPath();ctx.arc(mx,my,12*pulse,0,6.283);ctx.fillStyle=core;
-    ctx.shadowColor='#ffdd88';ctx.shadowBlur=30*pulse;ctx.fill();ctx.shadowBlur=0;
+    ctx.shadowColor='#ffd700';ctx.shadowBlur=30*pulse;ctx.fill();ctx.shadowBlur=0;
     requestAnimationFrame(animate);
   }
   animate();
