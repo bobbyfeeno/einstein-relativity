@@ -91,7 +91,7 @@ body{font-family:'Georgia','Times New Roman',serif;background:#1a120a;color:#f0e
 /* ============================================================
    EINSTEIN SVG CHARACTER
    ============================================================ */
-.einstein-wrap{width:180px;height:220px;margin:0 auto 10px;position:relative}
+.einstein-wrap{width:200px;height:240px;margin:0 auto 10px;position:relative}
 .einstein-svg{width:100%;height:100%;animation:einsteinBreathe 4s ease-in-out infinite}
 @keyframes einsteinBreathe{0%,100%{transform:scaleY(1) scaleX(1)}50%{transform:scaleY(1.02) scaleX(.99)}}
 .einstein-wrap .hair-strand{animation:hairSway 3s ease-in-out infinite alternate}
@@ -111,7 +111,7 @@ body{font-family:'Georgia','Times New Roman',serif;background:#1a120a;color:#f0e
   .anim-canvas{height:280px}
   #nav-dots{right:8px;gap:10px}
   .nav-dot{width:10px;height:10px}
-  .einstein-wrap{width:140px;height:170px}
+  .einstein-wrap{width:160px;height:190px}
   .speech-bubble{padding:16px 20px;font-size:.95rem}
 }
 </style>
@@ -371,149 +371,373 @@ function randInt(a,b){return Math.floor(rand(a,b+1))}
 function createEinstein(containerId, pose='wave') {
   const c = document.getElementById(containerId);
   if(!c) return;
+  /* Each pose defines: shoulder positions, elbow positions, wrist positions,
+     hand type (wave/point/open/chin/fist), eyebrow shapes, mouth shape */
   const poses = {
-    wave:     {lArm:'M25,105 Q10,85 18,70',rArm:'M75,105 Q95,75 85,55',lHand:'M16,68',rHand:'M84,53',brow1:'M28,38 Q38,30 48,36',brow2:'M52,36 Q62,30 72,38',mouth:'M38,68 Q50,76 62,68'},
-    point:    {lArm:'M25,105 Q15,100 10,95',rArm:'M75,105 Q100,80 110,70',lHand:'M8,93',rHand:'M109,68',brow1:'M28,38 Q38,33 48,37',brow2:'M52,37 Q62,30 72,35',mouth:'M40,68 Q50,73 60,68'},
-    think:    {lArm:'M25,105 Q20,90 35,72',rArm:'M75,105 Q85,100 80,95',lHand:'M34,70',rHand:'M79,93',brow1:'M28,40 Q38,33 48,38',brow2:'M52,35 Q62,28 72,36',mouth:'M42,68 Q50,70 58,68'},
-    excited:  {lArm:'M25,105 Q5,70 15,50',rArm:'M75,105 Q95,70 85,50',lHand:'M13,48',rHand:'M84,48',brow1:'M28,34 Q38,26 48,34',brow2:'M52,34 Q62,26 72,34',mouth:'M36,66 Q50,80 64,66'},
-    mindblown:{lArm:'M25,105 Q0,65 20,45',rArm:'M75,105 Q100,65 80,45',lHand:'M18,43',rHand:'M78,43',brow1:'M28,32 Q38,22 48,32',brow2:'M52,32 Q62,22 72,32',mouth:'M40,66 Q50,78 60,66'},
-    curious:  {lArm:'M25,105 Q15,95 20,88',rArm:'M75,105 Q90,90 82,80',lHand:'M18,86',rHand:'M81,78',brow1:'M28,36 Q38,28 48,35',brow2:'M52,38 Q62,34 72,40',mouth:'M42,67 Q50,72 58,69'},
-    explain:  {lArm:'M25,105 Q10,90 15,80',rArm:'M75,105 Q100,85 95,75',lHand:'M13,78',rHand:'M94,73',brow1:'M28,37 Q38,31 48,36',brow2:'M52,36 Q62,31 72,37',mouth:'M38,67 Q50,75 62,67'},
-    wonder:   {lArm:'M25,105 Q18,92 22,82',rArm:'M75,105 Q82,92 78,82',lHand:'M20,80',rHand:'M77,80',brow1:'M28,34 Q38,27 48,34',brow2:'M52,34 Q62,27 72,34',mouth:'M42,66 Q50,74 58,66'},
-    proud:    {lArm:'M25,105 Q12,95 15,88',rArm:'M75,105 Q88,95 85,88',lHand:'M13,86',rHand:'M84,86',brow1:'M28,37 Q38,32 48,37',brow2:'M52,37 Q62,32 72,37',mouth:'M36,66 Q50,78 64,66'},
-    present:  {lArm:'M25,105 Q10,85 12,75',rArm:'M75,105 Q105,80 100,68',lHand:'M10,73',rHand:'M99,66',brow1:'M28,36 Q38,30 48,36',brow2:'M52,36 Q62,30 72,36',mouth:'M38,67 Q50,76 62,67'}
+    wave: {
+      lShoulder:[22,92], lElbow:[12,78], lWrist:[16,66], lHandType:'open',
+      rShoulder:[78,92], rElbow:[92,72], rWrist:[88,54], rHandType:'wave',
+      brow1:'M26,36 Q37,28 48,35', brow2:'M52,35 Q63,28 74,36',
+      mouth:'M36,69 Q50,79 64,69', mouthFill:true
+    },
+    point: {
+      lShoulder:[22,92], lElbow:[14,98], lWrist:[8,94], lHandType:'open',
+      rShoulder:[78,92], rElbow:[98,78], rWrist:[112,66], rHandType:'point',
+      brow1:'M26,37 Q37,31 48,36', brow2:'M52,36 Q63,28 74,34',
+      mouth:'M40,68 Q50,74 60,68', mouthFill:false
+    },
+    think: {
+      lShoulder:[22,92], lElbow:[28,78], lWrist:[38,68], lHandType:'chin',
+      rShoulder:[78,92], rElbow:[84,100], rWrist:[80,96], rHandType:'fist',
+      brow1:'M26,39 Q37,31 48,37', brow2:'M52,34 Q63,26 74,35',
+      mouth:'M42,68 Q50,71 58,68', mouthFill:false
+    },
+    excited: {
+      lShoulder:[22,92], lElbow:[4,68], lWrist:[14,48], lHandType:'open',
+      rShoulder:[78,92], rElbow:[96,68], rWrist:[86,48], rHandType:'open',
+      brow1:'M26,33 Q37,24 48,33', brow2:'M52,33 Q63,24 74,33',
+      mouth:'M34,67 Q50,82 66,67', mouthFill:true
+    },
+    mindblown: {
+      lShoulder:[22,92], lElbow:[-2,62], lWrist:[18,42], lHandType:'open',
+      rShoulder:[78,92], rElbow:[102,62], rWrist:[82,42], rHandType:'open',
+      brow1:'M26,30 Q37,20 48,30', brow2:'M52,30 Q63,20 74,30',
+      mouth:'M38,67 Q50,80 62,67', mouthFill:true
+    },
+    curious: {
+      lShoulder:[22,92], lElbow:[14,94], lWrist:[18,86], lHandType:'fist',
+      rShoulder:[78,92], rElbow:[90,84], rWrist:[84,76], rHandType:'open',
+      brow1:'M26,35 Q37,26 48,34', brow2:'M52,37 Q63,32 74,39',
+      mouth:'M42,68 Q50,73 58,69', mouthFill:false
+    },
+    explain: {
+      lShoulder:[22,92], lElbow:[8,84], lWrist:[12,74], lHandType:'open',
+      rShoulder:[78,92], rElbow:[98,80], rWrist:[96,70], rHandType:'open',
+      brow1:'M26,36 Q37,30 48,35', brow2:'M52,35 Q63,30 74,36',
+      mouth:'M36,68 Q50,77 64,68', mouthFill:true
+    },
+    wonder: {
+      lShoulder:[22,92], lElbow:[16,88], lWrist:[20,80], lHandType:'open',
+      rShoulder:[78,92], rElbow:[84,88], rWrist:[80,80], rHandType:'open',
+      brow1:'M26,33 Q37,25 48,33', brow2:'M52,33 Q63,25 74,33',
+      mouth:'M42,67 Q50,75 58,67', mouthFill:false
+    },
+    proud: {
+      lShoulder:[22,92], lElbow:[10,96], lWrist:[14,88], lHandType:'fist',
+      rShoulder:[78,92], rElbow:[90,96], rWrist:[86,88], rHandType:'fist',
+      brow1:'M26,36 Q37,30 48,36', brow2:'M52,36 Q63,30 74,36',
+      mouth:'M34,67 Q50,80 66,67', mouthFill:true
+    },
+    present: {
+      lShoulder:[22,92], lElbow:[8,82], lWrist:[10,72], lHandType:'open',
+      rShoulder:[78,92], rElbow:[104,76], rWrist:[102,64], rHandType:'open',
+      brow1:'M26,35 Q37,28 48,35', brow2:'M52,35 Q63,28 74,35',
+      mouth:'M36,68 Q50,78 64,68', mouthFill:true
+    }
   };
   const p = poses[pose]||poses.wave;
-  const lhx=p.lHand.split(',')[0].replace('M',''), lhy=p.lHand.split(',')[1];
-  const rhx=p.rHand.split(',')[0].replace('M',''), rhy=p.rHand.split(',')[1];
-  c.innerHTML = `<svg class="einstein-svg" viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg">
+  const [lsx,lsy]=p.lShoulder,[lex,ley]=p.lElbow,[lwx,lwy]=p.lWrist;
+  const [rsx,rsy]=p.rShoulder,[rex,rey]=p.rElbow,[rwx,rwy]=p.rWrist;
+
+  /* Generate hand SVG based on type */
+  function handSVG(wx,wy,ex,ey,type,id,isLeft){
+    // Hand direction = wrist - elbow normalized
+    const dx=wx-ex, dy=wy-ey;
+    const len=Math.sqrt(dx*dx+dy*dy)||1;
+    const nx=dx/len, ny=dy/len;
+    // Perpendicular
+    const px=-ny, py=nx;
+    const s=isLeft?1:-1;
+    if(type==='wave'){
+      // Open hand with spread fingers, waving
+      return `<g filter="url(#softShadow${id})">
+        <ellipse cx="${wx}" cy="${wy}" rx="5.5" ry="6.5" fill="#f5d0a0" stroke="#ddb070" stroke-width=".4"
+          transform="rotate(${Math.atan2(dy,dx)*180/Math.PI+90},${wx},${wy})"/>
+        <path d="M${wx+px*3},${wy+py*3} Q${wx+px*4+nx*7},${wy+py*4+ny*7} ${wx+px*2+nx*11},${wy+py*2+ny*11}"
+          fill="none" stroke="#f0c890" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M${wx+px*1},${wy+py*1} Q${wx+px*1.5+nx*8},${wy+py*1.5+ny*8} ${wx+px*.5+nx*13},${wy+py*.5+ny*13}"
+          fill="none" stroke="#f0c890" stroke-width="2" stroke-linecap="round"/>
+        <path d="M${wx-px*1},${wy-py*1} Q${wx-px*1+nx*8},${wy-py*1+ny*8} ${wx-px*1.5+nx*12},${wy-py*1.5+ny*12}"
+          fill="none" stroke="#f0c890" stroke-width="2" stroke-linecap="round"/>
+        <path d="M${wx-px*3},${wy-py*3} Q${wx-px*3.5+nx*6},${wy-py*3.5+ny*6} ${wx-px*4+nx*9},${wy-py*4+ny*9}"
+          fill="none" stroke="#f0c890" stroke-width="1.8" stroke-linecap="round"/>
+      </g>`;
+    } else if(type==='point'){
+      return `<g filter="url(#softShadow${id})">
+        <ellipse cx="${wx}" cy="${wy}" rx="5" ry="6" fill="#f5d0a0" stroke="#ddb070" stroke-width=".4"
+          transform="rotate(${Math.atan2(dy,dx)*180/Math.PI+90},${wx},${wy})"/>
+        <path d="M${wx+px*.5},${wy+py*.5} L${wx+px*.5+nx*14},${wy+py*.5+ny*14}"
+          fill="none" stroke="#f0c890" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M${wx+px*2.5},${wy+py*2.5} Q${wx+px*3+nx*3},${wy+py*3+ny*3} ${wx+px*2+nx*4},${wy+py*2+ny*4}"
+          fill="none" stroke="#f0c890" stroke-width="2" stroke-linecap="round"/>
+        <path d="M${wx-px*2},${wy-py*2} Q${wx-px*2.5+nx*3},${wy-py*2.5+ny*3} ${wx-px*2+nx*4},${wy-py*2+ny*4}"
+          fill="none" stroke="#f0c890" stroke-width="2" stroke-linecap="round"/>
+      </g>`;
+    } else if(type==='chin'){
+      return `<g filter="url(#softShadow${id})">
+        <ellipse cx="${wx}" cy="${wy}" rx="6" ry="5" fill="#f5d0a0" stroke="#ddb070" stroke-width=".4"/>
+        <path d="M${wx-4},${wy-3} Q${wx-3},${wy-7} ${wx},${wy-5}" fill="none" stroke="#eac080" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M${wx+1},${wy-5} Q${wx+4},${wy-7} ${wx+4},${wy-3}" fill="none" stroke="#eac080" stroke-width="1.8" stroke-linecap="round"/>
+      </g>`;
+    } else if(type==='fist'){
+      return `<g filter="url(#softShadow${id})">
+        <ellipse cx="${wx}" cy="${wy}" rx="5.5" ry="5" fill="#f5d0a0" stroke="#ddb070" stroke-width=".4"/>
+        <path d="M${wx-3},${wy-2} Q${wx},${wy-5} ${wx+3},${wy-2}" fill="none" stroke="#eac080" stroke-width="1" stroke-linecap="round"/>
+        <ellipse cx="${wx}" cy="${wy}" rx="3" ry="2.5" fill="rgba(255,220,180,.2)"/>
+      </g>`;
+    } else { // 'open' - relaxed open palm
+      return `<g filter="url(#softShadow${id})">
+        <ellipse cx="${wx}" cy="${wy}" rx="5.5" ry="6" fill="#f5d0a0" stroke="#ddb070" stroke-width=".4"
+          transform="rotate(${Math.atan2(dy,dx)*180/Math.PI+90},${wx},${wy})"/>
+        <path d="M${wx+px*2},${wy+py*2} Q${wx+px*2.5+nx*5},${wy+py*2.5+ny*5} ${wx+px*1.5+nx*8},${wy+py*1.5+ny*8}"
+          fill="none" stroke="#f0c890" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M${wx},${wy} Q${wx+nx*6},${wy+ny*6} ${wx+nx*9},${wy+ny*9}"
+          fill="none" stroke="#f0c890" stroke-width="2" stroke-linecap="round"/>
+        <path d="M${wx-px*2},${wy-py*2} Q${wx-px*2.5+nx*5},${wy-py*2.5+ny*5} ${wx-px*2+nx*7},${wy-py*2+ny*7}"
+          fill="none" stroke="#f0c890" stroke-width="1.8" stroke-linecap="round"/>
+        <ellipse cx="${wx}" cy="${wy}" rx="3" ry="3.5" fill="rgba(255,220,180,.15)"
+          transform="rotate(${Math.atan2(dy,dx)*180/Math.PI+90},${wx},${wy})"/>
+      </g>`;
+    }
+  }
+
+  /* Generate arm with sleeve (upper arm + forearm as filled bezier shapes) */
+  function armSVG(sx,sy,ex,ey,wx,wy,id){
+    // Upper arm: shoulder to elbow — tapered sleeve
+    const ua_dx=ex-sx, ua_dy=ey-sy, ua_len=Math.sqrt(ua_dx*ua_dx+ua_dy*ua_dy)||1;
+    const ua_px=-ua_dy/ua_len, ua_py=ua_dx/ua_len;
+    const fa_dx=wx-ex, fa_dy=wy-ey, fa_len=Math.sqrt(fa_dx*fa_dx+fa_dy*fa_dy)||1;
+    const fa_px=-fa_dy/fa_len, fa_py=fa_dx/fa_len;
+    const sw1=6.5, sw2=5.5, sw3=4.5; // taper widths
+    return `
+      <!-- Upper arm sleeve -->
+      <path d="M${sx+ua_px*sw1},${sy+ua_py*sw1}
+               C${sx+ua_px*sw1+ua_dx*.3},${sy+ua_py*sw1+ua_dy*.3}
+                ${ex+ua_px*sw2-ua_dx*.1},${ey+ua_py*sw2-ua_dy*.1}
+                ${ex+ua_px*sw2},${ey+ua_py*sw2}
+               L${ex-ua_px*sw2},${ey-ua_py*sw2}
+               C${ex-ua_px*sw2-ua_dx*.1},${ey-ua_py*sw2-ua_dy*.1}
+                ${sx-ua_px*sw1+ua_dx*.3},${sy-ua_py*sw1+ua_dy*.3}
+                ${sx-ua_px*sw1},${sy-ua_py*sw1}Z"
+            fill="url(#coatGrad${id})" stroke="rgba(180,150,110,.25)" stroke-width=".4"/>
+      <!-- Sleeve shadow crease -->
+      <path d="M${sx},${sy} Q${(sx+ex)/2+ua_px*1.5},${(sy+ey)/2+ua_py*1.5} ${ex},${ey}"
+            fill="none" stroke="rgba(160,120,70,.12)" stroke-width="1.5"/>
+      <!-- Forearm sleeve (slightly narrower, cuff at end) -->
+      <path d="M${ex+fa_px*sw2},${ey+fa_py*sw2}
+               C${ex+fa_px*sw2+fa_dx*.3},${ey+fa_py*sw2+fa_dy*.3}
+                ${wx+fa_px*sw3-fa_dx*.1},${wy+fa_py*sw3-fa_dy*.1}
+                ${wx+fa_px*sw3},${wy+fa_py*sw3}
+               L${wx-fa_px*sw3},${wy-fa_py*sw3}
+               C${wx-fa_px*sw3-fa_dx*.1},${wy-fa_py*sw3-fa_dy*.1}
+                ${ex-fa_px*sw2+fa_dx*.3},${ey-fa_py*sw2+fa_dy*.3}
+                ${ex-fa_px*sw2},${ey-fa_py*sw2}Z"
+            fill="url(#coatGrad${id})" stroke="rgba(180,150,110,.2)" stroke-width=".3"/>
+      <!-- Cuff line -->
+      <line x1="${wx+fa_px*sw3}" y1="${wy+fa_py*sw3}" x2="${wx-fa_px*sw3}" y2="${wy-fa_py*sw3}"
+            stroke="rgba(180,150,110,.3)" stroke-width=".8"/>
+      <!-- Elbow joint shadow (subtle circle) -->
+      <circle cx="${ex}" cy="${ey}" r="3" fill="rgba(180,150,110,.08)"/>`;
+  }
+
+  const lArmSVG = armSVG(lsx,lsy,lex,ley,lwx,lwy,containerId);
+  const rArmSVG = armSVG(rsx,rsy,rex,rey,rwx,rwy,containerId);
+  const lHandSVG = handSVG(lwx,lwy,lex,ley,p.lHandType,containerId,true);
+  const rHandSVG = handSVG(rwx,rwy,rex,rey,p.rHandType,containerId,false);
+  const mouthPath = p.mouthFill
+    ? `<path d="${p.mouth}" fill="rgba(120,50,30,.15)" stroke="rgba(180,110,70,.6)" stroke-width="1.8" stroke-linecap="round"/>`
+    : `<path d="${p.mouth}" fill="none" stroke="rgba(180,110,70,.6)" stroke-width="1.8" stroke-linecap="round"/>`;
+
+  c.innerHTML = `<svg class="einstein-svg" viewBox="-15 -15 130 160" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <radialGradient id="skinGrad${containerId}" cx="38%" cy="32%"><stop offset="0%" stop-color="#fde8cc"/><stop offset="40%" stop-color="#f5d0a0"/><stop offset="100%" stop-color="#dda868"/></radialGradient>
-      <radialGradient id="skinShadow${containerId}" cx="55%" cy="70%"><stop offset="0%" stop-color="transparent"/><stop offset="60%" stop-color="transparent"/><stop offset="100%" stop-color="rgba(160,90,40,.15)"/></radialGradient>
-      <radialGradient id="cheekGrad${containerId}" cx="50%" cy="40%"><stop offset="0%" stop-color="#ff9988" stop-opacity=".5"/><stop offset="100%" stop-color="#ff9988" stop-opacity="0"/></radialGradient>
-      <linearGradient id="coatGrad${containerId}" x1="0" y1="0" x2=".2" y2="1"><stop offset="0%" stop-color="#fff8ee"/><stop offset="50%" stop-color="#f0e8d8"/><stop offset="100%" stop-color="#d8c8b0"/></linearGradient>
-      <linearGradient id="coatShadow${containerId}" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="rgba(120,80,40,.1)"/><stop offset="50%" stop-color="transparent"/><stop offset="100%" stop-color="rgba(120,80,40,.1)"/></linearGradient>
-      <radialGradient id="hairGrad${containerId}" cx="50%" cy="40%"><stop offset="0%" stop-color="#f5f0e8"/><stop offset="50%" stop-color="#e0d8cc"/><stop offset="100%" stop-color="#c8bcaa"/></radialGradient>
-      <radialGradient id="eyeWhite${containerId}" cx="45%" cy="40%"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#f0e8e0"/></radialGradient>
-      <radialGradient id="irisGrad${containerId}" cx="42%" cy="38%"><stop offset="0%" stop-color="#8b6834"/><stop offset="40%" stop-color="#6b4420"/><stop offset="100%" stop-color="#3a2210"/></radialGradient>
-      <filter id="warmGlow${containerId}"><feGaussianBlur stdDeviation="2" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter>
-      <filter id="softShadow${containerId}"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(80,40,10,.2)"/></filter>
+      <radialGradient id="skinGrad${containerId}" cx="38%" cy="32%">
+        <stop offset="0%" stop-color="#fde8cc"/><stop offset="25%" stop-color="#f8dab8"/>
+        <stop offset="55%" stop-color="#f0c898"/><stop offset="100%" stop-color="#d4a060"/>
+      </radialGradient>
+      <radialGradient id="skinShadow${containerId}" cx="58%" cy="68%">
+        <stop offset="0%" stop-color="transparent"/><stop offset="50%" stop-color="transparent"/>
+        <stop offset="100%" stop-color="rgba(140,75,30,.18)"/>
+      </radialGradient>
+      <radialGradient id="cheekGrad${containerId}" cx="50%" cy="40%">
+        <stop offset="0%" stop-color="#ff8877" stop-opacity=".55"/><stop offset="100%" stop-color="#ff8877" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="coatGrad${containerId}" x1="0" y1="0" x2=".15" y2="1">
+        <stop offset="0%" stop-color="#fffcf5"/><stop offset="30%" stop-color="#f5ece0"/>
+        <stop offset="70%" stop-color="#e8dcc8"/><stop offset="100%" stop-color="#d0c0a8"/>
+      </linearGradient>
+      <radialGradient id="hairGrad${containerId}" cx="50%" cy="35%">
+        <stop offset="0%" stop-color="#faf6f0"/><stop offset="30%" stop-color="#e8e0d4"/>
+        <stop offset="70%" stop-color="#d0c8b8"/><stop offset="100%" stop-color="#b8ac98"/>
+      </radialGradient>
+      <radialGradient id="eyeWhite${containerId}" cx="42%" cy="38%">
+        <stop offset="0%" stop-color="#ffffff"/><stop offset="80%" stop-color="#f5ede5"/><stop offset="100%" stop-color="#e8ddd0"/>
+      </radialGradient>
+      <radialGradient id="irisGrad${containerId}" cx="40%" cy="36%">
+        <stop offset="0%" stop-color="#a08040"/><stop offset="30%" stop-color="#7b5828"/>
+        <stop offset="70%" stop-color="#5a3818"/><stop offset="100%" stop-color="#2a1808"/>
+      </radialGradient>
+      <filter id="softShadow${containerId}"><feDropShadow dx="0" dy="1.5" stdDeviation="2.5" flood-color="rgba(60,30,5,.22)"/></filter>
+      <filter id="charShadow${containerId}"><feDropShadow dx="1" dy="3" stdDeviation="4" flood-color="rgba(40,20,0,.18)"/></filter>
     </defs>
-    <!-- Warm ambient glow behind character -->
-    <circle cx="50" cy="70" r="65" fill="none" stroke="rgba(240,180,80,.06)" stroke-width="8"/>
-    <circle cx="50" cy="70" r="55" fill="rgba(240,180,80,.03)"/>
-    <!-- Lab Coat Body -->
-    <path d="M28,88 L22,135 L78,135 L72,88 Q50,82 28,88Z" fill="url(#coatGrad${containerId})" stroke="rgba(180,150,110,.4)" stroke-width=".5" filter="url(#softShadow${containerId})"/>
-    <path d="M28,88 L22,135 L78,135 L72,88 Q50,82 28,88Z" fill="url(#coatShadow${containerId})"/>
-    <!-- Coat collar — soft, rounded -->
-    <path d="M34,86 Q50,79 66,86 L63,93 Q50,87 37,93Z" fill="#f8f0e0" stroke="rgba(180,150,110,.3)" stroke-width=".4"/>
-    <!-- Coat lapel lines -->
-    <path d="M38,92 Q42,105 40,120" fill="none" stroke="rgba(180,150,110,.15)" stroke-width=".6"/>
-    <path d="M62,92 Q58,105 60,120" fill="none" stroke="rgba(180,150,110,.15)" stroke-width=".6"/>
-    <!-- Coat pockets — rounded -->
-    <rect x="32" y="108" width="12" height="8" rx="3" fill="none" stroke="rgba(180,150,110,.25)" stroke-width=".6"/>
-    <rect x="56" y="108" width="12" height="8" rx="3" fill="none" stroke="rgba(180,150,110,.25)" stroke-width=".6"/>
-    <!-- Coat buttons — warm brown -->
-    <circle cx="50" cy="100" r="1.8" fill="#a08060"/><circle cx="50" cy="100" r=".8" fill="#c0a080"/>
-    <circle cx="50" cy="110" r="1.8" fill="#a08060"/><circle cx="50" cy="110" r=".8" fill="#c0a080"/>
-    <circle cx="50" cy="120" r="1.8" fill="#a08060"/><circle cx="50" cy="120" r=".8" fill="#c0a080"/>
-    <!-- Bowtie — warm burgundy with sheen -->
-    <polygon points="42,87 50,91.5 58,87 58,96 50,91.5 42,96" fill="#8b2020"/>
-    <polygon points="43,88 50,91.5 57,88 57,95 50,91.5 43,95" fill="#b03030"/>
-    <polygon points="44.5,89.5 50,91.5 50,91.5 44.5,93.5" fill="rgba(255,200,200,.2)"/>
-    <circle cx="50" cy="91.5" r="3" fill="#c83838"/>
-    <circle cx="50" cy="91.5" r="1.5" fill="#8b2020"/>
-    <circle cx="49" cy="90.5" r=".8" fill="rgba(255,200,200,.3)"/>
-    <!-- Arms — warm coat color -->
-    <path d="${p.lArm}" fill="none" stroke="#f0e4d0" stroke-width="9" stroke-linecap="round"/>
-    <path d="${p.lArm}" fill="none" stroke="rgba(180,150,110,.15)" stroke-width="9" stroke-linecap="round"/>
-    <path d="${p.rArm}" fill="none" stroke="#f0e4d0" stroke-width="9" stroke-linecap="round"/>
-    <path d="${p.rArm}" fill="none" stroke="rgba(180,150,110,.15)" stroke-width="9" stroke-linecap="round"/>
-    <!-- Hands — soft, rounded, warm -->
-    <circle cx="${lhx}" cy="${lhy}" r="6" fill="#f0c890" stroke="#ddb070" stroke-width=".4"/>
-    <circle cx="${lhx}" cy="${lhy}" r="3.5" fill="rgba(255,220,180,.3)"/>
-    <circle cx="${rhx}" cy="${rhy}" r="6" fill="#f0c890" stroke="#ddb070" stroke-width=".4"/>
-    <circle cx="${rhx}" cy="${rhy}" r="3.5" fill="rgba(255,220,180,.3)"/>
-    <!-- Ears — behind head -->
-    <ellipse cx="22" cy="54" rx="6" ry="8" fill="#e8b878" stroke="rgba(180,120,60,.3)" stroke-width=".5"/>
-    <ellipse cx="22" cy="54" rx="3" ry="5" fill="rgba(200,140,80,.2)"/>
-    <ellipse cx="78" cy="54" rx="6" ry="8" fill="#e8b878" stroke="rgba(180,120,60,.3)" stroke-width=".5"/>
-    <ellipse cx="78" cy="54" rx="3" ry="5" fill="rgba(200,140,80,.2)"/>
-    <!-- Head — big, rounded, warm Pixar proportions -->
-    <ellipse cx="50" cy="50" rx="30" ry="34" fill="url(#skinGrad${containerId})"/>
-    <ellipse cx="50" cy="50" rx="30" ry="34" fill="url(#skinShadow${containerId})"/>
-    <!-- Subtle skin warmth on forehead -->
-    <ellipse cx="50" cy="38" rx="18" ry="10" fill="rgba(255,220,180,.15)"/>
-    <!-- Hair - fluffy, volumetric like Gusteau/Linguini -->
-    <g class="hair-strand" style="transform-origin:50px 22px">
-      <!-- Main fluffy mass -->
-      <path d="M20 42 Q5 25 18 15 Q12 2 32 6 Q28 -6 50 -2 Q45 -8 62 -4 Q58 -8 75 2 Q68 -2 82 10 Q92 5 85 22 Q98 18 82 40" fill="url(#hairGrad${containerId})" stroke="rgba(180,170,150,.3)" stroke-width=".5"/>
-      <!-- Fluffy volume highlights -->
-      <path d="M25 30 Q15 18 22 12 Q18 4 35 6" fill="rgba(255,255,245,.2)" stroke="none"/>
-      <path d="M75 30 Q85 18 78 12 Q82 4 65 6" fill="rgba(255,255,245,.15)" stroke="none"/>
-      <!-- Wispy strands — soft, not sharp -->
-      <path d="M16 40 Q2 30 10 18" fill="none" stroke="rgba(220,210,195,.7)" stroke-width="4.5" stroke-linecap="round"/>
-      <path d="M84 40 Q98 30 90 18" fill="none" stroke="rgba(220,210,195,.7)" stroke-width="4.5" stroke-linecap="round"/>
-      <path d="M14 46 Q0 36 8 20" fill="none" stroke="rgba(210,200,185,.5)" stroke-width="3" stroke-linecap="round"/>
-      <path d="M86 46 Q100 36 92 20" fill="none" stroke="rgba(210,200,185,.5)" stroke-width="3" stroke-linecap="round"/>
-      <!-- Top flyaway wisps -->
-      <path d="M30 8 Q25 -4 34 -2" fill="none" stroke="rgba(230,220,205,.5)" stroke-width="2" stroke-linecap="round"/>
-      <path d="M50 -1 Q48 -10 55 -7" fill="none" stroke="rgba(230,220,205,.4)" stroke-width="2" stroke-linecap="round"/>
-      <path d="M70 8 Q75 -4 66 -2" fill="none" stroke="rgba(230,220,205,.5)" stroke-width="2" stroke-linecap="round"/>
+    <!-- Warm ambient glow -->
+    <ellipse cx="50" cy="72" rx="60" ry="70" fill="rgba(240,180,80,.04)"/>
+
+    <!-- === BODY — shaped torso with tapered waist === -->
+    <g filter="url(#charShadow${containerId})">
+      <path d="M24,88 C20,92 18,108 20,125 Q22,135 30,138 L70,138 Q78,135 80,125 C82,108 80,92 76,88
+               Q68,83 50,81 Q32,83 24,88Z"
+            fill="url(#coatGrad${containerId})" stroke="rgba(170,140,100,.35)" stroke-width=".5"/>
+      <!-- Coat side shadows for 3D shape -->
+      <path d="M24,88 C20,92 18,108 20,125 Q22,135 30,138 L35,138 Q30,120 28,100 Q26,90 30,86Z"
+            fill="rgba(160,130,90,.1)"/>
+      <path d="M76,88 C80,92 82,108 80,125 Q78,135 70,138 L65,138 Q70,120 72,100 Q74,90 70,86Z"
+            fill="rgba(160,130,90,.1)"/>
+      <!-- Collar / Lapels — V-shaped -->
+      <path d="M34,86 Q42,82 50,84 L46,100 L38,94Z" fill="#f8f2e8" stroke="rgba(180,150,110,.3)" stroke-width=".4"/>
+      <path d="M66,86 Q58,82 50,84 L54,100 L62,94Z" fill="#f8f2e8" stroke="rgba(180,150,110,.3)" stroke-width=".4"/>
+      <!-- Lapel fold shadow -->
+      <path d="M46,100 L50,84" fill="none" stroke="rgba(160,120,70,.12)" stroke-width=".8"/>
+      <path d="M54,100 L50,84" fill="none" stroke="rgba(160,120,70,.12)" stroke-width=".8"/>
+      <!-- Center seam -->
+      <path d="M50,100 L50,136" fill="none" stroke="rgba(160,120,70,.08)" stroke-width=".6"/>
+      <!-- Pockets with flap -->
+      <path d="M30,114 L30,108 Q30,106 32,106 L42,106 Q44,106 44,108 L44,114 Q44,116 42,116 L32,116 Q30,116 30,114Z"
+            fill="none" stroke="rgba(170,140,100,.22)" stroke-width=".6"/>
+      <line x1="30" y1="108" x2="44" y2="108" stroke="rgba(170,140,100,.18)" stroke-width=".5"/>
+      <path d="M56,114 L56,108 Q56,106 58,106 L68,106 Q70,106 70,108 L70,114 Q70,116 68,116 L58,116 Q56,116 56,114Z"
+            fill="none" stroke="rgba(170,140,100,.22)" stroke-width=".6"/>
+      <line x1="56" y1="108" x2="70" y2="108" stroke="rgba(170,140,100,.18)" stroke-width=".5"/>
+      <!-- Buttons -->
+      <circle cx="50" cy="103" r="2" fill="#9a7858"/><circle cx="50" cy="103" r=".9" fill="#c0a078"/>
+      <circle cx="50" cy="113" r="2" fill="#9a7858"/><circle cx="50" cy="113" r=".9" fill="#c0a078"/>
+      <circle cx="50" cy="123" r="2" fill="#9a7858"/><circle cx="50" cy="123" r=".9" fill="#c0a078"/>
     </g>
-    <!-- Eyes — BIG Pixar eyes with detailed reflections -->
-    <g class="blink" style="transform-origin:50px 48px">
-      <!-- Eye whites with warm shadow at top -->
-      <ellipse cx="37" cy="48" rx="10" ry="11.5" fill="url(#eyeWhite${containerId})"/>
-      <ellipse cx="37" cy="44" rx="9" ry="5" fill="rgba(180,140,100,.06)"/>
-      <ellipse cx="63" cy="48" rx="10" ry="11.5" fill="url(#eyeWhite${containerId})"/>
-      <ellipse cx="63" cy="44" rx="9" ry="5" fill="rgba(180,140,100,.06)"/>
-      <!-- Iris — warm brown with radial detail -->
-      <circle cx="38" cy="49" r="6" fill="url(#irisGrad${containerId})"/>
-      <circle cx="64" cy="49" r="6" fill="url(#irisGrad${containerId})"/>
+
+    <!-- === BOWTIE — layered, 3D === -->
+    <g filter="url(#softShadow${containerId})">
+      <path d="M40,86 Q45,84 50,91 Q55,84 60,86 Q55,92 60,98 Q55,100 50,93 Q45,100 40,98 Q45,92 40,86Z"
+            fill="#8b2020"/>
+      <path d="M41,87 Q46,85 50,91 Q54,85 59,87 Q54,92 59,97 Q54,99 50,93 Q46,99 41,97 Q46,92 41,87Z"
+            fill="#b03030"/>
+      <path d="M42,88 Q46,87 49,91" fill="none" stroke="rgba(255,200,200,.2)" stroke-width="1.2"/>
+      <circle cx="50" cy="92" r="3.2" fill="#c83838"/>
+      <circle cx="50" cy="92" r="1.6" fill="#8b2020"/>
+      <circle cx="49" cy="91" r=".9" fill="rgba(255,210,210,.35)"/>
+    </g>
+
+    <!-- === ARMS with proper sleeves === -->
+    ${lArmSVG}
+    ${lHandSVG}
+    ${rArmSVG}
+    ${rHandSVG}
+
+    <!-- === EARS (behind head layer) === -->
+    <ellipse cx="20" cy="52" rx="6.5" ry="9" fill="#e4b474" stroke="rgba(170,110,50,.3)" stroke-width=".5"/>
+    <ellipse cx="20" cy="52" rx="3.5" ry="5.5" fill="rgba(190,130,70,.2)"/>
+    <path d="M19,48 Q17,52 19,56" fill="none" stroke="rgba(170,110,50,.2)" stroke-width=".6"/>
+    <ellipse cx="80" cy="52" rx="6.5" ry="9" fill="#e4b474" stroke="rgba(170,110,50,.3)" stroke-width=".5"/>
+    <ellipse cx="80" cy="52" rx="3.5" ry="5.5" fill="rgba(190,130,70,.2)"/>
+    <path d="M81,48 Q83,52 81,56" fill="none" stroke="rgba(170,110,50,.2)" stroke-width=".6"/>
+
+    <!-- === HEAD — large, Pixar-proportioned === -->
+    <ellipse cx="50" cy="48" rx="31" ry="36" fill="url(#skinGrad${containerId})" filter="url(#softShadow${containerId})"/>
+    <ellipse cx="50" cy="48" rx="31" ry="36" fill="url(#skinShadow${containerId})"/>
+    <!-- Forehead warmth -->
+    <ellipse cx="50" cy="36" rx="20" ry="12" fill="rgba(255,225,190,.12)"/>
+    <!-- Jawline shadow -->
+    <path d="M25,60 Q35,78 50,82 Q65,78 75,60" fill="rgba(180,120,60,.06)" stroke="none"/>
+
+    <!-- === HAIR — volumetric, many overlapping strands === -->
+    <g class="hair-strand" style="transform-origin:50px 18px">
+      <!-- Base volume -->
+      <path d="M18 44 Q2 26 14 14 Q8 -2 28 4 Q22 -10 46 -6 Q40 -14 56 -10 Q52 -14 68 -6 Q62 -10 80 0
+               Q74 -4 88 8 Q96 2 88 22 Q102 16 84 42"
+            fill="url(#hairGrad${containerId})" stroke="rgba(170,158,138,.25)" stroke-width=".5"/>
+      <!-- Secondary volume layer (slight offset for depth) -->
+      <path d="M22 40 Q8 24 18 14 Q14 2 32 6 Q28 -6 48 -4 Q44 -10 60 -6 Q56 -10 74 -2 Q68 -4 84 6
+               Q90 2 84 20 Q96 16 80 38"
+            fill="rgba(245,240,232,.3)" stroke="none"/>
+      <!-- Wispy side strands -->
+      <path d="M14 42 Q-2 30 6 14" fill="none" stroke="rgba(215,205,188,.75)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M86 42 Q102 30 94 14" fill="none" stroke="rgba(215,205,188,.75)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M12 48 Q-4 38 4 18" fill="none" stroke="rgba(205,195,178,.5)" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M88 48 Q104 38 96 18" fill="none" stroke="rgba(205,195,178,.5)" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M10 52 Q-2 44 2 28" fill="none" stroke="rgba(195,185,168,.3)" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M90 52 Q102 44 98 28" fill="none" stroke="rgba(195,185,168,.3)" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Top flyaways -->
+      <path d="M28 6 Q22 -8 32 -6" fill="none" stroke="rgba(225,218,205,.5)" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M42 -4 Q38 -16 48 -12" fill="none" stroke="rgba(225,218,205,.45)" stroke-width="2" stroke-linecap="round"/>
+      <path d="M58 -6 Q62 -18 56 -14" fill="none" stroke="rgba(225,218,205,.4)" stroke-width="2" stroke-linecap="round"/>
+      <path d="M72 4 Q78 -8 68 -4" fill="none" stroke="rgba(225,218,205,.45)" stroke-width="2.2" stroke-linecap="round"/>
+      <!-- Highlight wisps at crown -->
+      <path d="M35 2 Q40 -6 50 -8 Q60 -6 65 2" fill="rgba(255,255,248,.15)" stroke="none"/>
+    </g>
+
+    <!-- === EYES — Pixar-quality with full detail === -->
+    <g class="blink" style="transform-origin:50px 46px">
+      <!-- Eyelash suggestion (subtle top lash line) -->
+      <path d="M26,44 Q37,38 48,44" fill="none" stroke="rgba(120,80,40,.2)" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M52,44 Q63,38 74,44" fill="none" stroke="rgba(120,80,40,.2)" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- Eye whites -->
+      <ellipse cx="37" cy="47" rx="10.5" ry="12" fill="url(#eyeWhite${containerId})" stroke="rgba(140,100,60,.12)" stroke-width=".6"/>
+      <ellipse cx="63" cy="47" rx="10.5" ry="12" fill="url(#eyeWhite${containerId})" stroke="rgba(140,100,60,.12)" stroke-width=".6"/>
+      <!-- Upper lid shadow -->
+      <ellipse cx="37" cy="42" rx="9.5" ry="5.5" fill="rgba(170,130,85,.07)"/>
+      <ellipse cx="63" cy="42" rx="9.5" ry="5.5" fill="rgba(170,130,85,.07)"/>
+      <!-- Iris with gradient -->
+      <circle cx="38" cy="48" r="6.5" fill="url(#irisGrad${containerId})"/>
+      <circle cx="64" cy="48" r="6.5" fill="url(#irisGrad${containerId})"/>
       <!-- Iris detail ring -->
-      <circle cx="38" cy="49" r="5.2" fill="none" stroke="rgba(140,100,40,.3)" stroke-width=".4"/>
-      <circle cx="64" cy="49" r="5.2" fill="none" stroke="rgba(140,100,40,.3)" stroke-width=".4"/>
-      <!-- Iris spokes (subtle) -->
-      <line x1="38" y1="44" x2="38" y2="54" stroke="rgba(120,80,30,.08)" stroke-width=".5"/>
-      <line x1="33" y1="49" x2="43" y2="49" stroke="rgba(120,80,30,.08)" stroke-width=".5"/>
-      <line x1="64" y1="44" x2="64" y2="54" stroke="rgba(120,80,30,.08)" stroke-width=".5"/>
-      <line x1="59" y1="49" x2="69" y2="49" stroke="rgba(120,80,30,.08)" stroke-width=".5"/>
-      <!-- Pupils — deep, warm -->
-      <circle cx="38" cy="49" r="3" fill="#1a0e05"/>
-      <circle cx="64" cy="49" r="3" fill="#1a0e05"/>
-      <!-- PRIMARY highlight — big, warm (upper right) -->
-      <circle cx="41" cy="46" r="2.5" fill="white" opacity=".92"/>
-      <circle cx="67" cy="46" r="2.5" fill="white" opacity=".92"/>
-      <!-- SECONDARY highlight — smaller (lower left) -->
-      <circle cx="36" cy="52" r="1.2" fill="white" opacity=".55"/>
-      <circle cx="62" cy="52" r="1.2" fill="white" opacity=".55"/>
-      <!-- TERTIARY warm reflection — golden lamplight -->
-      <circle cx="40" cy="50" r=".8" fill="#ffd080" opacity=".4"/>
-      <circle cx="66" cy="50" r=".8" fill="#ffd080" opacity=".4"/>
-      <!-- Soft eye outline -->
-      <ellipse cx="37" cy="48" rx="10" ry="11.5" fill="none" stroke="rgba(140,100,60,.15)" stroke-width=".6"/>
-      <ellipse cx="63" cy="48" rx="10" ry="11.5" fill="none" stroke="rgba(140,100,60,.15)" stroke-width=".6"/>
+      <circle cx="38" cy="48" r="5.5" fill="none" stroke="rgba(140,100,40,.25)" stroke-width=".5"/>
+      <circle cx="64" cy="48" r="5.5" fill="none" stroke="rgba(140,100,40,.25)" stroke-width=".5"/>
+      <!-- Iris radial spokes -->
+      ${[0,30,60,90,120,150].map(a=>`<line x1="${38+Math.cos(a*Math.PI/180)*2}" y1="${48+Math.sin(a*Math.PI/180)*2}" x2="${38+Math.cos(a*Math.PI/180)*6}" y2="${48+Math.sin(a*Math.PI/180)*6}" stroke="rgba(130,90,35,.1)" stroke-width=".4"/>
+      <line x1="${64+Math.cos(a*Math.PI/180)*2}" y1="${48+Math.sin(a*Math.PI/180)*2}" x2="${64+Math.cos(a*Math.PI/180)*6}" y2="${48+Math.sin(a*Math.PI/180)*6}" stroke="rgba(130,90,35,.1)" stroke-width=".4"/>`).join('')}
+      <!-- Pupils -->
+      <circle cx="38" cy="48" r="3.2" fill="#0e0802"/>
+      <circle cx="64" cy="48" r="3.2" fill="#0e0802"/>
+      <!-- PRIMARY highlight (large, upper-right) -->
+      <circle cx="41" cy="45" r="2.8" fill="white" opacity=".93"/>
+      <circle cx="67" cy="45" r="2.8" fill="white" opacity=".93"/>
+      <!-- SECONDARY highlight (small, lower-left) -->
+      <circle cx="36" cy="51" r="1.3" fill="white" opacity=".58"/>
+      <circle cx="62" cy="51" r="1.3" fill="white" opacity=".58"/>
+      <!-- Warm lamplight reflection -->
+      <circle cx="40" cy="49" r=".9" fill="#ffd080" opacity=".4"/>
+      <circle cx="66" cy="49" r=".9" fill="#ffd080" opacity=".4"/>
     </g>
-    <!-- Eyebrows — soft, warm -->
-    <path d="${p.brow1}" fill="none" stroke="rgba(140,110,70,.7)" stroke-width="2.5" stroke-linecap="round"/>
-    <path d="${p.brow2}" fill="none" stroke="rgba(140,110,70,.7)" stroke-width="2.5" stroke-linecap="round"/>
-    <!-- Rosy cheeks — warm, prominent like Ratatouille -->
-    <circle cx="24" cy="58" r="8" fill="url(#cheekGrad${containerId})"/>
-    <circle cx="76" cy="58" r="8" fill="url(#cheekGrad${containerId})"/>
-    <!-- Nose — round, Pixar-style -->
-    <ellipse cx="50" cy="58" rx="4.5" ry="3.5" fill="rgba(220,170,120,.3)"/>
-    <path d="M46 57 Q50 64 54 57" fill="none" stroke="rgba(180,120,70,.5)" stroke-width="1.5" stroke-linecap="round"/>
-    <!-- Subtle nose bridge highlight -->
-    <ellipse cx="50" cy="54" rx="2" ry="4" fill="rgba(255,230,200,.15)"/>
-    <!-- Laugh/smile lines -->
-    <path d="M30 60 Q28 64 30 68" fill="none" stroke="rgba(180,120,70,.15)" stroke-width=".8" stroke-linecap="round"/>
-    <path d="M70 60 Q72 64 70 68" fill="none" stroke="rgba(180,120,70,.15)" stroke-width=".8" stroke-linecap="round"/>
-    <!-- Mustache — warm gray with volume -->
-    <path d="M34 65 Q42 61 50 67 Q58 61 66 65 Q58 68 50 64 Q42 68 34 65Z" fill="rgba(180,170,155,.8)" stroke="rgba(150,140,125,.4)" stroke-width=".3"/>
-    <path d="M36 65 Q42 62 48 66" fill="none" stroke="rgba(200,190,175,.3)" stroke-width=".8"/>
-    <!-- Mouth — warm, expressive -->
-    <path d="${p.mouth}" fill="none" stroke="rgba(180,110,70,.6)" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Eyebrows — thick, expressive -->
+    <path d="${p.brow1}" fill="none" stroke="rgba(130,100,60,.7)" stroke-width="2.8" stroke-linecap="round"/>
+    <path d="${p.brow2}" fill="none" stroke="rgba(130,100,60,.7)" stroke-width="2.8" stroke-linecap="round"/>
+
+    <!-- Cheeks — rosy, warm -->
+    <circle cx="22" cy="58" r="9" fill="url(#cheekGrad${containerId})"/>
+    <circle cx="78" cy="58" r="9" fill="url(#cheekGrad${containerId})"/>
+
+    <!-- === NOSE — defined shape with bridge, nostrils, tip === -->
+    <path d="M50,40 Q51,48 50,54" fill="none" stroke="rgba(190,140,80,.12)" stroke-width="1.2"/>
+    <path d="M44,58 Q47,62 50,62 Q53,62 56,58" fill="rgba(210,160,100,.2)" stroke="rgba(180,120,70,.35)" stroke-width="1" stroke-linecap="round"/>
+    <ellipse cx="50" cy="58" rx="5" ry="3.8" fill="rgba(220,170,110,.18)"/>
+    <!-- Nose tip highlight -->
+    <ellipse cx="50" cy="57" rx="2.5" ry="1.8" fill="rgba(255,235,210,.18)"/>
+    <!-- Nostrils -->
+    <ellipse cx="47" cy="59.5" rx="1.8" ry="1" fill="rgba(160,100,50,.15)"/>
+    <ellipse cx="53" cy="59.5" rx="1.8" ry="1" fill="rgba(160,100,50,.15)"/>
+
+    <!-- Laugh/nasolabial lines -->
+    <path d="M29,56 Q27,62 29,68" fill="none" stroke="rgba(170,115,60,.12)" stroke-width=".9" stroke-linecap="round"/>
+    <path d="M71,56 Q73,62 71,68" fill="none" stroke="rgba(170,115,60,.12)" stroke-width=".9" stroke-linecap="round"/>
+
+    <!-- === MUSTACHE — full, volumetric === -->
+    <path d="M32,66 Q40,62 50,68 Q60,62 68,66 Q60,70 50,65 Q40,70 32,66Z" fill="rgba(175,165,148,.85)" stroke="rgba(145,135,118,.4)" stroke-width=".4"/>
+    <path d="M34,66 Q40,63 46,67" fill="none" stroke="rgba(200,192,178,.25)" stroke-width=".9"/>
+    <path d="M54,67 Q60,63 66,66" fill="none" stroke="rgba(200,192,178,.25)" stroke-width=".9"/>
+    <!-- Mustache shadow underneath -->
+    <path d="M35,67 Q50,72 65,67" fill="rgba(140,100,50,.06)" stroke="none"/>
+
+    <!-- Mouth -->
+    ${mouthPath}
   </svg>`;
 }
 
@@ -640,32 +864,60 @@ function initCanvas2(){
   let W,H;function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight}
   resize();window.addEventListener('resize',resize);
   let mx=W/2,my=H/2;
+  let smx=mx,smy=my; // smoothed sun position
   canvas.addEventListener('mousemove',e=>{const r=canvas.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top});
   canvas.addEventListener('touchmove',e=>{const r=canvas.getBoundingClientRect();const t=e.touches[0];mx=t.clientX-r.left;my=t.clientY-r.top;e.preventDefault()},{passive:false});
   let time=0;
+  const G=800; // gravitational constant for sim
   const planets=[
-    {angle:0,dist:120,speed:.4,r:8,color:'#e0a050',trail:[]},
-    {angle:2.1,dist:180,speed:.25,r:6,color:'#c87040',trail:[]},
-    {angle:4.2,dist:70,speed:.7,r:5,color:'#d4b870',trail:[]}
+    {x:0,y:0,vx:0,vy:0,r:9,  color:'#e8a848',name:'a',trail:[]},
+    {x:0,y:0,vx:0,vy:0,r:7,  color:'#d07040',name:'b',trail:[]},
+    {x:0,y:0,vx:0,vy:0,r:5.5,color:'#c4b870',name:'c',trail:[]},
+    {x:0,y:0,vx:0,vy:0,r:4,  color:'#88bbdd',name:'d',trail:[]},
+    {x:0,y:0,vx:0,vy:0,r:11, color:'#cc8844',name:'e',trail:[]},
+    {x:0,y:0,vx:0,vy:0,r:3.5,color:'#ddaa88',name:'f',trail:[]}
   ];
+  // Initialize orbital positions & velocities
+  function initPlanets(){
+    const dists=[70,110,150,190,55,230];
+    const angles=[0,1.2,2.5,3.8,5.0,4.5];
+    planets.forEach((pl,i)=>{
+      const d=dists[i],a=angles[i];
+      pl.x=smx+Math.cos(a)*d;
+      pl.y=smy+Math.sin(a)*d;
+      // Orbital velocity perpendicular to radius, magnitude = sqrt(G/d)
+      const v=Math.sqrt(G/d);
+      pl.vx=-Math.sin(a)*v;
+      pl.vy=Math.cos(a)*v;
+      pl.trail=[];
+    });
+  }
+  initPlanets();
+  const dt=0.12;
   function animate(){
     time+=.016;ctx.clearRect(0,0,W,H);
-    drawStars(ctx,W,H,80,time);drawWarmVignette(ctx,W,H);
+    drawStars(ctx,W,H,90,time);drawWarmVignette(ctx,W,H);
+    // Smooth sun position to prevent chaotic orbits
+    smx=lerp(smx,mx,.04);smy=lerp(smy,my,.04);
+    // Draw warped grid centered on sun
     const spacing=35,rows=Math.ceil(H/spacing)+1,cols=Math.ceil(W/spacing)+1;
-    // Draw warped grid
+    function warpPt(gx,gy){
+      const d=dist(gx,gy,smx,smy);
+      if(d<280){
+        const pull=4000/(d*d+300);
+        const angle=Math.atan2(smy-gy,smx-gx);
+        gx+=Math.cos(angle)*pull*22;gy+=Math.sin(angle)*pull*22;
+      }
+      return [gx,gy];
+    }
     ctx.lineWidth=.7;
     for(let r=0;r<=rows;r++){
       ctx.beginPath();
       for(let c=0;c<=cols;c++){
-        let gx=c*spacing,gy=r*spacing;
-        const d=dist(gx,gy,mx,my);
-        if(d<250){
-          const pull=3500/(d*d+400);
-          const angle=Math.atan2(my-gy,mx-gx);
-          gx+=Math.cos(angle)*pull*20;gy+=Math.sin(angle)*pull*20;
-        }
+        const [gx,gy]=warpPt(c*spacing,r*spacing);
+        const d=dist(c*spacing,r*spacing,smx,smy);
         const intensity=clamp(1-d/350,0,1);
-        ctx.strokeStyle=`rgba(${200+55*intensity},${160+60*intensity},${100+50*intensity},${.15+.35*intensity})`;
+        ctx.strokeStyle=`rgba(${200+55*intensity},${160+60*intensity},${100+50*intensity},${.12+.35*intensity})`;
         c===0?ctx.moveTo(gx,gy):ctx.lineTo(gx,gy);
       }
       ctx.stroke();
@@ -673,34 +925,91 @@ function initCanvas2(){
     for(let c=0;c<=cols;c++){
       ctx.beginPath();
       for(let r=0;r<=rows;r++){
-        let gx=c*spacing,gy=r*spacing;
-        const d=dist(gx,gy,mx,my);
-        if(d<250){const pull=3500/(d*d+400);const angle=Math.atan2(my-gy,mx-gx);gx+=Math.cos(angle)*pull*20;gy+=Math.sin(angle)*pull*20}
+        const [gx,gy]=warpPt(c*spacing,r*spacing);
         r===0?ctx.moveTo(gx,gy):ctx.lineTo(gx,gy);
       }
       ctx.stroke();
     }
-    // Central mass glow at mouse
-    const mg=ctx.createRadialGradient(mx,my,5,mx,my,60);mg.addColorStop(0,'rgba(255,220,140,.5)');mg.addColorStop(.5,'rgba(240,170,80,.2)');mg.addColorStop(1,'rgba(200,120,40,0)');
-    ctx.beginPath();ctx.arc(mx,my,60,0,Math.PI*2);ctx.fillStyle=mg;ctx.fill();
-    ctx.beginPath();ctx.arc(mx,my,12,0,Math.PI*2);
-    const cg=ctx.createRadialGradient(mx-3,my-3,2,mx,my,12);cg.addColorStop(0,'#fff8e0');cg.addColorStop(.5,'#ffcc44');cg.addColorStop(1,'#ff8800');
-    ctx.fillStyle=cg;ctx.shadowColor='#ffaa00';ctx.shadowBlur=20;ctx.fill();ctx.shadowBlur=0;
-    // Orbiting planets
+    // === SUN — realistic star at mouse ===
+    // Outer corona glow
+    const corona=ctx.createRadialGradient(smx,smy,8,smx,smy,80);
+    corona.addColorStop(0,'rgba(255,240,180,.35)');corona.addColorStop(.3,'rgba(255,200,100,.15)');
+    corona.addColorStop(.6,'rgba(255,150,50,.06)');corona.addColorStop(1,'rgba(200,100,20,0)');
+    ctx.beginPath();ctx.arc(smx,smy,80,0,Math.PI*2);ctx.fillStyle=corona;ctx.fill();
+    // Corona spikes
+    for(let i=0;i<12;i++){
+      const a=i*Math.PI/6+time*.2+Math.sin(time*3+i)*.1;
+      const spikeLen=30+10*Math.sin(time*4+i*1.7);
+      ctx.beginPath();ctx.moveTo(smx+Math.cos(a)*14,smy+Math.sin(a)*14);
+      ctx.lineTo(smx+Math.cos(a-0.08)*spikeLen*.5+Math.cos(a)*spikeLen,smy+Math.sin(a-0.08)*spikeLen*.5+Math.sin(a)*spikeLen);
+      ctx.lineTo(smx+Math.cos(a+0.08)*spikeLen*.5+Math.cos(a)*spikeLen,smy+Math.sin(a+0.08)*spikeLen*.5+Math.sin(a)*spikeLen);
+      ctx.closePath();
+      ctx.fillStyle=`rgba(255,220,120,${.04+.02*Math.sin(time*5+i)})`;ctx.fill();
+    }
+    // Sun body
+    ctx.beginPath();ctx.arc(smx,smy,14,0,Math.PI*2);
+    const sg=ctx.createRadialGradient(smx-3,smy-3,1,smx,smy,14);
+    sg.addColorStop(0,'#fffff0');sg.addColorStop(.25,'#fff8d0');sg.addColorStop(.5,'#ffcc44');
+    sg.addColorStop(.8,'#ff9922');sg.addColorStop(1,'#ee6600');
+    ctx.fillStyle=sg;ctx.shadowColor='#ffaa00';ctx.shadowBlur=25;ctx.fill();ctx.shadowBlur=0;
+    // Sun surface detail
+    ctx.beginPath();ctx.arc(smx,smy,14,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,200,80,.3)';ctx.lineWidth=.8;ctx.stroke();
+
+    // === ORBITAL PHYSICS — Verlet-style leapfrog integration ===
     planets.forEach(pl=>{
-      pl.angle+=pl.speed*.016;
-      const px=mx+Math.cos(pl.angle)*pl.dist;
-      const py=my+Math.sin(pl.angle)*pl.dist*.6;
-      pl.trail.push({x:px,y:py,a:1});
-      if(pl.trail.length>40)pl.trail.shift();
+      const dx=smx-pl.x, dy=smy-pl.y;
+      const d2=dx*dx+dy*dy;
+      const d=Math.sqrt(d2);
+      // Clamp minimum distance to prevent slingshot
+      const dClamped=Math.max(d,25);
+      const accel=G/(dClamped*dClamped);
+      const ax=dx/d*accel, ay=dy/d*accel;
+      pl.vx+=ax*dt; pl.vy+=ay*dt;
+      // Light damping to keep orbits stable
+      const speed=Math.sqrt(pl.vx*pl.vx+pl.vy*pl.vy);
+      const idealSpeed=Math.sqrt(G/dClamped);
+      const dampFactor=0.998; // very gentle
+      // If way too fast or too slow, nudge toward circular velocity
+      if(speed>idealSpeed*2.5){const f=0.99;pl.vx*=f;pl.vy*=f}
+      if(d<20){
+        // Push out if too close — prevent collision with sun
+        pl.x=smx-dx/d*22;pl.y=smy-dy/d*22;
+        // Reflect velocity
+        const dot=pl.vx*dx/d+pl.vy*dy/d;
+        pl.vx-=1.5*dot*dx/d;pl.vy-=1.5*dot*dy/d;
+      }
+      pl.vx*=dampFactor;pl.vy*=dampFactor;
+      pl.x+=pl.vx*dt; pl.y+=pl.vy*dt;
+      // Keep in bounds with wrap
+      if(pl.x<-30)pl.x=W+30;if(pl.x>W+30)pl.x=-30;
+      if(pl.y<-30)pl.y=H+30;if(pl.y>H+30)pl.y=-30;
       // Trail
-      ctx.beginPath();
-      pl.trail.forEach((tp,i)=>{
-        tp.a*=.95;
-        if(i===0)ctx.moveTo(tp.x,tp.y);else ctx.lineTo(tp.x,tp.y);
-      });
-      ctx.strokeStyle=pl.color+'66';ctx.lineWidth=2;ctx.stroke();
-      ctx.beginPath();ctx.arc(px,py,pl.r,0,Math.PI*2);ctx.fillStyle=pl.color;ctx.shadowColor=pl.color;ctx.shadowBlur=10;ctx.fill();ctx.shadowBlur=0;
+      pl.trail.push({x:pl.x,y:pl.y,a:1});
+      if(pl.trail.length>60)pl.trail.shift();
+    });
+    // Draw orbital trails (fading)
+    planets.forEach(pl=>{
+      if(pl.trail.length<2)return;
+      for(let i=1;i<pl.trail.length;i++){
+        const t0=pl.trail[i-1],t1=pl.trail[i];
+        t0.a*=.96;
+        const alpha=t1.a*.5;
+        if(alpha<.01)continue;
+        ctx.beginPath();ctx.moveTo(t0.x,t0.y);ctx.lineTo(t1.x,t1.y);
+        ctx.strokeStyle=pl.color+Math.floor(alpha*255).toString(16).padStart(2,'0');
+        ctx.lineWidth=pl.r*.4;ctx.stroke();
+      }
+    });
+    // Draw planets
+    planets.forEach(pl=>{
+      ctx.beginPath();ctx.arc(pl.x,pl.y,pl.r,0,Math.PI*2);
+      const pg=ctx.createRadialGradient(pl.x-pl.r*.3,pl.y-pl.r*.3,pl.r*.1,pl.x,pl.y,pl.r);
+      pg.addColorStop(0,'#fff8e0');pg.addColorStop(.4,pl.color);pg.addColorStop(1,pl.color.replace(/[0-9a-f]{2}$/i,'00'));
+      ctx.fillStyle=pg;ctx.shadowColor=pl.color;ctx.shadowBlur=12;ctx.fill();ctx.shadowBlur=0;
+      // Specular highlight
+      ctx.beginPath();ctx.arc(pl.x-pl.r*.25,pl.y-pl.r*.3,pl.r*.35,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,.3)';ctx.fill();
     });
     requestAnimationFrame(animate);
   }
@@ -1255,79 +1564,206 @@ function initCanvas10(){
   const pages=[];
   const timeParticles=[];// Floating time dust
   function drawTwin(x,y,age,label,isTravel){
-    const skinLight=lerp(240,210,age);const skinDark=lerp(200,170,age);
+    const skinBase=lerp(248,220,age);const skinMid=lerp(215,185,age);const skinDark=lerp(195,160,age);
     ctx.save();ctx.translate(x,y);
     // Aura glow
-    const auraColor=isTravel?'rgba(240,200,120,.1)':'rgba(255,180,80,.08)';
-    const ag=ctx.createRadialGradient(0,20,10,0,20,80);ag.addColorStop(0,auraColor);ag.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.beginPath();ctx.arc(0,20,80,0,Math.PI*2);ctx.fillStyle=ag;ctx.fill();
-    // Body with gradient
-    ctx.beginPath();ctx.moveTo(-20,30);ctx.lineTo(-25,80);ctx.lineTo(25,80);ctx.lineTo(20,30);ctx.closePath();
-    const bg=ctx.createLinearGradient(0,30,0,80);
-    if(isTravel){bg.addColorStop(0,'#6a7a8a');bg.addColorStop(1,'#3a4a58')}
-    else{bg.addColorStop(0,age>.5?'#7a7060':'#6a6858');bg.addColorStop(1,age>.5?'#504840':'#48443c')}
-    ctx.fillStyle=bg;ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,.15)';ctx.lineWidth=.5;ctx.stroke();
-    // Head
-    ctx.beginPath();ctx.arc(0,0,25,0,Math.PI*2);
-    const sg=ctx.createRadialGradient(-5,-5,3,0,0,25);sg.addColorStop(0,`rgb(${skinLight+10},${skinDark-20},${skinDark-60})`);sg.addColorStop(1,`rgb(${skinLight-20},${skinDark-50},${skinDark-90})`);
-    ctx.fillStyle=sg;ctx.fill();
-    // Hair
-    const hairGray=lerp(0,1,age);
-    const hairR=lerp(60,210,hairGray),hairG=lerp(40,210,hairGray),hairB=lerp(20,210,hairGray);
-    ctx.beginPath();ctx.arc(0,-8,27,Math.PI,0);ctx.fillStyle=`rgb(${hairR},${hairG},${hairB})`;ctx.fill();
-    // Extra hair detail
-    for(let i=-2;i<=2;i++){
-      ctx.beginPath();ctx.moveTo(i*8,-30);ctx.quadraticCurveTo(i*10+3,-38,i*8+6,-32);
-      ctx.strokeStyle=`rgba(${hairR},${hairG},${hairB},.6)`;ctx.lineWidth=2;ctx.stroke();
-    }
-    // Eyes - Disney style
-    const eyeSize=lerp(5,3.5,age);
-    // Eye whites
-    ctx.beginPath();ctx.ellipse(-8,0,eyeSize,eyeSize*1.15,0,0,Math.PI*2);ctx.fillStyle='white';ctx.fill();
-    ctx.strokeStyle='rgba(0,0,0,.1)';ctx.lineWidth=.5;ctx.stroke();
-    ctx.beginPath();ctx.ellipse(8,0,eyeSize,eyeSize*1.15,0,0,Math.PI*2);ctx.fillStyle='white';ctx.fill();ctx.stroke();
-    // Iris
-    const irisR=eyeSize*.6;
-    ctx.beginPath();ctx.arc(-8,1,irisR,0,Math.PI*2);
-    const ig1=ctx.createRadialGradient(-8,0,irisR*.2,-8,1,irisR);ig1.addColorStop(0,'#6B4423');ig1.addColorStop(1,'#3B2413');
-    ctx.fillStyle=ig1;ctx.fill();
-    ctx.beginPath();ctx.arc(8,1,irisR,0,Math.PI*2);ctx.fillStyle=ig1;ctx.fill();
-    // Pupils
-    ctx.beginPath();ctx.arc(-8,1,irisR*.45,0,Math.PI*2);ctx.fillStyle='#111';ctx.fill();
-    ctx.beginPath();ctx.arc(8,1,irisR*.45,0,Math.PI*2);ctx.fillStyle='#111';ctx.fill();
-    // Eye highlights
-    ctx.beginPath();ctx.arc(-6,-1.5,irisR*.35,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.85)';ctx.fill();
-    ctx.beginPath();ctx.arc(10,-1.5,irisR*.35,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.85)';ctx.fill();
-    // Eyebrows
-    ctx.lineWidth=2;ctx.lineCap='round';ctx.strokeStyle=`rgba(${hairR*.5},${hairG*.5},${hairB*.5},.8)`;
-    ctx.beginPath();ctx.moveTo(-14,-7);ctx.quadraticCurveTo(-8,-12,-2,-8);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(2,-8);ctx.quadraticCurveTo(8,-12,14,-7);ctx.stroke();
-    // Cheeks
-    ctx.beginPath();ctx.arc(-16,8,5,0,Math.PI*2);ctx.fillStyle='rgba(255,160,160,.2)';ctx.fill();
-    ctx.beginPath();ctx.arc(16,8,5,0,Math.PI*2);ctx.fillStyle='rgba(255,160,160,.2)';ctx.fill();
-    // Wrinkles if old
-    if(age>.3){
-      ctx.strokeStyle=`rgba(150,100,60,${age*.4})`;ctx.lineWidth=.7;
-      ctx.beginPath();ctx.moveTo(-15,-18);ctx.lineTo(-10,-16);ctx.moveTo(-8,-19);ctx.lineTo(-3,-17);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(3,-17);ctx.lineTo(8,-19);ctx.moveTo(10,-16);ctx.lineTo(15,-18);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(-18,2);ctx.lineTo(-22,0);ctx.moveTo(-18,4);ctx.lineTo(-22,6);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(18,2);ctx.lineTo(22,0);ctx.moveTo(18,4);ctx.lineTo(22,6);ctx.stroke();
-      // Nose lines
-      ctx.beginPath();ctx.moveTo(-4,10);ctx.quadraticCurveTo(-6,16,-10,18);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(4,10);ctx.quadraticCurveTo(6,16,10,18);ctx.stroke();
-    }
-    // Nose
-    ctx.beginPath();ctx.moveTo(-2,5);ctx.quadraticCurveTo(0,12,2,5);ctx.strokeStyle='rgba(180,130,90,.5)';ctx.lineWidth=1.2;ctx.stroke();
-    // Mouth
+    const auraColor=isTravel?'rgba(100,180,255,.1)':'rgba(255,200,100,.1)';
+    const ag=ctx.createRadialGradient(0,20,10,0,20,85);ag.addColorStop(0,auraColor);ag.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.beginPath();ctx.arc(0,20,85,0,Math.PI*2);ctx.fillStyle=ag;ctx.fill();
+    // Drop shadow under character
+    ctx.beginPath();ctx.ellipse(0,82,22,5,0,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.15)';ctx.fill();
+
+    // === BODY — shaped torso, rounded shoulders, tapered waist ===
     ctx.beginPath();
-    if(age>.5){ctx.moveTo(-6,14);ctx.lineTo(6,14);ctx.strokeStyle='rgba(150,100,60,.5)'}
-    else{ctx.moveTo(-7,12);ctx.quadraticCurveTo(0,20,7,12);ctx.strokeStyle='rgba(200,120,80,.7)'}
-    ctx.lineWidth=1.5;ctx.stroke();
+    ctx.moveTo(-18,28);// left shoulder
+    ctx.quadraticCurveTo(-24,35,-23,50);// upper left
+    ctx.quadraticCurveTo(-22,65,-20,72);// waist taper
+    ctx.quadraticCurveTo(-22,78,-25,82);// hip flare
+    ctx.lineTo(25,82);// bottom
+    ctx.quadraticCurveTo(22,78,20,72);// right hip
+    ctx.quadraticCurveTo(22,65,23,50);// right side
+    ctx.quadraticCurveTo(24,35,18,28);// right shoulder
+    ctx.quadraticCurveTo(0,24,-18,28);// neckline
+    ctx.closePath();
+    const bg=ctx.createLinearGradient(-24,28,24,82);
+    if(isTravel){
+      bg.addColorStop(0,'#7088a0');bg.addColorStop(.3,'#5a7088');bg.addColorStop(.7,'#4a6078');bg.addColorStop(1,'#3a4e60');
+    } else {
+      const ageTint=age>.5?.15:0;
+      bg.addColorStop(0,`rgb(${110+ageTint*40},${100+ageTint*30},${80+ageTint*20})`);
+      bg.addColorStop(1,`rgb(${70+ageTint*30},${62+ageTint*25},${50+ageTint*15})`);
+    }
+    ctx.fillStyle=bg;ctx.shadowColor='rgba(0,0,0,.2)';ctx.shadowBlur=8;ctx.fill();ctx.shadowBlur=0;
+    ctx.strokeStyle='rgba(255,255,255,.1)';ctx.lineWidth=.5;ctx.stroke();
+    // Collar / neckline detail
+    ctx.beginPath();ctx.moveTo(-12,28);ctx.quadraticCurveTo(0,24,12,28);
+    ctx.strokeStyle=isTravel?'rgba(180,200,220,.3)':'rgba(200,180,140,.3)';ctx.lineWidth=1;ctx.stroke();
+    // Shirt V-line underneath collar
+    ctx.beginPath();ctx.moveTo(-6,28);ctx.lineTo(0,38);ctx.lineTo(6,28);
+    ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=.6;ctx.stroke();
+    // Side seam shadows
+    ctx.beginPath();ctx.moveTo(-22,34);ctx.quadraticCurveTo(-20,55,-22,75);
+    ctx.strokeStyle='rgba(0,0,0,.06)';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(22,34);ctx.quadraticCurveTo(20,55,22,75);ctx.stroke();
+
+    // === ARMS — upper arm + forearm with proper joints ===
+    // Left arm
+    ctx.beginPath();ctx.moveTo(-18,30);ctx.quadraticCurveTo(-28,42,-26,55);ctx.quadraticCurveTo(-24,62,-20,68);
+    ctx.strokeStyle=bg.addColorStop?'#5a7088':isTravel?'#5a7088':'rgb(90,80,65)';
+    // Redraw arm with fill
+    ctx.beginPath();
+    ctx.moveTo(-18,28);ctx.quadraticCurveTo(-22,30,-26,38);ctx.quadraticCurveTo(-30,48,-27,58);
+    ctx.quadraticCurveTo(-24,64,-20,68);ctx.lineTo(-16,64);ctx.quadraticCurveTo(-20,58,-22,50);
+    ctx.quadraticCurveTo(-24,40,-18,32);ctx.closePath();
+    const laG=ctx.createLinearGradient(-28,30,-16,68);
+    if(isTravel){laG.addColorStop(0,'#6882a0');laG.addColorStop(1,'#4a6478')}
+    else{laG.addColorStop(0,'rgb(100,90,75)');laG.addColorStop(1,'rgb(75,66,54)')}
+    ctx.fillStyle=laG;ctx.fill();
+    // Left hand — mitten style
+    ctx.beginPath();ctx.ellipse(-20,70,5,4.5,-.2,0,Math.PI*2);
+    const lhg=ctx.createRadialGradient(-21,69,1,-20,70,5);
+    lhg.addColorStop(0,`rgb(${skinBase},${skinMid-10},${skinDark-50})`);
+    lhg.addColorStop(1,`rgb(${skinMid},${skinDark-20},${skinDark-70})`);
+    ctx.fillStyle=lhg;ctx.fill();
+    // Thumb
+    ctx.beginPath();ctx.ellipse(-16,68,2.5,2,0.4,0,Math.PI*2);ctx.fillStyle=lhg;ctx.fill();
+
+    // Right arm
+    ctx.beginPath();
+    ctx.moveTo(18,28);ctx.quadraticCurveTo(22,30,26,38);ctx.quadraticCurveTo(30,48,27,58);
+    ctx.quadraticCurveTo(24,64,20,68);ctx.lineTo(16,64);ctx.quadraticCurveTo(20,58,22,50);
+    ctx.quadraticCurveTo(24,40,18,32);ctx.closePath();
+    const raG=ctx.createLinearGradient(16,30,28,68);
+    if(isTravel){raG.addColorStop(0,'#6882a0');raG.addColorStop(1,'#4a6478')}
+    else{raG.addColorStop(0,'rgb(100,90,75)');raG.addColorStop(1,'rgb(75,66,54)')}
+    ctx.fillStyle=raG;ctx.fill();
+    // Right hand
+    ctx.beginPath();ctx.ellipse(20,70,5,4.5,.2,0,Math.PI*2);
+    ctx.fillStyle=lhg;ctx.fill();
+    ctx.beginPath();ctx.ellipse(16,68,2.5,2,-0.4,0,Math.PI*2);ctx.fillStyle=lhg;ctx.fill();
+
+    // === HEAD — warm skin with multiple gradient stops ===
+    ctx.beginPath();ctx.arc(0,0,26,0,Math.PI*2);
+    const hg=ctx.createRadialGradient(-6,-6,3,0,0,26);
+    hg.addColorStop(0,`rgb(${skinBase+5},${skinMid},${skinDark-30})`);
+    hg.addColorStop(.5,`rgb(${skinBase-5},${skinMid-15},${skinDark-50})`);
+    hg.addColorStop(1,`rgb(${skinBase-25},${skinMid-40},${skinDark-70})`);
+    ctx.fillStyle=hg;ctx.shadowColor='rgba(80,40,10,.15)';ctx.shadowBlur=6;ctx.fill();ctx.shadowBlur=0;
+    // Jawline shadow
+    ctx.beginPath();ctx.moveTo(-22,8);ctx.quadraticCurveTo(-10,26,0,28);ctx.quadraticCurveTo(10,26,22,8);
+    ctx.strokeStyle=`rgba(150,100,50,${.06+age*.08})`;ctx.lineWidth=1.5;ctx.stroke();
+
+    // === EARS ===
+    ctx.beginPath();ctx.ellipse(-25,2,5,7,-.15,0,Math.PI*2);ctx.fillStyle=`rgb(${skinBase-10},${skinMid-25},${skinDark-55})`;ctx.fill();
+    ctx.beginPath();ctx.ellipse(-25,2,2.5,4,-.15,0,Math.PI*2);ctx.fillStyle=`rgba(${skinDark-20},${skinDark-60},${skinDark-90},.2)`;ctx.fill();
+    ctx.beginPath();ctx.ellipse(25,2,5,7,.15,0,Math.PI*2);ctx.fillStyle=`rgb(${skinBase-10},${skinMid-25},${skinDark-55})`;ctx.fill();
+    ctx.beginPath();ctx.ellipse(25,2,2.5,4,.15,0,Math.PI*2);ctx.fillStyle=`rgba(${skinDark-20},${skinDark-60},${skinDark-90},.2)`;ctx.fill();
+
+    // === HAIR — with gray transition ===
+    const hairGray=lerp(0,1,age);
+    const hR=lerp(55,215,hairGray),hG=lerp(35,215,hairGray),hB=lerp(18,215,hairGray);
+    ctx.beginPath();ctx.arc(0,-8,28,Math.PI+.15,-.15);ctx.fillStyle=`rgb(${hR},${hG},${hB})`;ctx.fill();
+    // Hair highlight
+    ctx.beginPath();ctx.arc(0,-12,20,Math.PI+.3,-.3);ctx.fillStyle=`rgba(${hR+30},${hG+30},${hB+30},.3)`;ctx.fill();
+    // Strands at top
+    for(let i=-3;i<=3;i++){
+      ctx.beginPath();ctx.moveTo(i*6,-32);ctx.quadraticCurveTo(i*7+2,-40+Math.abs(i),i*6+4,-34);
+      ctx.strokeStyle=`rgba(${hR},${hG},${hB},.6)`;ctx.lineWidth=1.8;ctx.lineCap='round';ctx.stroke();
+    }
+    // Sideburns
+    ctx.beginPath();ctx.moveTo(-23,-4);ctx.quadraticCurveTo(-26,4,-24,10);
+    ctx.strokeStyle=`rgba(${hR},${hG},${hB},.5)`;ctx.lineWidth=3;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(23,-4);ctx.quadraticCurveTo(26,4,24,10);ctx.stroke();
+
+    // === EYES — full Pixar detail with sclera, iris gradient, dual highlights, lashes ===
+    const eyeSize=lerp(5.5,4,age);
+    // Eyelash lines
+    ctx.beginPath();ctx.moveTo(-14,-3);ctx.quadraticCurveTo(-8,-7,-2,-3.5);
+    ctx.strokeStyle=`rgba(${hR*.3},${hG*.3},${hB*.3},.25)`;ctx.lineWidth=1;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(2,-3.5);ctx.quadraticCurveTo(8,-7,14,-3);ctx.stroke();
+    // Sclera
+    [-8,8].forEach(ex=>{
+      ctx.beginPath();ctx.ellipse(ex,0,eyeSize,eyeSize*1.2,0,0,Math.PI*2);
+      const ew=ctx.createRadialGradient(ex-.5,-.5,eyeSize*.1,ex,0,eyeSize);
+      ew.addColorStop(0,'#ffffff');ew.addColorStop(.85,'#f5ede5');ew.addColorStop(1,'#e0d4c4');
+      ctx.fillStyle=ew;ctx.fill();
+      ctx.strokeStyle='rgba(100,70,40,.1)';ctx.lineWidth=.5;ctx.stroke();
+    });
+    // Iris with gradient
+    const irisR=eyeSize*.65;
+    [-8,8].forEach(ex=>{
+      ctx.beginPath();ctx.arc(ex,.8,irisR,0,Math.PI*2);
+      const ig=ctx.createRadialGradient(ex-.5,.3,irisR*.15,ex,.8,irisR);
+      ig.addColorStop(0,'#8B6834');ig.addColorStop(.4,'#6B4423');ig.addColorStop(1,'#3B2413');
+      ctx.fillStyle=ig;ctx.fill();
+      // Iris ring
+      ctx.beginPath();ctx.arc(ex,.8,irisR*.88,0,Math.PI*2);
+      ctx.strokeStyle='rgba(120,80,30,.2)';ctx.lineWidth=.3;ctx.stroke();
+    });
+    // Pupils
+    [-8,8].forEach(ex=>{
+      ctx.beginPath();ctx.arc(ex,.8,irisR*.48,0,Math.PI*2);ctx.fillStyle='#0a0602';ctx.fill();
+    });
+    // Primary highlights (large)
+    [-8,8].forEach(ex=>{
+      ctx.beginPath();ctx.arc(ex+2,-1.8,irisR*.4,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.88)';ctx.fill();
+    });
+    // Secondary highlights (small)
+    [-8,8].forEach(ex=>{
+      ctx.beginPath();ctx.arc(ex-1.5,2.5,irisR*.2,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.5)';ctx.fill();
+    });
+    // Warm reflection dot
+    [-8,8].forEach(ex=>{
+      ctx.beginPath();ctx.arc(ex+1,1.5,.5,0,Math.PI*2);ctx.fillStyle='rgba(255,210,120,.35)';ctx.fill();
+    });
+
+    // Eyebrows
+    ctx.lineWidth=2.2;ctx.lineCap='round';ctx.strokeStyle=`rgba(${hR*.4},${hG*.4},${hB*.4},.75)`;
+    ctx.beginPath();ctx.moveTo(-15,-7);ctx.quadraticCurveTo(-8,-12.5,-1,-8);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(1,-8);ctx.quadraticCurveTo(8,-12.5,15,-7);ctx.stroke();
+
+    // Cheeks — rosy glow
+    ctx.beginPath();ctx.arc(-16,8,6,0,Math.PI*2);
+    const cg1=ctx.createRadialGradient(-16,7,1,-16,8,6);cg1.addColorStop(0,'rgba(255,140,130,.3)');cg1.addColorStop(1,'rgba(255,140,130,0)');
+    ctx.fillStyle=cg1;ctx.fill();
+    ctx.beginPath();ctx.arc(16,8,6,0,Math.PI*2);ctx.fillStyle=cg1;ctx.fill();
+
+    // === NOSE — defined shape ===
+    ctx.beginPath();ctx.moveTo(-1,3);ctx.quadraticCurveTo(0,10,1,3);
+    ctx.strokeStyle='rgba(170,120,70,.4)';ctx.lineWidth=1;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(-3.5,10);ctx.quadraticCurveTo(0,13.5,3.5,10);
+    ctx.fillStyle=`rgba(${skinMid},${skinDark-20},${skinDark-50},.15)`;ctx.fill();
+    ctx.strokeStyle='rgba(170,120,70,.3)';ctx.lineWidth=.8;ctx.stroke();
+
+    // Wrinkles if aging
+    if(age>.3){
+      ctx.strokeStyle=`rgba(140,90,50,${age*.35})`;ctx.lineWidth=.7;ctx.lineCap='round';
+      // Forehead lines
+      ctx.beginPath();ctx.moveTo(-12,-18);ctx.lineTo(-4,-16.5);ctx.moveTo(-3,-19);ctx.lineTo(5,-17.5);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(4,-17);ctx.lineTo(12,-18.5);ctx.stroke();
+      // Crow's feet
+      ctx.beginPath();ctx.moveTo(-17,0);ctx.lineTo(-22,-2);ctx.moveTo(-17,2);ctx.lineTo(-22,4);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(17,0);ctx.lineTo(22,-2);ctx.moveTo(17,2);ctx.lineTo(22,4);ctx.stroke();
+      // Nasolabial folds
+      ctx.beginPath();ctx.moveTo(-5,9);ctx.quadraticCurveTo(-7,14,-10,17);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(5,9);ctx.quadraticCurveTo(7,14,10,17);ctx.stroke();
+    }
+
+    // === MOUTH ===
+    ctx.beginPath();
+    if(age>.5){
+      ctx.moveTo(-6,15);ctx.quadraticCurveTo(0,17,6,15);
+      ctx.strokeStyle='rgba(150,90,50,.5)';
+    } else {
+      ctx.moveTo(-8,13);ctx.quadraticCurveTo(0,21,8,13);
+      ctx.strokeStyle='rgba(200,110,70,.65)';
+    }
+    ctx.lineWidth=1.6;ctx.lineCap='round';ctx.stroke();
+
     ctx.restore();
     // Label with glow
-    ctx.fillStyle='rgba(255,255,255,.65)';ctx.font='13px Georgia';ctx.textAlign='center';
-    ctx.shadowColor=isTravel?'rgba(100,150,255,.3)':'rgba(255,200,100,.3)';ctx.shadowBlur=6;
+    ctx.fillStyle='rgba(255,255,255,.7)';ctx.font='13px Georgia';ctx.textAlign='center';
+    ctx.shadowColor=isTravel?'rgba(100,150,255,.35)':'rgba(255,200,100,.35)';ctx.shadowBlur=6;
     ctx.fillText(label,x,y+100);ctx.shadowBlur=0;
   }
   function animate(){
