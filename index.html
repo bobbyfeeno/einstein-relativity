@@ -215,7 +215,7 @@ body{font-family:'Georgia','Times New Roman',serif;background:#1a120a;color:#f0e
     <h3>Move your mouse to warp the universe</h3>
     <canvas class="anim-canvas" id="canvas2"></canvas>
     <div class="speech-bubble">
-      <div class="typewriter" data-text="Space and time aren't separate — they're woven together into a single fabric. Massive objects like stars and planets create dips in this fabric. Move your mouse over the grid to see how mass warps spacetime!"></div>
+      <div class="typewriter" data-text="Space and time aren't separate — they're woven together into a single fabric. Massive objects like stars and planets create dips in this fabric. Swipe across the grid to warp spacetime! Drag your finger through the fabric and watch it ripple."></div>
     </div>
   </div>
 </section>
@@ -381,8 +381,8 @@ function createEinstein(containerId, pose='wave') {
       mouth:'M36,69 Q50,79 64,69', mouthFill:true
     },
     point: {
-      lShoulder:[22,92], lElbow:[14,98], lWrist:[8,94], lHandType:'open',
-      rShoulder:[78,92], rElbow:[98,78], rWrist:[112,66], rHandType:'point',
+      lShoulder:[22,92], lElbow:[16,100], lWrist:[12,96], lHandType:'open',
+      rShoulder:[78,92], rElbow:[94,80], rWrist:[104,68], rHandType:'point',
       brow1:'M26,37 Q37,31 48,36', brow2:'M52,36 Q63,28 74,34',
       mouth:'M40,68 Q50,74 60,68', mouthFill:false
     },
@@ -393,14 +393,14 @@ function createEinstein(containerId, pose='wave') {
       mouth:'M42,68 Q50,71 58,68', mouthFill:false
     },
     excited: {
-      lShoulder:[22,92], lElbow:[4,68], lWrist:[14,48], lHandType:'open',
-      rShoulder:[78,92], rElbow:[96,68], rWrist:[86,48], rHandType:'open',
+      lShoulder:[22,92], lElbow:[8,72], lWrist:[16,54], lHandType:'open',
+      rShoulder:[78,92], rElbow:[92,72], rWrist:[84,54], rHandType:'open',
       brow1:'M26,33 Q37,24 48,33', brow2:'M52,33 Q63,24 74,33',
       mouth:'M34,67 Q50,82 66,67', mouthFill:true
     },
     mindblown: {
-      lShoulder:[22,92], lElbow:[-2,62], lWrist:[18,42], lHandType:'open',
-      rShoulder:[78,92], rElbow:[102,62], rWrist:[82,42], rHandType:'open',
+      lShoulder:[22,92], lElbow:[6,66], lWrist:[18,48], lHandType:'open',
+      rShoulder:[78,92], rElbow:[94,66], rWrist:[82,48], rHandType:'open',
       brow1:'M26,30 Q37,20 48,30', brow2:'M52,30 Q63,20 74,30',
       mouth:'M38,67 Q50,80 62,67', mouthFill:true
     },
@@ -429,8 +429,8 @@ function createEinstein(containerId, pose='wave') {
       mouth:'M34,67 Q50,80 66,67', mouthFill:true
     },
     present: {
-      lShoulder:[22,92], lElbow:[8,82], lWrist:[10,72], lHandType:'open',
-      rShoulder:[78,92], rElbow:[104,76], rWrist:[102,64], rHandType:'open',
+      lShoulder:[22,92], lElbow:[10,82], lWrist:[12,72], lHandType:'open',
+      rShoulder:[78,92], rElbow:[96,78], rWrist:[98,66], rHandType:'open',
       brow1:'M26,35 Q37,28 48,35', brow2:'M52,35 Q63,28 74,35',
       mouth:'M36,68 Q50,78 64,68', mouthFill:true
     }
@@ -551,8 +551,9 @@ function createEinstein(containerId, pose='wave') {
   c.innerHTML = `<svg class="einstein-svg" viewBox="-15 -15 130 160" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <radialGradient id="skinGrad${containerId}" cx="38%" cy="32%">
-        <stop offset="0%" stop-color="#fde8cc"/><stop offset="25%" stop-color="#f8dab8"/>
-        <stop offset="55%" stop-color="#f0c898"/><stop offset="100%" stop-color="#d4a060"/>
+        <stop offset="0%" stop-color="#fde8cc"/><stop offset="20%" stop-color="#f8dab8"/>
+        <stop offset="50%" stop-color="#f0c898"/><stop offset="80%" stop-color="#dba56a"/>
+        <stop offset="100%" stop-color="#c48a48"/>
       </radialGradient>
       <radialGradient id="skinShadow${containerId}" cx="58%" cy="68%">
         <stop offset="0%" stop-color="transparent"/><stop offset="50%" stop-color="transparent"/>
@@ -578,10 +579,17 @@ function createEinstein(containerId, pose='wave') {
       </radialGradient>
       <filter id="softShadow${containerId}"><feDropShadow dx="0" dy="1.5" stdDeviation="2.5" flood-color="rgba(60,30,5,.22)"/></filter>
       <filter id="charShadow${containerId}"><feDropShadow dx="1" dy="3" stdDeviation="4" flood-color="rgba(40,20,0,.18)"/></filter>
+      <filter id="charOutline${containerId}">
+        <feMorphology in="SourceAlpha" result="expanded" operator="dilate" radius="1.2"/>
+        <feFlood flood-color="rgba(40,25,10,.55)" result="color"/>
+        <feComposite in="color" in2="expanded" operator="in" result="outline"/>
+        <feMerge><feMergeNode in="outline"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
     </defs>
     <!-- Warm ambient glow -->
     <ellipse cx="50" cy="72" rx="60" ry="70" fill="rgba(240,180,80,.04)"/>
 
+    <g filter="url(#charOutline${containerId})">
     <!-- === BODY — shaped torso with tapered waist === -->
     <g filter="url(#charShadow${containerId})">
       <path d="M24,88 C20,92 18,108 20,125 Q22,135 30,138 L70,138 Q78,135 80,125 C82,108 80,92 76,88
@@ -599,7 +607,14 @@ function createEinstein(containerId, pose='wave') {
       <path d="M46,100 L50,84" fill="none" stroke="rgba(160,120,70,.12)" stroke-width=".8"/>
       <path d="M54,100 L50,84" fill="none" stroke="rgba(160,120,70,.12)" stroke-width=".8"/>
       <!-- Center seam -->
-      <path d="M50,100 L50,136" fill="none" stroke="rgba(160,120,70,.08)" stroke-width=".6"/>
+      <path d="M50,100 L50,136" fill="none" stroke="rgba(160,120,70,.12)" stroke-width=".8"/>
+      <!-- Coat fold creases -->
+      <path d="M30,96 Q34,110 32,125" fill="none" stroke="rgba(160,120,70,.1)" stroke-width=".7"/>
+      <path d="M70,96 Q66,110 68,125" fill="none" stroke="rgba(160,120,70,.1)" stroke-width=".7"/>
+      <path d="M36,92 Q38,104 36,118" fill="none" stroke="rgba(160,120,70,.07)" stroke-width=".5"/>
+      <path d="M64,92 Q62,104 64,118" fill="none" stroke="rgba(160,120,70,.07)" stroke-width=".5"/>
+      <!-- Coat hem shadow -->
+      <path d="M28,136 Q50,140 72,136" fill="none" stroke="rgba(140,100,50,.12)" stroke-width="1"/>
       <!-- Pockets with flap -->
       <path d="M30,114 L30,108 Q30,106 32,106 L42,106 Q44,106 44,108 L44,114 Q44,116 42,116 L32,116 Q30,116 30,114Z"
             fill="none" stroke="rgba(170,140,100,.22)" stroke-width=".6"/>
@@ -640,37 +655,52 @@ function createEinstein(containerId, pose='wave') {
     <path d="M81,48 Q83,52 81,56" fill="none" stroke="rgba(170,110,50,.2)" stroke-width=".6"/>
 
     <!-- === HEAD — large, Pixar-proportioned === -->
-    <ellipse cx="50" cy="48" rx="31" ry="36" fill="url(#skinGrad${containerId})" filter="url(#softShadow${containerId})"/>
+    <ellipse cx="50" cy="48" rx="31" ry="36" fill="url(#skinGrad${containerId})" filter="url(#softShadow${containerId})"
+      stroke="rgba(140,90,40,.3)" stroke-width="1"/>
     <ellipse cx="50" cy="48" rx="31" ry="36" fill="url(#skinShadow${containerId})"/>
     <!-- Forehead warmth -->
-    <ellipse cx="50" cy="36" rx="20" ry="12" fill="rgba(255,225,190,.12)"/>
-    <!-- Jawline shadow -->
-    <path d="M25,60 Q35,78 50,82 Q65,78 75,60" fill="rgba(180,120,60,.06)" stroke="none"/>
+    <ellipse cx="50" cy="36" rx="20" ry="12" fill="rgba(255,225,190,.15)"/>
+    <!-- Jawline shadow — stronger -->
+    <path d="M25,60 Q35,78 50,82 Q65,78 75,60" fill="rgba(160,100,40,.12)" stroke="none"/>
+    <!-- Chin shadow -->
+    <ellipse cx="50" cy="76" rx="12" ry="5" fill="rgba(140,80,30,.08)"/>
 
     <!-- === HAIR — volumetric, many overlapping strands === -->
     <g class="hair-strand" style="transform-origin:50px 18px">
       <!-- Base volume -->
       <path d="M18 44 Q2 26 14 14 Q8 -2 28 4 Q22 -10 46 -6 Q40 -14 56 -10 Q52 -14 68 -6 Q62 -10 80 0
                Q74 -4 88 8 Q96 2 88 22 Q102 16 84 42"
-            fill="url(#hairGrad${containerId})" stroke="rgba(170,158,138,.25)" stroke-width=".5"/>
+            fill="url(#hairGrad${containerId})" stroke="rgba(140,128,108,.4)" stroke-width=".8"/>
       <!-- Secondary volume layer (slight offset for depth) -->
       <path d="M22 40 Q8 24 18 14 Q14 2 32 6 Q28 -6 48 -4 Q44 -10 60 -6 Q56 -10 74 -2 Q68 -4 84 6
                Q90 2 84 20 Q96 16 80 38"
             fill="rgba(245,240,232,.3)" stroke="none"/>
-      <!-- Wispy side strands -->
-      <path d="M14 42 Q-2 30 6 14" fill="none" stroke="rgba(215,205,188,.75)" stroke-width="5" stroke-linecap="round"/>
-      <path d="M86 42 Q102 30 94 14" fill="none" stroke="rgba(215,205,188,.75)" stroke-width="5" stroke-linecap="round"/>
-      <path d="M12 48 Q-4 38 4 18" fill="none" stroke="rgba(205,195,178,.5)" stroke-width="3.5" stroke-linecap="round"/>
-      <path d="M88 48 Q104 38 96 18" fill="none" stroke="rgba(205,195,178,.5)" stroke-width="3.5" stroke-linecap="round"/>
-      <path d="M10 52 Q-2 44 2 28" fill="none" stroke="rgba(195,185,168,.3)" stroke-width="2.5" stroke-linecap="round"/>
-      <path d="M90 52 Q102 44 98 28" fill="none" stroke="rgba(195,185,168,.3)" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- Top flyaways -->
-      <path d="M28 6 Q22 -8 32 -6" fill="none" stroke="rgba(225,218,205,.5)" stroke-width="2.2" stroke-linecap="round"/>
-      <path d="M42 -4 Q38 -16 48 -12" fill="none" stroke="rgba(225,218,205,.45)" stroke-width="2" stroke-linecap="round"/>
-      <path d="M58 -6 Q62 -18 56 -14" fill="none" stroke="rgba(225,218,205,.4)" stroke-width="2" stroke-linecap="round"/>
-      <path d="M72 4 Q78 -8 68 -4" fill="none" stroke="rgba(225,218,205,.45)" stroke-width="2.2" stroke-linecap="round"/>
+      <!-- Individual strand separations — dark lines between clumps -->
+      <path d="M24 36 Q10 20 16 8" fill="none" stroke="rgba(160,145,120,.35)" stroke-width="1" stroke-linecap="round"/>
+      <path d="M30 28 Q18 12 24 2" fill="none" stroke="rgba(160,145,120,.3)" stroke-width=".8" stroke-linecap="round"/>
+      <path d="M40 20 Q34 4 40 -4" fill="none" stroke="rgba(160,145,120,.3)" stroke-width=".8" stroke-linecap="round"/>
+      <path d="M50 18 Q48 2 52 -8" fill="none" stroke="rgba(160,145,120,.3)" stroke-width=".8" stroke-linecap="round"/>
+      <path d="M60 20 Q64 4 60 -4" fill="none" stroke="rgba(160,145,120,.3)" stroke-width=".8" stroke-linecap="round"/>
+      <path d="M70 28 Q82 12 76 2" fill="none" stroke="rgba(160,145,120,.3)" stroke-width=".8" stroke-linecap="round"/>
+      <path d="M76 36 Q90 20 84 8" fill="none" stroke="rgba(160,145,120,.35)" stroke-width="1" stroke-linecap="round"/>
+      <!-- Wispy side strands — thicker, more defined -->
+      <path d="M14 42 Q-2 30 6 14" fill="none" stroke="rgba(210,200,182,.8)" stroke-width="5.5" stroke-linecap="round"/>
+      <path d="M86 42 Q102 30 94 14" fill="none" stroke="rgba(210,200,182,.8)" stroke-width="5.5" stroke-linecap="round"/>
+      <path d="M14 42 Q-2 30 6 14" fill="none" stroke="rgba(170,158,138,.3)" stroke-width="1" stroke-linecap="round"/>
+      <path d="M86 42 Q102 30 94 14" fill="none" stroke="rgba(170,158,138,.3)" stroke-width="1" stroke-linecap="round"/>
+      <path d="M12 48 Q-4 38 4 18" fill="none" stroke="rgba(200,190,172,.55)" stroke-width="4" stroke-linecap="round"/>
+      <path d="M88 48 Q104 38 96 18" fill="none" stroke="rgba(200,190,172,.55)" stroke-width="4" stroke-linecap="round"/>
+      <path d="M10 52 Q-2 44 2 28" fill="none" stroke="rgba(195,185,168,.35)" stroke-width="3" stroke-linecap="round"/>
+      <path d="M90 52 Q102 44 98 28" fill="none" stroke="rgba(195,185,168,.35)" stroke-width="3" stroke-linecap="round"/>
+      <!-- Top flyaways — more prominent -->
+      <path d="M28 6 Q22 -8 32 -6" fill="none" stroke="rgba(220,212,198,.55)" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M42 -4 Q38 -16 48 -12" fill="none" stroke="rgba(220,212,198,.5)" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M58 -6 Q62 -18 56 -14" fill="none" stroke="rgba(220,212,198,.45)" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M72 4 Q78 -8 68 -4" fill="none" stroke="rgba(220,212,198,.5)" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M35 -2 Q30 -12 38 -10" fill="none" stroke="rgba(215,208,195,.4)" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M65 -2 Q70 -12 62 -10" fill="none" stroke="rgba(215,208,195,.4)" stroke-width="1.8" stroke-linecap="round"/>
       <!-- Highlight wisps at crown -->
-      <path d="M35 2 Q40 -6 50 -8 Q60 -6 65 2" fill="rgba(255,255,248,.15)" stroke="none"/>
+      <path d="M35 2 Q40 -6 50 -8 Q60 -6 65 2" fill="rgba(255,255,248,.18)" stroke="none"/>
     </g>
 
     <!-- === EYES — Pixar-quality with full detail === -->
@@ -707,30 +737,35 @@ function createEinstein(containerId, pose='wave') {
       <circle cx="66" cy="49" r=".9" fill="#ffd080" opacity=".4"/>
     </g>
 
-    <!-- Eyebrows — thick, expressive -->
-    <path d="${p.brow1}" fill="none" stroke="rgba(130,100,60,.7)" stroke-width="2.8" stroke-linecap="round"/>
-    <path d="${p.brow2}" fill="none" stroke="rgba(130,100,60,.7)" stroke-width="2.8" stroke-linecap="round"/>
+    <!-- Eyebrows — thick, expressive, crisp -->
+    <path d="${p.brow1}" fill="none" stroke="rgba(100,70,35,.8)" stroke-width="3.2" stroke-linecap="round"/>
+    <path d="${p.brow2}" fill="none" stroke="rgba(100,70,35,.8)" stroke-width="3.2" stroke-linecap="round"/>
+    <!-- Brow highlight edge -->
+    <path d="${p.brow1}" fill="none" stroke="rgba(180,160,130,.2)" stroke-width="1.2" stroke-linecap="round" transform="translate(0,-1.2)"/>
+    <path d="${p.brow2}" fill="none" stroke="rgba(180,160,130,.2)" stroke-width="1.2" stroke-linecap="round" transform="translate(0,-1.2)"/>
 
     <!-- Cheeks — rosy, warm -->
     <circle cx="22" cy="58" r="9" fill="url(#cheekGrad${containerId})"/>
     <circle cx="78" cy="58" r="9" fill="url(#cheekGrad${containerId})"/>
 
     <!-- === NOSE — defined shape with bridge, nostrils, tip === -->
-    <path d="M50,40 Q51,48 50,54" fill="none" stroke="rgba(190,140,80,.12)" stroke-width="1.2"/>
-    <path d="M44,58 Q47,62 50,62 Q53,62 56,58" fill="rgba(210,160,100,.2)" stroke="rgba(180,120,70,.35)" stroke-width="1" stroke-linecap="round"/>
-    <ellipse cx="50" cy="58" rx="5" ry="3.8" fill="rgba(220,170,110,.18)"/>
+    <path d="M50,38 Q51.5,46 50,54" fill="none" stroke="rgba(180,120,60,.18)" stroke-width="1.4"/>
+    <path d="M44,58 Q47,62.5 50,63 Q53,62.5 56,58" fill="rgba(210,160,100,.25)" stroke="rgba(160,100,50,.45)" stroke-width="1.2" stroke-linecap="round"/>
+    <ellipse cx="50" cy="58" rx="5.5" ry="4" fill="rgba(220,170,110,.2)"/>
     <!-- Nose tip highlight -->
-    <ellipse cx="50" cy="57" rx="2.5" ry="1.8" fill="rgba(255,235,210,.18)"/>
-    <!-- Nostrils -->
-    <ellipse cx="47" cy="59.5" rx="1.8" ry="1" fill="rgba(160,100,50,.15)"/>
-    <ellipse cx="53" cy="59.5" rx="1.8" ry="1" fill="rgba(160,100,50,.15)"/>
+    <ellipse cx="50" cy="56.5" rx="2.8" ry="2" fill="rgba(255,235,210,.22)"/>
+    <!-- Nose bridge shadow -->
+    <path d="M48,42 Q49,48 48.5,54" fill="none" stroke="rgba(170,110,50,.08)" stroke-width="1.5"/>
+    <!-- Nostrils — darker, more defined -->
+    <ellipse cx="46.5" cy="60" rx="2" ry="1.2" fill="rgba(140,80,30,.22)"/>
+    <ellipse cx="53.5" cy="60" rx="2" ry="1.2" fill="rgba(140,80,30,.22)"/>
 
     <!-- Laugh/nasolabial lines -->
     <path d="M29,56 Q27,62 29,68" fill="none" stroke="rgba(170,115,60,.12)" stroke-width=".9" stroke-linecap="round"/>
     <path d="M71,56 Q73,62 71,68" fill="none" stroke="rgba(170,115,60,.12)" stroke-width=".9" stroke-linecap="round"/>
 
-    <!-- === MUSTACHE — full, volumetric === -->
-    <path d="M32,66 Q40,62 50,68 Q60,62 68,66 Q60,70 50,65 Q40,70 32,66Z" fill="rgba(175,165,148,.85)" stroke="rgba(145,135,118,.4)" stroke-width=".4"/>
+    <!-- === MUSTACHE — full, volumetric, crisp === -->
+    <path d="M32,66 Q40,62 50,68 Q60,62 68,66 Q60,70 50,65 Q40,70 32,66Z" fill="rgba(170,160,142,.9)" stroke="rgba(120,108,88,.5)" stroke-width=".7"/>
     <path d="M34,66 Q40,63 46,67" fill="none" stroke="rgba(200,192,178,.25)" stroke-width=".9"/>
     <path d="M54,67 Q60,63 66,66" fill="none" stroke="rgba(200,192,178,.25)" stroke-width=".9"/>
     <!-- Mustache shadow underneath -->
@@ -738,6 +773,7 @@ function createEinstein(containerId, pose='wave') {
 
     <!-- Mouth -->
     ${mouthPath}
+    </g><!-- end charOutline group -->
   </svg>`;
 }
 
@@ -863,12 +899,76 @@ function initCanvas2(){
   const ctx=canvas.getContext('2d');
   let W,H;function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight}
   resize();window.addEventListener('resize',resize);
-  let mx=W/2,my=H/2;
-  let smx=mx,smy=my; // smoothed sun position
-  canvas.addEventListener('mousemove',e=>{const r=canvas.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top});
-  canvas.addEventListener('touchmove',e=>{const r=canvas.getBoundingClientRect();const t=e.touches[0];mx=t.clientX-r.left;my=t.clientY-r.top;e.preventDefault()},{passive:false});
+
+  // Sun stays at center
+  const sunX=()=>W/2, sunY=()=>H/2;
+
+  // === SWIPE RIPPLE SYSTEM ===
+  // Instead of static position warping, we track swipe trails that create ripples
+  const ripples=[]; // {x, y, vx, vy, strength, age, maxAge}
+  const swipeTrail=[]; // recent touch/mouse positions for trail effect
+  let lastMx=null, lastMy=null, lastTime=0;
+  let isDown=false;
+
+  function addRipple(x,y,vx,vy){
+    const speed=Math.sqrt(vx*vx+vy*vy);
+    if(speed<0.5)return;
+    ripples.push({
+      x, y, vx:vx*.3, vy:vy*.3,
+      strength:Math.min(speed*0.8, 40),
+      age:0, maxAge:2.5+Math.random()*.5,
+      radius:0, maxRadius:120+speed*2
+    });
+    // Keep ripples manageable
+    if(ripples.length>80)ripples.splice(0,ripples.length-80);
+  }
+
+  function handleMove(cx,cy){
+    const now=performance.now()/1000;
+    if(lastMx!==null && isDown){
+      const dt=now-lastTime;
+      if(dt>0&&dt<0.2){
+        const vx=(cx-lastMx)/dt;
+        const vy=(cy-lastMy)/dt;
+        // Add ripples along the swipe path
+        addRipple(cx,cy,vx,vy);
+        // Swipe trail for visual
+        swipeTrail.push({x:cx,y:cy,age:0,vx,vy});
+        if(swipeTrail.length>60)swipeTrail.shift();
+      }
+    }
+    lastMx=cx;lastMy=cy;lastTime=now;
+  }
+
+  canvas.addEventListener('mousedown',()=>{isDown=true});
+  canvas.addEventListener('mouseup',()=>{isDown=false;lastMx=null});
+  canvas.addEventListener('mouseleave',()=>{isDown=false;lastMx=null});
+  canvas.addEventListener('mousemove',e=>{
+    const r=canvas.getBoundingClientRect();
+    const cx=e.clientX-r.left, cy=e.clientY-r.top;
+    // Also warp on hover (lighter effect) — stronger on click-drag
+    if(!isDown){
+      if(lastMx!==null){
+        const now=performance.now()/1000;
+        const dt=now-lastTime;
+        if(dt>0&&dt<0.2){
+          const vx=(cx-lastMx)/dt*.3; // lighter for hover
+          const vy=(cy-lastMy)/dt*.3;
+          const speed=Math.sqrt(vx*vx+vy*vy);
+          if(speed>2) addRipple(cx,cy,vx,vy);
+        }
+      }
+      lastMx=cx;lastMy=cy;lastTime=performance.now()/1000;
+    } else {
+      handleMove(cx,cy);
+    }
+  });
+  canvas.addEventListener('touchstart',e=>{isDown=true;const r=canvas.getBoundingClientRect();const t=e.touches[0];lastMx=t.clientX-r.left;lastMy=t.clientY-r.top;lastTime=performance.now()/1000;e.preventDefault()},{passive:false});
+  canvas.addEventListener('touchmove',e=>{const r=canvas.getBoundingClientRect();const t=e.touches[0];handleMove(t.clientX-r.left,t.clientY-r.top);e.preventDefault()},{passive:false});
+  canvas.addEventListener('touchend',()=>{isDown=false;lastMx=null});
+
   let time=0;
-  const G=800; // gravitational constant for sim
+  const G=800;
   const planets=[
     {x:0,y:0,vx:0,vy:0,r:9,  color:'#e8a848',name:'a',trail:[]},
     {x:0,y:0,vx:0,vy:0,r:7,  color:'#d07040',name:'b',trail:[]},
@@ -877,15 +977,14 @@ function initCanvas2(){
     {x:0,y:0,vx:0,vy:0,r:11, color:'#cc8844',name:'e',trail:[]},
     {x:0,y:0,vx:0,vy:0,r:3.5,color:'#ddaa88',name:'f',trail:[]}
   ];
-  // Initialize orbital positions & velocities
   function initPlanets(){
+    const cx=W/2,cy=H/2;
     const dists=[70,110,150,190,55,230];
     const angles=[0,1.2,2.5,3.8,5.0,4.5];
     planets.forEach((pl,i)=>{
       const d=dists[i],a=angles[i];
-      pl.x=smx+Math.cos(a)*d;
-      pl.y=smy+Math.sin(a)*d;
-      // Orbital velocity perpendicular to radius, magnitude = sqrt(G/d)
+      pl.x=cx+Math.cos(a)*d;
+      pl.y=cy+Math.sin(a)*d;
       const v=Math.sqrt(G/d);
       pl.vx=-Math.sin(a)*v;
       pl.vy=Math.cos(a)*v;
@@ -894,30 +993,83 @@ function initCanvas2(){
   }
   initPlanets();
   const dt=0.12;
+
   function animate(){
     time+=.016;ctx.clearRect(0,0,W,H);
     drawStars(ctx,W,H,90,time);drawWarmVignette(ctx,W,H);
-    // Smooth sun position to prevent chaotic orbits
-    smx=lerp(smx,mx,.04);smy=lerp(smy,my,.04);
-    // Draw warped grid centered on sun
-    const spacing=35,rows=Math.ceil(H/spacing)+1,cols=Math.ceil(W/spacing)+1;
+    const smx=sunX(), smy=sunY();
+
+    // === Update ripples ===
+    for(let i=ripples.length-1;i>=0;i--){
+      const rp=ripples[i];
+      rp.age+=.016;
+      rp.x+=rp.vx*.016;
+      rp.y+=rp.vy*.016;
+      rp.vx*=.97; rp.vy*=.97;
+      rp.radius=rp.maxRadius*(rp.age/rp.maxAge);
+      if(rp.age>=rp.maxAge) ripples.splice(i,1);
+    }
+    // Update swipe trail
+    for(let i=swipeTrail.length-1;i>=0;i--){
+      swipeTrail[i].age+=.016;
+      if(swipeTrail[i].age>1) swipeTrail.splice(i,1);
+    }
+
+    // === WARP FUNCTION — combines sun gravity + all active ripples ===
     function warpPt(gx,gy){
-      const d=dist(gx,gy,smx,smy);
-      if(d<280){
-        const pull=4000/(d*d+300);
+      // Sun gravity warp (always present at center)
+      const sd=dist(gx,gy,smx,smy);
+      if(sd<280){
+        const pull=3000/(sd*sd+400);
         const angle=Math.atan2(smy-gy,smx-gx);
-        gx+=Math.cos(angle)*pull*22;gy+=Math.sin(angle)*pull*22;
+        gx+=Math.cos(angle)*pull*18;gy+=Math.sin(angle)*pull*18;
+      }
+      // Ripple warping — each ripple creates an expanding ring distortion
+      for(const rp of ripples){
+        const rdx=gx-rp.x, rdy=gy-rp.y;
+        const rd=Math.sqrt(rdx*rdx+rdy*rdy);
+        // Ring distortion: strongest at the wavefront radius
+        const ringDist=Math.abs(rd-rp.radius);
+        const ringWidth=25+rp.radius*.15;
+        if(ringDist<ringWidth){
+          const fade=1-rp.age/rp.maxAge;
+          const ringIntensity=Math.cos(ringDist/ringWidth*Math.PI*.5)*fade;
+          // Displacement is radial (outward from ripple center) with swipe direction bias
+          const rdLen=rd||1;
+          const rnx=rdx/rdLen, rny=rdy/rdLen;
+          // Mix radial push with swipe velocity direction
+          const svLen=Math.sqrt(rp.vx*rp.vx+rp.vy*rp.vy)||1;
+          const svnx=rp.vx/svLen, svny=rp.vy/svLen;
+          const mixX=rnx*.5+svnx*.5;
+          const mixY=rny*.5+svny*.5;
+          const displacement=ringIntensity*rp.strength*.6;
+          gx+=mixX*displacement;
+          gy+=mixY*displacement;
+          // Add sine wobble for organic feel
+          const wobble=Math.sin(rd*.08+rp.age*8)*ringIntensity*rp.strength*.15;
+          gx+=rny*wobble;
+          gy-=rnx*wobble;
+        }
       }
       return [gx,gy];
     }
+
+    // Draw warped grid
+    const spacing=35,rows=Math.ceil(H/spacing)+1,cols=Math.ceil(W/spacing)+1;
     ctx.lineWidth=.7;
     for(let r=0;r<=rows;r++){
       ctx.beginPath();
       for(let c=0;c<=cols;c++){
-        const [gx,gy]=warpPt(c*spacing,r*spacing);
-        const d=dist(c*spacing,r*spacing,smx,smy);
-        const intensity=clamp(1-d/350,0,1);
-        ctx.strokeStyle=`rgba(${200+55*intensity},${160+60*intensity},${100+50*intensity},${.12+.35*intensity})`;
+        const ox=c*spacing,oy=r*spacing;
+        const [gx,gy]=warpPt(ox,oy);
+        // Color based on displacement amount
+        const dx=gx-ox,dy=gy-oy;
+        const disp=Math.sqrt(dx*dx+dy*dy);
+        const intensity=clamp(disp/40,0,1);
+        const sd=dist(ox,oy,smx,smy);
+        const sunInt=clamp(1-sd/350,0,1);
+        const totalInt=clamp(intensity+sunInt,0,1);
+        ctx.strokeStyle=`rgba(${200+55*totalInt},${160+60*totalInt},${100+80*totalInt},${.1+.4*totalInt})`;
         c===0?ctx.moveTo(gx,gy):ctx.lineTo(gx,gy);
       }
       ctx.stroke();
@@ -925,18 +1077,41 @@ function initCanvas2(){
     for(let c=0;c<=cols;c++){
       ctx.beginPath();
       for(let r=0;r<=rows;r++){
-        const [gx,gy]=warpPt(c*spacing,r*spacing);
+        const ox=c*spacing,oy=r*spacing;
+        const [gx,gy]=warpPt(ox,oy);
+        const dx=gx-ox,dy=gy-oy;
+        const disp=Math.sqrt(dx*dx+dy*dy);
+        const intensity=clamp(disp/40,0,1);
+        const sd=dist(ox,oy,smx,smy);
+        const sunInt=clamp(1-sd/350,0,1);
+        const totalInt=clamp(intensity+sunInt,0,1);
+        ctx.strokeStyle=`rgba(${200+55*totalInt},${160+60*totalInt},${100+80*totalInt},${.1+.4*totalInt})`;
         r===0?ctx.moveTo(gx,gy):ctx.lineTo(gx,gy);
       }
       ctx.stroke();
     }
-    // === SUN — realistic star at mouse ===
-    // Outer corona glow
+
+    // Draw swipe trail glow
+    swipeTrail.forEach(st=>{
+      const alpha=(1-st.age)*0.3;
+      if(alpha<.01)return;
+      ctx.beginPath();ctx.arc(st.x,st.y,4+st.age*8,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,220,120,${alpha})`;ctx.fill();
+    });
+
+    // Draw ripple rings (subtle visual feedback)
+    ripples.forEach(rp=>{
+      const fade=1-rp.age/rp.maxAge;
+      if(fade<.02)return;
+      ctx.beginPath();ctx.arc(rp.x,rp.y,rp.radius,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(255,220,140,${fade*.08})`;ctx.lineWidth=2+fade*3;ctx.stroke();
+    });
+
+    // === SUN at center ===
     const corona=ctx.createRadialGradient(smx,smy,8,smx,smy,80);
     corona.addColorStop(0,'rgba(255,240,180,.35)');corona.addColorStop(.3,'rgba(255,200,100,.15)');
     corona.addColorStop(.6,'rgba(255,150,50,.06)');corona.addColorStop(1,'rgba(200,100,20,0)');
     ctx.beginPath();ctx.arc(smx,smy,80,0,Math.PI*2);ctx.fillStyle=corona;ctx.fill();
-    // Corona spikes
     for(let i=0;i<12;i++){
       const a=i*Math.PI/6+time*.2+Math.sin(time*3+i)*.1;
       const spikeLen=30+10*Math.sin(time*4+i*1.7);
@@ -946,49 +1121,53 @@ function initCanvas2(){
       ctx.closePath();
       ctx.fillStyle=`rgba(255,220,120,${.04+.02*Math.sin(time*5+i)})`;ctx.fill();
     }
-    // Sun body
     ctx.beginPath();ctx.arc(smx,smy,14,0,Math.PI*2);
     const sg=ctx.createRadialGradient(smx-3,smy-3,1,smx,smy,14);
     sg.addColorStop(0,'#fffff0');sg.addColorStop(.25,'#fff8d0');sg.addColorStop(.5,'#ffcc44');
     sg.addColorStop(.8,'#ff9922');sg.addColorStop(1,'#ee6600');
     ctx.fillStyle=sg;ctx.shadowColor='#ffaa00';ctx.shadowBlur=25;ctx.fill();ctx.shadowBlur=0;
-    // Sun surface detail
     ctx.beginPath();ctx.arc(smx,smy,14,0,Math.PI*2);
     ctx.strokeStyle='rgba(255,200,80,.3)';ctx.lineWidth=.8;ctx.stroke();
 
-    // === ORBITAL PHYSICS — Verlet-style leapfrog integration ===
+    // === ORBITAL PHYSICS — planets also react to ripples ===
     planets.forEach(pl=>{
       const dx=smx-pl.x, dy=smy-pl.y;
       const d2=dx*dx+dy*dy;
       const d=Math.sqrt(d2);
-      // Clamp minimum distance to prevent slingshot
       const dClamped=Math.max(d,25);
       const accel=G/(dClamped*dClamped);
       const ax=dx/d*accel, ay=dy/d*accel;
       pl.vx+=ax*dt; pl.vy+=ay*dt;
-      // Light damping to keep orbits stable
+      // Ripple perturbation on planets
+      for(const rp of ripples){
+        const rdx=pl.x-rp.x, rdy=pl.y-rp.y;
+        const rd=Math.sqrt(rdx*rdx+rdy*rdy);
+        const ringDist=Math.abs(rd-rp.radius);
+        if(ringDist<30){
+          const fade=1-rp.age/rp.maxAge;
+          const push=fade*rp.strength*.003*Math.cos(ringDist/30*Math.PI*.5);
+          const rn=rd||1;
+          pl.vx+=rdx/rn*push;
+          pl.vy+=rdy/rn*push;
+        }
+      }
       const speed=Math.sqrt(pl.vx*pl.vx+pl.vy*pl.vy);
       const idealSpeed=Math.sqrt(G/dClamped);
-      const dampFactor=0.998; // very gentle
-      // If way too fast or too slow, nudge toward circular velocity
-      if(speed>idealSpeed*2.5){const f=0.99;pl.vx*=f;pl.vy*=f}
+      const dampFactor=0.998;
+      if(speed>idealSpeed*2.5){pl.vx*=0.99;pl.vy*=0.99}
       if(d<20){
-        // Push out if too close — prevent collision with sun
         pl.x=smx-dx/d*22;pl.y=smy-dy/d*22;
-        // Reflect velocity
         const dot=pl.vx*dx/d+pl.vy*dy/d;
         pl.vx-=1.5*dot*dx/d;pl.vy-=1.5*dot*dy/d;
       }
       pl.vx*=dampFactor;pl.vy*=dampFactor;
       pl.x+=pl.vx*dt; pl.y+=pl.vy*dt;
-      // Keep in bounds with wrap
       if(pl.x<-30)pl.x=W+30;if(pl.x>W+30)pl.x=-30;
       if(pl.y<-30)pl.y=H+30;if(pl.y>H+30)pl.y=-30;
-      // Trail
       pl.trail.push({x:pl.x,y:pl.y,a:1});
       if(pl.trail.length>60)pl.trail.shift();
     });
-    // Draw orbital trails (fading)
+    // Draw orbital trails
     planets.forEach(pl=>{
       if(pl.trail.length<2)return;
       for(let i=1;i<pl.trail.length;i++){
@@ -1007,7 +1186,6 @@ function initCanvas2(){
       const pg=ctx.createRadialGradient(pl.x-pl.r*.3,pl.y-pl.r*.3,pl.r*.1,pl.x,pl.y,pl.r);
       pg.addColorStop(0,'#fff8e0');pg.addColorStop(.4,pl.color);pg.addColorStop(1,pl.color.replace(/[0-9a-f]{2}$/i,'00'));
       ctx.fillStyle=pg;ctx.shadowColor=pl.color;ctx.shadowBlur=12;ctx.fill();ctx.shadowBlur=0;
-      // Specular highlight
       ctx.beginPath();ctx.arc(pl.x-pl.r*.25,pl.y-pl.r*.3,pl.r*.35,0,Math.PI*2);
       ctx.fillStyle='rgba(255,255,255,.3)';ctx.fill();
     });
