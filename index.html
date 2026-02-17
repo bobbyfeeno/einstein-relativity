@@ -900,13 +900,7 @@ function initCanvas2(){
   let W,H;function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight}
   resize();window.addEventListener('resize',resize);
 
-  // Sun stays at center
-  const sunX=()=>W/2, sunY=()=>H/2;
-
-  // === SUBTLE TOUCH WARP — gentle rubber-sheet dip ===
-  let touchX=-9999, touchY=-9999; // current pointer position
-  let touching=false;
-  // Smooth interpolated warp center (eases toward touch, eases back when released)
+  let touchX=-9999, touchY=-9999, touching=false;
   let warpX=-9999, warpY=-9999, warpStrength=0;
 
   canvas.addEventListener('mousemove',e=>{
@@ -924,184 +918,59 @@ function initCanvas2(){
   },{passive:false});
   canvas.addEventListener('touchend',()=>{touching=false});
 
-  let time=0;
-  const G=800;
-  const planets=[
-    {x:0,y:0,vx:0,vy:0,r:9,  color:'#e8a848',name:'a',trail:[]},
-    {x:0,y:0,vx:0,vy:0,r:7,  color:'#d07040',name:'b',trail:[]},
-    {x:0,y:0,vx:0,vy:0,r:5.5,color:'#c4b870',name:'c',trail:[]},
-    {x:0,y:0,vx:0,vy:0,r:4,  color:'#88bbdd',name:'d',trail:[]},
-    {x:0,y:0,vx:0,vy:0,r:11, color:'#cc8844',name:'e',trail:[]},
-    {x:0,y:0,vx:0,vy:0,r:3.5,color:'#ddaa88',name:'f',trail:[]}
-  ];
-  function initPlanets(){
-    const cx=W/2,cy=H/2;
-    const dists=[70,110,150,190,55,230];
-    const angles=[0,1.2,2.5,3.8,5.0,4.5];
-    planets.forEach((pl,i)=>{
-      const d=dists[i],a=angles[i];
-      pl.x=cx+Math.cos(a)*d;
-      pl.y=cy+Math.sin(a)*d;
-      const v=Math.sqrt(G/d);
-      pl.vx=-Math.sin(a)*v;
-      pl.vy=Math.cos(a)*v;
-      pl.trail=[];
-    });
-  }
-  initPlanets();
-  const dt=0.12;
-
   function animate(){
-    time+=.016;ctx.clearRect(0,0,W,H);
-    drawStars(ctx,W,H,90,time);drawWarmVignette(ctx,W,H);
-    const smx=sunX(), smy=sunY();
+    ctx.clearRect(0,0,W,H);
 
-    // === Smooth warp position tracking ===
+    // Smooth warp tracking
     if(touching){
-      warpX+=(touchX-warpX)*.1; warpY+=(touchY-warpY)*.1;
+      warpX+=(touchX-warpX)*.12; warpY+=(touchY-warpY)*.12;
       warpStrength+=(1-warpStrength)*.08;
     } else {
-      warpStrength*=.93; // gentle fade out
+      warpStrength*=.92;
     }
 
-    // === WARP FUNCTION — sun gravity + gentle touch dip ===
+    // Warp function — pure Gaussian dip toward touch point
     function warpPt(gx,gy){
-      // Sun gravity warp (always present at center)
-      const sd=dist(gx,gy,smx,smy);
-      if(sd<280){
-        const pull=3000/(sd*sd+400);
-        const angle=Math.atan2(smy-gy,smx-gx);
-        gx+=Math.cos(angle)*pull*18;gy+=Math.sin(angle)*pull*18;
-      }
-      // Gentle touch dip — smooth Gaussian-like falloff
-      if(warpStrength>.01){
+      if(warpStrength>.005){
         const dx=gx-warpX, dy=gy-warpY;
         const d2=dx*dx+dy*dy;
-        const radius=160; // how wide the dip extends
-        const depth=22*warpStrength; // max pixel displacement
+        const radius=140;
+        const depth=28*warpStrength;
         const falloff=Math.exp(-d2/(radius*radius));
-        const angle=Math.atan2(smy-gy,smx-gx); // pull toward center
+        const angle=Math.atan2(warpY-gy,warpX-gx);
         gx+=Math.cos(angle)*falloff*depth;
         gy+=Math.sin(angle)*falloff*depth;
       }
       return [gx,gy];
     }
 
-    // Draw warped grid
-    const spacing=35,rows=Math.ceil(H/spacing)+1,cols=Math.ceil(W/spacing)+1;
-    ctx.lineWidth=.7;
+    // Draw grid — clean, thin, evenly spaced
+    const spacing=32;
+    const rows=Math.ceil(H/spacing)+1;
+    const cols=Math.ceil(W/spacing)+1;
+    ctx.lineWidth=1;
+
+    // Horizontal lines
     for(let r=0;r<=rows;r++){
       ctx.beginPath();
       for(let c=0;c<=cols;c++){
-        const ox=c*spacing,oy=r*spacing;
-        const [gx,gy]=warpPt(ox,oy);
-        // Color based on displacement amount
-        const dx=gx-ox,dy=gy-oy;
-        const disp=Math.sqrt(dx*dx+dy*dy);
-        const intensity=clamp(disp/40,0,1);
-        const sd=dist(ox,oy,smx,smy);
-        const sunInt=clamp(1-sd/350,0,1);
-        const totalInt=clamp(intensity+sunInt,0,1);
-        ctx.strokeStyle=`rgba(${200+55*totalInt},${160+60*totalInt},${100+80*totalInt},${.1+.4*totalInt})`;
+        const [gx,gy]=warpPt(c*spacing,r*spacing);
         c===0?ctx.moveTo(gx,gy):ctx.lineTo(gx,gy);
       }
+      ctx.strokeStyle='rgba(140,160,220,.18)';
       ctx.stroke();
     }
+    // Vertical lines
     for(let c=0;c<=cols;c++){
       ctx.beginPath();
       for(let r=0;r<=rows;r++){
-        const ox=c*spacing,oy=r*spacing;
-        const [gx,gy]=warpPt(ox,oy);
-        const dx=gx-ox,dy=gy-oy;
-        const disp=Math.sqrt(dx*dx+dy*dy);
-        const intensity=clamp(disp/40,0,1);
-        const sd=dist(ox,oy,smx,smy);
-        const sunInt=clamp(1-sd/350,0,1);
-        const totalInt=clamp(intensity+sunInt,0,1);
-        ctx.strokeStyle=`rgba(${200+55*totalInt},${160+60*totalInt},${100+80*totalInt},${.1+.4*totalInt})`;
+        const [gx,gy]=warpPt(c*spacing,r*spacing);
         r===0?ctx.moveTo(gx,gy):ctx.lineTo(gx,gy);
       }
+      ctx.strokeStyle='rgba(140,160,220,.18)';
       ctx.stroke();
     }
 
-    // === SUN at center ===
-    const corona=ctx.createRadialGradient(smx,smy,8,smx,smy,80);
-    corona.addColorStop(0,'rgba(255,240,180,.35)');corona.addColorStop(.3,'rgba(255,200,100,.15)');
-    corona.addColorStop(.6,'rgba(255,150,50,.06)');corona.addColorStop(1,'rgba(200,100,20,0)');
-    ctx.beginPath();ctx.arc(smx,smy,80,0,Math.PI*2);ctx.fillStyle=corona;ctx.fill();
-    for(let i=0;i<12;i++){
-      const a=i*Math.PI/6+time*.2+Math.sin(time*3+i)*.1;
-      const spikeLen=30+10*Math.sin(time*4+i*1.7);
-      ctx.beginPath();ctx.moveTo(smx+Math.cos(a)*14,smy+Math.sin(a)*14);
-      ctx.lineTo(smx+Math.cos(a-0.08)*spikeLen*.5+Math.cos(a)*spikeLen,smy+Math.sin(a-0.08)*spikeLen*.5+Math.sin(a)*spikeLen);
-      ctx.lineTo(smx+Math.cos(a+0.08)*spikeLen*.5+Math.cos(a)*spikeLen,smy+Math.sin(a+0.08)*spikeLen*.5+Math.sin(a)*spikeLen);
-      ctx.closePath();
-      ctx.fillStyle=`rgba(255,220,120,${.04+.02*Math.sin(time*5+i)})`;ctx.fill();
-    }
-    ctx.beginPath();ctx.arc(smx,smy,14,0,Math.PI*2);
-    const sg=ctx.createRadialGradient(smx-3,smy-3,1,smx,smy,14);
-    sg.addColorStop(0,'#fffff0');sg.addColorStop(.25,'#fff8d0');sg.addColorStop(.5,'#ffcc44');
-    sg.addColorStop(.8,'#ff9922');sg.addColorStop(1,'#ee6600');
-    ctx.fillStyle=sg;ctx.shadowColor='#ffaa00';ctx.shadowBlur=25;ctx.fill();ctx.shadowBlur=0;
-    ctx.beginPath();ctx.arc(smx,smy,14,0,Math.PI*2);
-    ctx.strokeStyle='rgba(255,200,80,.3)';ctx.lineWidth=.8;ctx.stroke();
-
-    // === ORBITAL PHYSICS — planets also react to ripples ===
-    planets.forEach(pl=>{
-      const dx=smx-pl.x, dy=smy-pl.y;
-      const d2=dx*dx+dy*dy;
-      const d=Math.sqrt(d2);
-      const dClamped=Math.max(d,25);
-      const accel=G/(dClamped*dClamped);
-      const ax=dx/d*accel, ay=dy/d*accel;
-      pl.vx+=ax*dt; pl.vy+=ay*dt;
-      // Gentle touch perturbation on planets
-      if(warpStrength>.01){
-        const pdx=pl.x-warpX, pdy=pl.y-warpY;
-        const pd2=pdx*pdx+pdy*pdy;
-        const falloff=Math.exp(-pd2/(180*180))*warpStrength*.15;
-        const tAngle=Math.atan2(smy-pl.y,smx-pl.x);
-        pl.vx+=Math.cos(tAngle)*falloff;
-        pl.vy+=Math.sin(tAngle)*falloff;
-      }
-      const speed=Math.sqrt(pl.vx*pl.vx+pl.vy*pl.vy);
-      const idealSpeed=Math.sqrt(G/dClamped);
-      const dampFactor=0.998;
-      if(speed>idealSpeed*2.5){pl.vx*=0.99;pl.vy*=0.99}
-      if(d<20){
-        pl.x=smx-dx/d*22;pl.y=smy-dy/d*22;
-        const dot=pl.vx*dx/d+pl.vy*dy/d;
-        pl.vx-=1.5*dot*dx/d;pl.vy-=1.5*dot*dy/d;
-      }
-      pl.vx*=dampFactor;pl.vy*=dampFactor;
-      pl.x+=pl.vx*dt; pl.y+=pl.vy*dt;
-      if(pl.x<-30)pl.x=W+30;if(pl.x>W+30)pl.x=-30;
-      if(pl.y<-30)pl.y=H+30;if(pl.y>H+30)pl.y=-30;
-      pl.trail.push({x:pl.x,y:pl.y,a:1});
-      if(pl.trail.length>60)pl.trail.shift();
-    });
-    // Draw orbital trails
-    planets.forEach(pl=>{
-      if(pl.trail.length<2)return;
-      for(let i=1;i<pl.trail.length;i++){
-        const t0=pl.trail[i-1],t1=pl.trail[i];
-        t0.a*=.96;
-        const alpha=t1.a*.5;
-        if(alpha<.01)continue;
-        ctx.beginPath();ctx.moveTo(t0.x,t0.y);ctx.lineTo(t1.x,t1.y);
-        ctx.strokeStyle=pl.color+Math.floor(alpha*255).toString(16).padStart(2,'0');
-        ctx.lineWidth=pl.r*.4;ctx.stroke();
-      }
-    });
-    // Draw planets
-    planets.forEach(pl=>{
-      ctx.beginPath();ctx.arc(pl.x,pl.y,pl.r,0,Math.PI*2);
-      const pg=ctx.createRadialGradient(pl.x-pl.r*.3,pl.y-pl.r*.3,pl.r*.1,pl.x,pl.y,pl.r);
-      pg.addColorStop(0,'#fff8e0');pg.addColorStop(.4,pl.color);pg.addColorStop(1,pl.color.replace(/[0-9a-f]{2}$/i,'00'));
-      ctx.fillStyle=pg;ctx.shadowColor=pl.color;ctx.shadowBlur=12;ctx.fill();ctx.shadowBlur=0;
-      ctx.beginPath();ctx.arc(pl.x-pl.r*.25,pl.y-pl.r*.3,pl.r*.35,0,Math.PI*2);
-      ctx.fillStyle='rgba(255,255,255,.3)';ctx.fill();
-    });
     requestAnimationFrame(animate);
   }
   animate();
