@@ -1180,29 +1180,40 @@ function initCanvas4(){
     // Light beam path via gravitational simulation — photon curves around mass
     beamScreen=[];
     {
-      const G_BEAM=2200; // gravity constant — tuned for visible deflection
-      const dt=0.7;
-      const MAX_STEPS=1200;
-      // Start from back-right, heading toward top-left
-      let px=GRID_EXTENT*1.5, pz=-GRID_EXTENT*1.2;
-      let vx=-1.6, vz=1.2; // initial velocity
-      // Normalize speed
-      const speed=Math.sqrt(vx*vx+vz*vz);
-      const PHOTON_SPEED=2.8;
-      vx=vx/speed*PHOTON_SPEED; vz=vz/speed*PHOTON_SPEED;
+      const dt=0.3;
+      const MAX_STEPS=2000;
+      const PHOTON_SPEED=2.5;
+      const IMPACT_PARAM=GRID_EXTENT*0.35; // closest approach distance
+      // Start photon coming from bottom, offset to the right of the mass
+      let px=IMPACT_PARAM, pz=-GRID_EXTENT*1.8;
+      let vx=0, vz=PHOTON_SPEED; // moving straight up initially
       for(let i=0;i<MAX_STEPS;i++){
         const dx=sunX3-px, dz=sunZ3-pz;
         const dist2=dx*dx+dz*dz;
         const d=Math.sqrt(dist2);
-        if(d<5) break; // only stop if extremely close
-        const force=G_BEAM/(dist2);
-        vx+=dx/d*force*dt;
-        vz+=dz/d*force*dt;
+        if(d<3) break;
+        // GR-accurate deflection: perpendicular force only (no speed change)
+        // This ensures the photon maintains constant speed and only bends its direction
+        const speed=Math.sqrt(vx*vx+vz*vz);
+        // Unit vector toward mass
+        const ux=dx/d, uz=dz/d;
+        // Component of velocity toward mass
+        const vDot=vx*ux+vz*uz;
+        // Perpendicular component of gravitational pull
+        // Only apply the component that changes direction, not speed
+        const GM=800;
+        const accel=GM/(dist2);
+        // Apply full gravitational acceleration but renormalize speed after
+        vx+=ux*accel*dt;
+        vz+=uz*accel*dt;
+        // Renormalize to constant photon speed (photons don't speed up/slow down)
+        const newSpeed=Math.sqrt(vx*vx+vz*vz);
+        vx=vx/newSpeed*PHOTON_SPEED;
+        vz=vz/newSpeed*PHOTON_SPEED;
         px+=vx*dt;
         pz+=vz*dt;
-        // Only stop if WAY outside the grid
         if(Math.abs(px)>GRID_EXTENT*3||Math.abs(pz)>GRID_EXTENT*3) break;
-        const py=depress(px,pz)*0.85; // follow the surface closely
+        const py=depress(px,pz)*0.85;
         beamScreen.push(project(px,py,pz));
       }
     }
