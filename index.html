@@ -1180,15 +1180,17 @@ function initCanvas4(){
     // Light beam path via gravitational simulation — photon curves around mass
     beamScreen=[];
     {
-      // Photon deflected by gravity with capped force — enters, bends, exits
+      // LAW: Photon must stay within grid bounds and ride the grid surface
       const dt=0.005;
       const MAX_STEPS=200000;
       const PHOTON_SPEED=2.5;
       const GM=150;
-      const MIN_DIST=80; // caps force to prevent spiral-in
-      const IMPACT_PARAM=140;
-      let px=IMPACT_PARAM, pz=-GRID_EXTENT*1.8;
+      const MIN_DIST=80;
+      const GRID_BOUND=GRID_EXTENT; // photon cannot leave the grid
+      // Start at right edge of grid, heading across
+      let px=GRID_BOUND*0.5, pz=-GRID_BOUND*0.95;
       let vx=0, vz=PHOTON_SPEED;
+      let exited=false;
       for(let i=0;i<MAX_STEPS;i++){
         const dx=sunX3-px, dz=sunZ3-pz;
         const d=Math.sqrt(dx*dx+dz*dz);
@@ -1201,11 +1203,17 @@ function initCanvas4(){
         vz=vz/ns*PHOTON_SPEED;
         px+=vx*dt;
         pz+=vz*dt;
-        if(Math.abs(px)>GRID_EXTENT*5||pz>GRID_EXTENT*5) break;
+        // CLAMP: photon must stay within grid bounds
+        if(px<-GRID_BOUND) px=-GRID_BOUND;
+        if(px>GRID_BOUND) px=GRID_BOUND;
+        if(pz<-GRID_BOUND) pz=-GRID_BOUND;
+        if(pz>GRID_BOUND){exited=true;} // reached far edge = exit
+        // Photon Y always equals grid surface (rides on the grid)
         if(i%40===0){
           const py=depress(px,pz);
           beamScreen.push(project(px,py,pz));
         }
+        if(exited) break;
       }
     }
   }
