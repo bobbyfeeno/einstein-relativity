@@ -53,6 +53,8 @@ body{font-family:'Georgia','Times New Roman',serif;background:#0a0a2e;color:#e8e
    CHAPTER SECTIONS
    ============================================================ */
 .chapter{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px 80px;position:relative;overflow:hidden}
+.chapter .chapter-inner{opacity:0;transform:translateY(30px);transition:opacity .8s ease,transform .8s ease}
+.chapter.in-view .chapter-inner{opacity:1;transform:translateY(0)}
 .chapter-inner{max-width:800px;width:100%;text-align:center;position:relative;z-index:2}
 .chapter-number{font-size:.85rem;color:rgba(255,215,0,.7);letter-spacing:4px;text-transform:uppercase;margin-bottom:8px}
 .chapter h2{font-size:2.4rem;color:#ffd700;margin-bottom:6px;text-shadow:0 0 30px rgba(255,215,0,.3);line-height:1.2}
@@ -1371,13 +1373,16 @@ function initScroll(){
   const dots=document.querySelectorAll('.nav-dot');
   const chapters=document.querySelectorAll('.chapter');
   const scrollInd=document.getElementById('scroll-indicator');
+  // Fade-in observer for chapters
+  const fadeObs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in-view')});
+  },{threshold:.15});
+  chapters.forEach(ch=>fadeObs.observe(ch));
   function onScroll(){
     const scrollTop=window.scrollY;const docH=document.body.scrollHeight-window.innerHeight;
     const progress=clamp(scrollTop/docH,0,1);
     bar.style.width=`${progress*100}%`;
-    // Hide scroll indicator after scrolling
     if(scrollTop>200)scrollInd.style.opacity='0';else scrollInd.style.opacity='1';
-    // Active dot
     chapters.forEach((ch,i)=>{
       const rect=ch.getBoundingClientRect();
       const inView=rect.top<window.innerHeight*.5&&rect.bottom>window.innerHeight*.5;
