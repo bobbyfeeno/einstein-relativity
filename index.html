@@ -215,7 +215,7 @@ body{font-family:'Georgia','Times New Roman',serif;background:#1a120a;color:#f0e
     <h3>Move your mouse to warp the universe</h3>
     <canvas class="anim-canvas" id="canvas2"></canvas>
     <div class="speech-bubble">
-      <div class="typewriter" data-text="Space and time aren't separate — they're woven together into a single fabric. Massive objects like stars and planets create dips in this fabric. Swipe across the grid to warp spacetime! Drag your finger through the fabric and watch it ripple."></div>
+      <div class="typewriter" data-text="Space and time aren't separate — they're woven together into a single fabric. Massive objects like stars and planets create dips in this fabric. Touch the grid gently and watch spacetime curve beneath your finger — like pressing on a soft rubber sheet."></div>
     </div>
   </div>
 </section>
@@ -903,69 +903,26 @@ function initCanvas2(){
   // Sun stays at center
   const sunX=()=>W/2, sunY=()=>H/2;
 
-  // === SWIPE RIPPLE SYSTEM ===
-  // Instead of static position warping, we track swipe trails that create ripples
-  const ripples=[]; // {x, y, vx, vy, strength, age, maxAge}
-  const swipeTrail=[]; // recent touch/mouse positions for trail effect
-  let lastMx=null, lastMy=null, lastTime=0;
-  let isDown=false;
+  // === SUBTLE TOUCH WARP — gentle rubber-sheet dip ===
+  let touchX=-9999, touchY=-9999; // current pointer position
+  let touching=false;
+  // Smooth interpolated warp center (eases toward touch, eases back when released)
+  let warpX=-9999, warpY=-9999, warpStrength=0;
 
-  function addRipple(x,y,vx,vy){
-    const speed=Math.sqrt(vx*vx+vy*vy);
-    if(speed<0.5)return;
-    ripples.push({
-      x, y, vx:vx*.3, vy:vy*.3,
-      strength:Math.min(speed*0.8, 40),
-      age:0, maxAge:2.5+Math.random()*.5,
-      radius:0, maxRadius:120+speed*2
-    });
-    // Keep ripples manageable
-    if(ripples.length>80)ripples.splice(0,ripples.length-80);
-  }
-
-  function handleMove(cx,cy){
-    const now=performance.now()/1000;
-    if(lastMx!==null && isDown){
-      const dt=now-lastTime;
-      if(dt>0&&dt<0.2){
-        const vx=(cx-lastMx)/dt;
-        const vy=(cy-lastMy)/dt;
-        // Add ripples along the swipe path
-        addRipple(cx,cy,vx,vy);
-        // Swipe trail for visual
-        swipeTrail.push({x:cx,y:cy,age:0,vx,vy});
-        if(swipeTrail.length>60)swipeTrail.shift();
-      }
-    }
-    lastMx=cx;lastMy=cy;lastTime=now;
-  }
-
-  canvas.addEventListener('mousedown',()=>{isDown=true});
-  canvas.addEventListener('mouseup',()=>{isDown=false;lastMx=null});
-  canvas.addEventListener('mouseleave',()=>{isDown=false;lastMx=null});
   canvas.addEventListener('mousemove',e=>{
     const r=canvas.getBoundingClientRect();
-    const cx=e.clientX-r.left, cy=e.clientY-r.top;
-    // Also warp on hover (lighter effect) — stronger on click-drag
-    if(!isDown){
-      if(lastMx!==null){
-        const now=performance.now()/1000;
-        const dt=now-lastTime;
-        if(dt>0&&dt<0.2){
-          const vx=(cx-lastMx)/dt*.3; // lighter for hover
-          const vy=(cy-lastMy)/dt*.3;
-          const speed=Math.sqrt(vx*vx+vy*vy);
-          if(speed>2) addRipple(cx,cy,vx,vy);
-        }
-      }
-      lastMx=cx;lastMy=cy;lastTime=performance.now()/1000;
-    } else {
-      handleMove(cx,cy);
-    }
+    touchX=e.clientX-r.left; touchY=e.clientY-r.top; touching=true;
   });
-  canvas.addEventListener('touchstart',e=>{isDown=true;const r=canvas.getBoundingClientRect();const t=e.touches[0];lastMx=t.clientX-r.left;lastMy=t.clientY-r.top;lastTime=performance.now()/1000;e.preventDefault()},{passive:false});
-  canvas.addEventListener('touchmove',e=>{const r=canvas.getBoundingClientRect();const t=e.touches[0];handleMove(t.clientX-r.left,t.clientY-r.top);e.preventDefault()},{passive:false});
-  canvas.addEventListener('touchend',()=>{isDown=false;lastMx=null});
+  canvas.addEventListener('mouseleave',()=>{touching=false});
+  canvas.addEventListener('touchstart',e=>{
+    const r=canvas.getBoundingClientRect();const t=e.touches[0];
+    touchX=t.clientX-r.left; touchY=t.clientY-r.top; touching=true; e.preventDefault();
+  },{passive:false});
+  canvas.addEventListener('touchmove',e=>{
+    const r=canvas.getBoundingClientRect();const t=e.touches[0];
+    touchX=t.clientX-r.left; touchY=t.clientY-r.top; e.preventDefault();
+  },{passive:false});
+  canvas.addEventListener('touchend',()=>{touching=false});
 
   let time=0;
   const G=800;
@@ -999,23 +956,15 @@ function initCanvas2(){
     drawStars(ctx,W,H,90,time);drawWarmVignette(ctx,W,H);
     const smx=sunX(), smy=sunY();
 
-    // === Update ripples ===
-    for(let i=ripples.length-1;i>=0;i--){
-      const rp=ripples[i];
-      rp.age+=.016;
-      rp.x+=rp.vx*.016;
-      rp.y+=rp.vy*.016;
-      rp.vx*=.97; rp.vy*=.97;
-      rp.radius=rp.maxRadius*(rp.age/rp.maxAge);
-      if(rp.age>=rp.maxAge) ripples.splice(i,1);
-    }
-    // Update swipe trail
-    for(let i=swipeTrail.length-1;i>=0;i--){
-      swipeTrail[i].age+=.016;
-      if(swipeTrail[i].age>1) swipeTrail.splice(i,1);
+    // === Smooth warp position tracking ===
+    if(touching){
+      warpX+=(touchX-warpX)*.1; warpY+=(touchY-warpY)*.1;
+      warpStrength+=(1-warpStrength)*.08;
+    } else {
+      warpStrength*=.93; // gentle fade out
     }
 
-    // === WARP FUNCTION — combines sun gravity + all active ripples ===
+    // === WARP FUNCTION — sun gravity + gentle touch dip ===
     function warpPt(gx,gy){
       // Sun gravity warp (always present at center)
       const sd=dist(gx,gy,smx,smy);
@@ -1024,32 +973,16 @@ function initCanvas2(){
         const angle=Math.atan2(smy-gy,smx-gx);
         gx+=Math.cos(angle)*pull*18;gy+=Math.sin(angle)*pull*18;
       }
-      // Ripple warping — each ripple creates an expanding ring distortion
-      for(const rp of ripples){
-        const rdx=gx-rp.x, rdy=gy-rp.y;
-        const rd=Math.sqrt(rdx*rdx+rdy*rdy);
-        // Ring distortion: strongest at the wavefront radius
-        const ringDist=Math.abs(rd-rp.radius);
-        const ringWidth=25+rp.radius*.15;
-        if(ringDist<ringWidth){
-          const fade=1-rp.age/rp.maxAge;
-          const ringIntensity=Math.cos(ringDist/ringWidth*Math.PI*.5)*fade;
-          // Displacement is radial (outward from ripple center) with swipe direction bias
-          const rdLen=rd||1;
-          const rnx=rdx/rdLen, rny=rdy/rdLen;
-          // Mix radial push with swipe velocity direction
-          const svLen=Math.sqrt(rp.vx*rp.vx+rp.vy*rp.vy)||1;
-          const svnx=rp.vx/svLen, svny=rp.vy/svLen;
-          const mixX=rnx*.5+svnx*.5;
-          const mixY=rny*.5+svny*.5;
-          const displacement=ringIntensity*rp.strength*.6;
-          gx+=mixX*displacement;
-          gy+=mixY*displacement;
-          // Add sine wobble for organic feel
-          const wobble=Math.sin(rd*.08+rp.age*8)*ringIntensity*rp.strength*.15;
-          gx+=rny*wobble;
-          gy-=rnx*wobble;
-        }
+      // Gentle touch dip — smooth Gaussian-like falloff
+      if(warpStrength>.01){
+        const dx=gx-warpX, dy=gy-warpY;
+        const d2=dx*dx+dy*dy;
+        const radius=160; // how wide the dip extends
+        const depth=22*warpStrength; // max pixel displacement
+        const falloff=Math.exp(-d2/(radius*radius));
+        const angle=Math.atan2(smy-gy,smx-gx); // pull toward center
+        gx+=Math.cos(angle)*falloff*depth;
+        gy+=Math.sin(angle)*falloff*depth;
       }
       return [gx,gy];
     }
@@ -1091,22 +1024,6 @@ function initCanvas2(){
       ctx.stroke();
     }
 
-    // Draw swipe trail glow
-    swipeTrail.forEach(st=>{
-      const alpha=(1-st.age)*0.3;
-      if(alpha<.01)return;
-      ctx.beginPath();ctx.arc(st.x,st.y,4+st.age*8,0,Math.PI*2);
-      ctx.fillStyle=`rgba(255,220,120,${alpha})`;ctx.fill();
-    });
-
-    // Draw ripple rings (subtle visual feedback)
-    ripples.forEach(rp=>{
-      const fade=1-rp.age/rp.maxAge;
-      if(fade<.02)return;
-      ctx.beginPath();ctx.arc(rp.x,rp.y,rp.radius,0,Math.PI*2);
-      ctx.strokeStyle=`rgba(255,220,140,${fade*.08})`;ctx.lineWidth=2+fade*3;ctx.stroke();
-    });
-
     // === SUN at center ===
     const corona=ctx.createRadialGradient(smx,smy,8,smx,smy,80);
     corona.addColorStop(0,'rgba(255,240,180,.35)');corona.addColorStop(.3,'rgba(255,200,100,.15)');
@@ -1138,18 +1055,14 @@ function initCanvas2(){
       const accel=G/(dClamped*dClamped);
       const ax=dx/d*accel, ay=dy/d*accel;
       pl.vx+=ax*dt; pl.vy+=ay*dt;
-      // Ripple perturbation on planets
-      for(const rp of ripples){
-        const rdx=pl.x-rp.x, rdy=pl.y-rp.y;
-        const rd=Math.sqrt(rdx*rdx+rdy*rdy);
-        const ringDist=Math.abs(rd-rp.radius);
-        if(ringDist<30){
-          const fade=1-rp.age/rp.maxAge;
-          const push=fade*rp.strength*.003*Math.cos(ringDist/30*Math.PI*.5);
-          const rn=rd||1;
-          pl.vx+=rdx/rn*push;
-          pl.vy+=rdy/rn*push;
-        }
+      // Gentle touch perturbation on planets
+      if(warpStrength>.01){
+        const pdx=pl.x-warpX, pdy=pl.y-warpY;
+        const pd2=pdx*pdx+pdy*pdy;
+        const falloff=Math.exp(-pd2/(180*180))*warpStrength*.15;
+        const tAngle=Math.atan2(smy-pl.y,smx-pl.x);
+        pl.vx+=Math.cos(tAngle)*falloff;
+        pl.vy+=Math.sin(tAngle)*falloff;
       }
       const speed=Math.sqrt(pl.vx*pl.vx+pl.vy*pl.vy);
       const idealSpeed=Math.sqrt(G/dClamped);
