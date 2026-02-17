@@ -967,9 +967,9 @@ function initCanvas2(){
           if(dd<bestD){bestD=dd;bestGX=gx;bestGZ=gz;}
         }
       }
-      smoothWarpGX+=(bestGX-smoothWarpGX)*.1;
-      smoothWarpGZ+=(bestGZ-smoothWarpGZ)*.1;
-      warpStrength+=(1-warpStrength)*.08;
+      smoothWarpGX=bestGX;
+      smoothWarpGZ=bestGZ;
+      warpStrength=1;
     } else {
       warpStrength*=.93;
     }
