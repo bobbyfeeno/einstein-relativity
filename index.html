@@ -892,97 +892,75 @@ function initCanvas1(){
 }
 
 /* ============================================================
-   CHAPTER 2: SPACE-TIME FABRIC — 3D Perspective Grid
+   CHAPTER 2: SPACE-TIME FABRIC — Lightweight Pre-projected Grid
    ============================================================ */
 function initCanvas2(){
   const canvas=document.getElementById('canvas2');if(!canvas)return;
   const dpr=Math.min(window.devicePixelRatio||1, 2);
   const ctx=canvas.getContext('2d');
   let W,H;
+
+  // Grid config
+  const LINES=15;
+  // Pre-computed grid points (filled on resize)
+  let grid=null; // grid[row][col] = {x, y} in screen coords
+
+  function buildGrid(){
+    // Fake 3D perspective: vanishing point at top-center,
+    // lines converge and get closer together toward the top.
+    const vx=W*0.5, vy=H*0.08; // vanishing point
+    const bottomLeft={x:W*-0.15, y:H*0.95};
+    const bottomRight={x:W*1.15, y:H*0.95};
+    grid=[];
+    for(let r=0;r<LINES;r++){
+      const row=[];
+      // t=0 is bottom (near), t=1 is top (far/vanishing point)
+      // Use power curve so lines bunch up near the top (perspective)
+      const t=Math.pow(r/(LINES-1), 0.7);
+      for(let c=0;c<LINES;c++){
+        const s=c/(LINES-1);
+        // Interpolate bottom edge position
+        const bx=bottomLeft.x+(bottomRight.x-bottomLeft.x)*s;
+        const by=bottomLeft.y+(bottomRight.y-bottomLeft.y)*s;
+        // Lerp toward vanishing point
+        row.push({x:bx+(vx-bx)*t, y:by+(vy-by)*t});
+      }
+      grid.push(row);
+    }
+  }
+
   function resize(){
     W=canvas.offsetWidth; H=canvas.offsetHeight;
     canvas.width=W*dpr; canvas.height=H*dpr;
     ctx.setTransform(dpr,0,0,dpr,0,0);
+    buildGrid();
   }
-  resize();window.addEventListener('resize',resize);
+  resize();window.addEventListener('resize',()=>{resize()});
 
-  let touchX=-9999, touchY=-9999, touching=false;
+  // Smooth warp position (lerp toward touch)
+  let warpX=-9999, warpY=-9999;
+  let touching=false;
   let warpStrength=0;
+  let rawTouchX=-9999, rawTouchY=-9999;
 
-  // 3D grid parameters
-  const gridSize=14;
-  const gridSpacing=1.0;
-  const halfGrid=gridSize*gridSpacing/2;
-
-  // Camera (precomputed trig)
-  const camDist=14;
-  const camAngle=0.65;
-  const fov=600;
-  const cosA=Math.cos(camAngle), sinA=Math.sin(camAngle);
-
-  // Warp target in grid space
-  let smoothWarpGX=0, smoothWarpGZ=0;
-
-  // Inverse projection: screen coords → grid coords (y=0 plane)
-  function screenToGrid(sx,sy){
-    // Invert: sx = W/2 + gx*(fov/tz), sy = H*0.42 + ry*(fov/tz)
-    // where ry = -gz*sinA, tz = gz*cosA + camDist (for y=0)
-    // From sx: gx = (sx - W/2) * tz / fov
-    // From sy: (sy - H*0.42) = (-gz*sinA) * fov / tz
-    // Let tz = gz*cosA + camDist
-    // (sy - H*0.42) * tz = -gz*sinA*fov
-    // (sy - H*0.42) * (gz*cosA + camDist) = -gz*sinA*fov
-    // gz*cosA*(sy-H*0.42) + camDist*(sy-H*0.42) = -gz*sinA*fov
-    // gz*(cosA*(sy-H*0.42) + sinA*fov) = -camDist*(sy-H*0.42)
-    const dy=sy-H*0.42;
-    const denom=cosA*dy+sinA*fov;
-    if(Math.abs(denom)<0.001) return {x:0,z:0};
-    const gz=-camDist*dy/denom;
-    const tz=gz*cosA+camDist;
-    if(tz<0.1) return {x:0,z:0};
-    const gx=(sx-W/2)*tz/fov;
-    // Clamp to grid bounds
-    return {
-      x:Math.max(-halfGrid,Math.min(halfGrid,gx)),
-      z:Math.max(-halfGrid,Math.min(halfGrid,gz))
-    };
-  }
+  const WARP_RADIUS=120; // pixels
+  const R2=WARP_RADIUS*WARP_RADIUS;
 
   canvas.addEventListener('mousemove',e=>{
     const r=canvas.getBoundingClientRect();
-    touchX=e.clientX-r.left; touchY=e.clientY-r.top; touching=true;
-    const g=screenToGrid(touchX,touchY);
-    smoothWarpGX=g.x; smoothWarpGZ=g.z; warpStrength=1;
+    rawTouchX=e.clientX-r.left; rawTouchY=e.clientY-r.top; touching=true;
   });
   canvas.addEventListener('mouseleave',()=>{touching=false});
   canvas.addEventListener('touchstart',e=>{
-    e.preventDefault();
-    const r=canvas.getBoundingClientRect();const t=e.touches[0];
-    touchX=t.clientX-r.left; touchY=t.clientY-r.top; touching=true;
-    const g=screenToGrid(touchX,touchY);
-    smoothWarpGX=g.x; smoothWarpGZ=g.z; warpStrength=1;
+    e.preventDefault();const r=canvas.getBoundingClientRect();const t=e.touches[0];
+    rawTouchX=t.clientX-r.left; rawTouchY=t.clientY-r.top; touching=true;
+    warpX=rawTouchX; warpY=rawTouchY; // snap on first touch
   },{passive:false});
   canvas.addEventListener('touchmove',e=>{
-    e.preventDefault();
-    const r=canvas.getBoundingClientRect();const t=e.touches[0];
-    touchX=t.clientX-r.left; touchY=t.clientY-r.top;
-    const g=screenToGrid(touchX,touchY);
-    smoothWarpGX=g.x; smoothWarpGZ=g.z; warpStrength=1;
+    e.preventDefault();const r=canvas.getBoundingClientRect();const t=e.touches[0];
+    rawTouchX=t.clientX-r.left; rawTouchY=t.clientY-r.top;
   },{passive:false});
   canvas.addEventListener('touchend',()=>{touching=false});
-
-  function project(x3,y3,z3){
-    const ry=y3*cosA-z3*sinA;
-    const tz=y3*sinA+z3*cosA+camDist;
-    if(tz<0.1) return null;
-    const scale=fov/tz;
-    return {x:W/2+x3*scale, y:H*0.42+ry*scale};
-  }
-
-  // Precompute warp constants
-  const warpRadius=3.5;
-  const r2=warpRadius*warpRadius;
-  const invR2=1/r2;
 
   // IntersectionObserver: only animate when visible
   let ch2Visible=false;
@@ -995,54 +973,62 @@ function initCanvas2(){
 
   function animate(){
     animId=null;
+    if(!grid) {if(ch2Visible) animId=requestAnimationFrame(animate); return;}
     ctx.clearRect(0,0,W,H);
 
-    if(!touching) warpStrength*=.93;
-    const ws=warpStrength;
-    const doWarp=ws>0.005;
-    const depth=3.0*ws;
-    const wgx=smoothWarpGX, wgz=smoothWarpGZ;
+    // Lerp smoothing on warp position (0.3 = fast but smooth)
+    if(touching){
+      warpX+=(rawTouchX-warpX)*0.3;
+      warpY+=(rawTouchY-warpY)*0.3;
+      warpStrength+=(1-warpStrength)*0.3;
+    } else {
+      warpStrength*=0.92;
+    }
 
-    // Draw grid — single strokeStyle, single beginPath/stroke per direction
+    const doWarp=warpStrength>0.005;
+    const str=warpStrength;
+    const wx=warpX, wy=warpY;
+
+    // Compute warped Y offsets into a flat array for speed
+    // offsets[r*LINES+c] = offsetY for that point
+    const N=LINES*LINES;
+    const offY=new Float32Array(N);
+    if(doWarp){
+      for(let r=0;r<LINES;r++){
+        const row=grid[r];
+        const base=r*LINES;
+        for(let c=0;c<LINES;c++){
+          const dx=row[c].x-wx, dy=row[c].y-wy;
+          const d2=dx*dx+dy*dy;
+          if(d2<R2){
+            const f=1-d2/R2;
+            offY[base+c]=str*f*f*40;
+          }
+        }
+      }
+    }
+
+    // Draw all grid lines — single color, single stroke
+    ctx.strokeStyle='rgba(140,150,220,0.25)';
     ctx.lineWidth=1;
-    ctx.strokeStyle='rgba(140,150,220,0.22)';
 
-    // Lines along Z (one beginPath, all lines, one stroke)
+    // Horizontal lines (along columns for each row)
     ctx.beginPath();
-    for(let ix=0;ix<=gridSize;ix++){
-      const gx=ix*gridSpacing-halfGrid;
-      let started=false;
-      for(let iz=0;iz<=gridSize;iz++){
-        const gz=iz*gridSpacing-halfGrid;
-        let gy=0;
-        if(doWarp){const dx=gx-wgx,dz=gz-wgz,d2=dx*dx+dz*dz;if(d2<r2){const f=1-d2*invR2;gy=depth*f*f;}}
-        const ry=gy*cosA-gz*sinA;
-        const tz=gy*sinA+gz*cosA+camDist;
-        if(tz<0.1){started=false;continue;}
-        const s=fov/tz;
-        const px=W/2+gx*s, py=H*0.42+ry*s;
-        if(!started){ctx.moveTo(px,py);started=true;}
-        else ctx.lineTo(px,py);
+    for(let r=0;r<LINES;r++){
+      const row=grid[r], base=r*LINES;
+      ctx.moveTo(row[0].x, row[0].y+offY[base]);
+      for(let c=1;c<LINES;c++){
+        ctx.lineTo(row[c].x, row[c].y+offY[base+c]);
       }
     }
     ctx.stroke();
 
-    // Lines along X (one beginPath, all lines, one stroke)
+    // Vertical lines (along rows for each column)
     ctx.beginPath();
-    for(let iz=0;iz<=gridSize;iz++){
-      const gz=iz*gridSpacing-halfGrid;
-      let started=false;
-      for(let ix=0;ix<=gridSize;ix++){
-        const gx=ix*gridSpacing-halfGrid;
-        let gy=0;
-        if(doWarp){const dx=gx-wgx,dz=gz-wgz,d2=dx*dx+dz*dz;if(d2<r2){const f=1-d2*invR2;gy=depth*f*f;}}
-        const ry=gy*cosA-gz*sinA;
-        const tz=gy*sinA+gz*cosA+camDist;
-        if(tz<0.1){started=false;continue;}
-        const s=fov/tz;
-        const px=W/2+gx*s, py=H*0.42+ry*s;
-        if(!started){ctx.moveTo(px,py);started=true;}
-        else ctx.lineTo(px,py);
+    for(let c=0;c<LINES;c++){
+      ctx.moveTo(grid[0][c].x, grid[0][c].y+offY[c]);
+      for(let r=1;r<LINES;r++){
+        ctx.lineTo(grid[r][c].x, grid[r][c].y+offY[r*LINES+c]);
       }
     }
     ctx.stroke();
