@@ -1177,30 +1177,34 @@ function initCanvas4(){
     // Sun screen position (at bottom of depression)
     sunScreen=project(sunX3,DEPRESSION_DEPTH,sunZ3);
 
-    // Light beam path in 3D: enters from back-right, curves around depression, exits front-left
+    // Light beam path via gravitational simulation — photon curves around mass
     beamScreen=[];
-    const BEAM_STEPS=250;
-    const beamStartX=GRID_EXTENT*1.2, beamStartZ=-GRID_EXTENT*1.0;
-    const beamEndX=-GRID_EXTENT*0.8, beamEndZ=GRID_EXTENT*0.8;
-    // Bezier control points to curve around the sun
-    const cp1x=GRID_EXTENT*0.6, cp1z=-GRID_EXTENT*0.2;
-    const cp2x=-GRID_EXTENT*0.1, cp2z=GRID_EXTENT*0.4;
-    // Closest approach offset to avoid going through sun
-    const passOffset=55;
-    for(let i=0;i<=BEAM_STEPS;i++){
-      const t=i/BEAM_STEPS; const u=1-t;
-      let bx=u*u*u*beamStartX+3*u*u*t*cp1x+3*u*t*t*cp2x+t*t*t*beamEndX;
-      let bz=u*u*u*beamStartZ+3*u*u*t*cp1z+3*u*t*t*cp2z+t*t*t*beamEndZ;
-      // Push beam slightly away from sun center so it doesn't intersect
-      const dx=bx-sunX3, dz=bz-sunZ3;
-      const bd=Math.sqrt(dx*dx+dz*dz)+1;
-      if(bd<passOffset){
-        const push=(passOffset-bd)/bd;
-        bx+=dx*push; bz+=dz*push;
+    {
+      const G_BEAM=3800; // gravity constant — tuned for visible deflection
+      const dt=0.9;
+      const MAX_STEPS=600;
+      // Start from back-right, heading toward top-left
+      let px=GRID_EXTENT*1.2, pz=-GRID_EXTENT*0.95;
+      let vx=-1.8, vz=1.4; // initial velocity
+      // Normalize speed
+      const speed=Math.sqrt(vx*vx+vz*vz);
+      const PHOTON_SPEED=3.2;
+      vx=vx/speed*PHOTON_SPEED; vz=vz/speed*PHOTON_SPEED;
+      for(let i=0;i<MAX_STEPS;i++){
+        const dx=sunX3-px, dz=sunZ3-pz;
+        const dist2=dx*dx+dz*dz;
+        const d=Math.sqrt(dist2);
+        if(d<15) break; // too close to sun, stop
+        const force=G_BEAM/(dist2);
+        vx+=dx/d*force*dt;
+        vz+=dz/d*force*dt;
+        px+=vx*dt;
+        pz+=vz*dt;
+        // Stop if photon leaves the grid area
+        if(Math.abs(px)>GRID_EXTENT*1.5||Math.abs(pz)>GRID_EXTENT*1.5) break;
+        const py=depress(px,pz)*0.15; // ride slightly above surface
+        beamScreen.push(project(px,py,pz));
       }
-      // Beam follows the surface of the depression
-      const by=depress(bx,bz)*0.15; // ride slightly above surface
-      beamScreen.push(project(bx,by,bz));
     }
   }
   rebuild();window.addEventListener('resize',rebuild);
