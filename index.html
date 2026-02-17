@@ -1183,7 +1183,7 @@ function initCanvas4(){
       const dt=0.3;
       const MAX_STEPS=4000;
       const PHOTON_SPEED=2.5;
-      const IMPACT_PARAM=GRID_EXTENT*0.35; // closest approach distance
+      const IMPACT_PARAM=GRID_EXTENT*0.55; // closest approach distance
       // Start photon coming from bottom, offset to the right of the mass
       let px=IMPACT_PARAM, pz=-GRID_EXTENT*1.8;
       let vx=0, vz=PHOTON_SPEED; // moving straight up initially
@@ -1191,7 +1191,7 @@ function initCanvas4(){
         const dx=sunX3-px, dz=sunZ3-pz;
         const dist2=dx*dx+dz*dz;
         const d=Math.sqrt(dist2);
-        if(d<3) break;
+        if(d<0.5) break;
         // GR-accurate deflection: perpendicular force only (no speed change)
         // This ensures the photon maintains constant speed and only bends its direction
         const speed=Math.sqrt(vx*vx+vz*vz);
