@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Einstein's General Relativity — A Cartoon Adventure</title>
+<style>
+/* ===== RESET & BASE ===== */
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#0a0a2e;color:#fff;overflow-x:hidden;min-height:100vh}
+/* ===== LOADING SCREEN ===== */
+#loader{position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse at center,#1a1a4e 0%,#0a0a2e 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s}
+#loader.hidden{opacity:0;pointer-events:none}
+.loader-einstein{width:120px;height:120px;animation:loaderBounce 1s ease-in-out infinite}
+@keyframes loaderBounce{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-20px) rotate(5deg)}}
+.loader-text{margin-top:24px;font-size:1.4rem;color:#f0c040;animation:loaderPulse 1.2s ease-in-out infinite}
+@keyframes loaderPulse{0%,100%{opacity:.4}50%{opacity:1}}
+.loader-bar{width:200px;height:6px;background:rgba(255,255,255,.15);border-radius:3px;margin-top:16px;overflow:hidden}
+.loader-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#f0c040,#ff6b6b);border-radius:3px;animation:loaderFill 2s ease-in-out forwards}
+@keyframes loaderFill{to{width:100%}}
+
+/* ===== STAR BACKGROUND ===== */
+#stars-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ===== PROGRESS BAR ===== */
+#progress-bar{position:fixed;top:0;left:0;right:0;height:5px;z-index:100;background:rgba(255,255,255,.1)}
+#progress-fill{height:100%;width:16.66%;background:linear-gradient(90deg,#f0c040,#ff6b6b,#a855f7);transition:width .5s cubic-bezier(.4,0,.2,1);border-radius:0 3px 3px 0}
+
+/* ===== NAV ===== */
+#chapter-nav{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:8px;background:rgba(10,10,46,.85);backdrop-filter:blur(12px);padding:8px 16px;border-radius:40px;border:1px solid rgba(255,255,255,.1)}
+.nav-dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s;border:2px solid transparent;position:relative}
+.nav-dot:hover{background:rgba(255,255,255,.4);transform:scale(1.2)}
+.nav-dot.active{background:#f0c040;border-color:#fff;box-shadow:0 0 12px rgba(240,192,64,.6)}
+.nav-dot .tooltip{position:absolute;top:24px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:.7rem;background:rgba(0,0,0,.8);padding:4px 8px;border-radius:6px;opacity:0;transition:opacity .2s;pointer-events:none}
+.nav-dot:hover .tooltip{opacity:1}
+
+/* ===== CHAPTER CONTAINER ===== */
+#app{position:relative;z-index:1}
+.chapter{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:60px 20px 40px;position:relative;opacity:0;transform:translateY(40px);transition:opacity .8s,transform .8s}
+.chapter.visible{opacity:1;transform:translateY(0)}
+.chapter-inner{max-width:900px;width:100%;text-align:center}
+.chapter h2{font-size:clamp(1.8rem,5vw,3rem);margin-bottom:.3em;background:linear-gradient(135deg,#f0c040,#ff6b6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.chapter h3{font-size:clamp(1rem,3vw,1.4rem);color:rgba(255,255,255,.6);margin-bottom:1.5em;font-weight:400}
+
+/* ===== EINSTEIN CHARACTER ===== */
+.einstein-container{display:inline-block;position:relative;margin-bottom:20px}
+.einstein{width:140px;height:180px;position:relative;animation:einsteinFloat 3s ease-in-out infinite}
+@keyframes einsteinFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+/* Head */
+.e-head{width:80px;height:80px;background:radial-gradient(circle at 35% 35%,#ffe0c0,#f5c89a);border-radius:50%;position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:2}
+/* Hair */
+.e-hair{position:absolute;top:-15px;left:50%;transform:translateX(-50%);width:95px;height:50px;z-index:3}
+.e-hair::before,.e-hair::after{content:'';position:absolute;background:#d4d4d4;border-radius:50%}
+.e-hair::before{width:40px;height:35px;top:0;left:0;transform:rotate(-20deg)}
+.e-hair::after{width:40px;height:35px;top:0;right:0;transform:rotate(20deg)}
+.e-hair-mid{position:absolute;top:-5px;left:50%;transform:translateX(-50%);width:30px;height:25px;background:#d4d4d4;border-radius:50% 50% 30% 30%;z-index:3}
+/* Mustache */
+.e-mustache{position:absolute;top:52px;left:50%;transform:translateX(-50%);width:35px;height:12px;background:#d4d4d4;border-radius:0 0 50% 50%;z-index:4}
+/* Eyes */
+.e-eyes{position:absolute;top:30px;left:50%;transform:translateX(-50%);display:flex;gap:18px;z-index:4}
+.e-eye{width:10px;height:12px;background:#333;border-radius:50%;position:relative;animation:blink 4s infinite}
+@keyframes blink{0%,96%,100%{transform:scaleY(1)}98%{transform:scaleY(.1)}}
+/* Smile */
+.e-smile{position:absolute;top:60px;left:50%;transform:translateX(-50%);width:20px;height:10px;border:3px solid #c67a4a;border-top:none;border-radius:0 0 50% 50%;z-index:4}
+/* Body */
+.e-body{position:absolute;top:75px;left:50%;transform:translateX(-50%);width:70px;height:80px;background:linear-gradient(180deg,#5b4a8a,#4a3a7a);border-radius:20px 20px 10px 10px;z-index:1}
+/* Arms */
+.e-arm-l,.e-arm-r{position:absolute;top:85px;width:18px;height:50px;background:#5b4a8a;border-radius:10px;z-index:0}
+.e-arm-l{left:20px;transform:rotate(15deg);transform-origin:top center;animation:armWaveL 3s ease-in-out infinite}
+.e-arm-r{right:20px;transform:rotate(-15deg);transform-origin:top center;animation:armWaveR 4s ease-in-out infinite}
+@keyframes armWaveL{0%,100%{transform:rotate(15deg)}50%{transform:rotate(25deg)}}
+@keyframes armWaveR{0%,100%{transform:rotate(-15deg)}50%{transform:rotate(-30deg)}}
+
+/* Pose variations */
+.einstein.pointing .e-arm-r{animation:armPoint 2s ease-in-out infinite}
+@keyframes armPoint{0%,100%{transform:rotate(-60deg)}50%{transform:rotate(-65deg)}}
+.einstein.thinking .e-arm-r{animation:none;transform:rotate(-70deg) translateX(10px)}
+.einstein.excited .e-arm-l,.einstein.excited .e-arm-r{animation:armExcited 0.5s ease-in-out infinite alternate}
+@keyframes armExcited{from{transform:rotate(-40deg)}to{transform:rotate(-60deg)}}
+.einstein.waving .e-arm-r{animation:armBigWave 1s ease-in-out infinite}
+@keyframes armBigWave{0%,100%{transform:rotate(-30deg)}50%{transform:rotate(-70deg)}}
+
+/* ===== SPEECH BUBBLE ===== */
+.speech-bubble{background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:20px 28px;margin:20px auto;max-width:600px;position:relative;font-size:clamp(.95rem,2.5vw,1.15rem);line-height:1.6;color:rgba(255,255,255,.9);animation:bubblePop .5s cubic-bezier(.175,.885,.32,1.275)}
+.speech-bubble::after{content:'';position:absolute;top:-12px;left:50%;transform:translateX(-50%);border:8px solid transparent;border-bottom-color:rgba(255,255,255,.12)}
+@keyframes bubblePop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* ===== ANIMATION CANVASES ===== */
+.anim-area{width:100%;max-width:700px;height:400px;margin:20px auto;border-radius:20px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.08);position:relative;overflow:hidden}
+.anim-area canvas{width:100%;height:100%;display:block}
+
+/* ===== INTERACTIVE HINT ===== */
+.interact-hint{font-size:.8rem;color:rgba(255,255,255,.4);margin-top:8px;animation:hintPulse 2s ease-in-out infinite}
+@keyframes hintPulse{0%,100%{opacity:.4}50%{opacity:.8}}
+
+/* ===== CHAPTER NAV BUTTONS ===== */
+.chapter-btns{display:flex;gap:16px;justify-content:center;margin-top:30px}
+.chapter-btn{padding:12px 32px;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:#fff;border-radius:40px;font-size:1rem;cursor:pointer;transition:all .3s}
+.chapter-btn:hover{background:rgba(240,192,64,.2);border-color:#f0c040;transform:translateY(-2px);box-shadow:0 4px 20px rgba(240,192,64,.3)}
+.chapter-btn:active{transform:translateY(0)}
+
+/* ===== FOOTER ===== */
+#footer{text-align:center;padding:40px 20px;color:rgba(255,255,255,.3);font-size:.85rem;position:relative;z-index:1}
+#footer a{color:#f0c040;text-decoration:none}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:600px){
+  .anim-area{height:300px}
+  .einstein{transform:scale(.8);transform-origin:center}
+  #chapter-nav{padding:6px 10px;gap:6px}
+  .nav-dot{width:11px;height:11px}
+  .chapter{padding:50px 16px 30px}
+  .speech-bubble{padding:14px 18px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loader">
+  <svg class="loader-einstein" viewBox="0 0 120 120">
+    <circle cx="60" cy="40" r="28" fill="#ffe0c0"/>
+    <ellipse cx="42" cy="10" rx="18" ry="14" fill="#d4d4d4"/>
+    <ellipse cx="78" cy="10" rx="18" ry="14" fill="#d4d4d4"/>
+    <ellipse cx="60" cy="5" rx="12" ry="10" fill="#d4d4d4"/>
+    <circle cx="50" cy="36" r="4" fill="#333"/>
+    <circle cx="70" cy="36" r="4" fill="#333"/>
+    <path d="M48 56 Q60 66 72 56" stroke="#d4d4d4" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M52 50 Q60 54 68 50" stroke="#c67a4a" stroke-width="2" fill="none"/>
+    <rect x="35" y="68" width="50" height="50" rx="16" fill="#5b4a8a"/>
+    <rect x="22" y="72" width="14" height="36" rx="7" fill="#5b4a8a" transform="rotate(15,29,72)"/>
+    <rect x="84" y="72" width="14" height="36" rx="7" fill="#5b4a8a" transform="rotate(-15,91,72)"/>
+  </svg>
+  <div class="loader-text">Warping spacetime...</div>
+  <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+</div>
+
+<!-- STARS -->
+<canvas id="stars-canvas"></canvas>
+
+<!-- PROGRESS BAR -->
+<div id="progress-bar"><div id="progress-fill"></div></div>
+
+<!-- NAV DOTS -->
+<div id="chapter-nav"></div>
+
+<!-- APP -->
+<div id="app">
+
+<!-- CHAPTER 1 -->
+<section class="chapter" id="ch1" data-chapter="1">
+<div class="chapter-inner">
+  <div class="einstein-container">
+    <div class="einstein waving">
+      <div class="e-hair"><div class="e-hair-mid"></div></div>
+      <div class="e-head"></div>
+      <div class="e-eyes"><div class="e-eye"></div><div class="e-eye"></div></div>
+      <div class="e-mustache"></div>
+      <div class="e-smile"></div>
+      <div class="e-body"></div>
+      <div class="e-arm-l"></div>
+      <div class="e-arm-r"></div>
+    </div>
+  </div>
+  <h2>Chapter 1: What is Gravity?</h2>
+  <h3>Newton's Apple vs. Einstein's Curved Spacetime</h3>
+  <div class="speech-bubble">
+    Hello, friend! 👋 I'm Albert Einstein! For centuries, people thought gravity was a <strong>force pulling things down</strong>. Newton saw an apple fall and thought — "the Earth pulls it!" But I discovered something even cooler: <strong>gravity isn't a force at all. It's curved space!</strong>
+  </div>
+  <div class="anim-area" id="anim-ch1"><canvas></canvas></div>
+  <p class="interact-hint">🍎 Watch the apple fall, then see spacetime bend!</p>
+  <div class="chapter-btns">
+    <button class="chapter-btn" onclick="goChapter(2)">Next Chapter →</button>
+  </div>
+</div>
+</section>
+
+<!-- CHAPTER 2 -->
+<section class="chapter" id="ch2" data-chapter="2">
+<div class="chapter-inner">
+  <div class="einstein-container">
+    <div class="einstein pointing">
+      <div class="e-hair"><div class="e-hair-mid"></div></div>
+      <div class="e-head"></div>
+      <div class="e-eyes"><div class="e-eye"></div><div class="e-eye"></div></div>
+      <div class="e-mustache"></div>
+      <div class="e-smile"></div>
+      <div class="e-body"></div>
+      <div class="e-arm-l"></div>
+      <div class="e-arm-r"></div>
+    </div>
+  </div>
+  <h2>Chapter 2: The Fabric of Space-Time</h2>
+  <h3>Imagine the Universe as a Giant Trampoline</h3>
+  <div class="speech-bubble">
+    Picture a big stretchy sheet — that's <strong>spacetime</strong>! When you put something heavy on it, like a planet, it <strong>bends and curves</strong>. Smaller objects nearby roll toward the dip. That's how planets orbit stars — they're just following the curves! 🌍
+  </div>
+  <div class="anim-area" id="anim-ch2"><canvas></canvas></div>
+  <p class="interact-hint">🖱️ Move your mouse/finger to place mass on the grid!</p>
+  <div class="chapter-btns">
+    <button class="chapter-btn" onclick="goChapter(1)">← Previous</button>
+    <button class="chapter-btn" onclick="goChapter(3)">Next Chapter →</button>
+  </div>
+</div>
+</section>
+
+<!-- CHAPTER 3 -->
+<section class="chapter" id="ch3" data-chapter="3">
+<div class="chapter-inner">
+  <div class="einstein-container">
+    <div class="einstein thinking">
+      <div class="e-hair"><div class="e-hair-mid"></div></div>
+      <div class="e-head"></div>
+      <div class="e-eyes"><div class="e-eye"></div><div class="e-eye"></div></div>
+      <div class="e-mustache"></div>
+      <div class="e-smile"></div>
+      <div class="e-body"></div>
+      <div class="e-arm-l"></div>
+      <div class="e-arm-r"></div>
+    </div>
+  </div>
+  <h2>Chapter 3: Time Slows Down!</h2>
+  <h3>Time Dilation — Clocks Don't Always Agree</h3>
+  <div class="speech-bubble">
+    Here's the wild part: <strong>time itself slows down near heavy objects!</strong> A clock on Earth ticks normally, but a clock near a black hole would tick much slower. If you flew near a black hole and came back, everyone else would have aged more than you! ⏰🕳️
+  </div>
+  <div class="anim-area" id="anim-ch3"><canvas></canvas></div>
+  <p class="interact-hint">⏰ Watch the two clocks — the one near the black hole ticks slower!</p>
+  <div class="chapter-btns">
+    <button class="chapter-btn" onclick="goChapter(2)">← Previous</button>
+    <button class="chapter-btn" onclick="goChapter(4)">Next Chapter →</button>
+  </div>
+</div>
+</section>
+
+<!-- CHAPTER 4 -->
+<section class="chapter" id="ch4" data-chapter="4">
+<div class="chapter-inner">
+  <div class="einstein-container">
+    <div class="einstein excited">
+      <div class="e-hair"><div class="e-hair-mid"></div></div>
+      <div class="e-head"></div>
+      <div class="e-eyes"><div class="e-eye"></div><div class="e-eye"></div></div>
+      <div class="e-mustache"></div>
+      <div class="e-smile"></div>
+      <div class="e-body"></div>
+      <div class="e-arm-l"></div>
+      <div class="e-arm-r"></div>
+    </div>
+  </div>
+  <h2>Chapter 4: Light Bends!</h2>
+  <h3>Gravitational Lensing — Seeing Around Corners</h3>
+  <div class="speech-bubble">
+    Even <strong>light follows curved spacetime!</strong> When light from a distant star passes near something very heavy, it bends around it. This means we can see stars that are <em>behind</em> massive objects — like peeking around a cosmic corner! This is called <strong>gravitational lensing</strong>. ✨🔭
+  </div>
+  <div class="anim-area" id="anim-ch4"><canvas></canvas></div>
+  <p class="interact-hint">✨ Watch light bend around the massive object!</p>
+  <div class="chapter-btns">
+    <button class="chapter-btn" onclick="goChapter(3)">← Previous</button>
+    <button class="chapter-btn" onclick="goChapter(5)">Next Chapter →</button>
+  </div>
+</div>
+</section>
+
+<!-- CHAPTER 5 -->
+<section class="chapter" id="ch5" data-chapter="5">
+<div class="chapter-inner">
+  <div class="einstein-container">
+    <div class="einstein thinking">
+      <div class="e-hair"><div class="e-hair-mid"></div></div>
+      <div class="e-head"></div>
+      <div class="e-eyes"><div class="e-eye"></div><div class="e-eye"></div></div>
+      <div class="e-mustache"></div>
+      <div class="e-smile"></div>
+      <div class="e-body"></div>
+      <div class="e-arm-l"></div>
+      <div class="e-arm-r"></div>
+    </div>
+  </div>
+  <h2>Chapter 5: Black Holes</h2>
+  <h3>Where Spacetime Curves So Much, Nothing Escapes</h3>
+  <div class="speech-bubble">
+    When a star collapses, spacetime can curve <strong>so extremely</strong> that nothing — not even light — can escape. That's a <strong>black hole!</strong> It has an "event horizon" — a point of no return. Anything that crosses it is gone forever. Spooky, right? 🕳️
+  </div>
+  <div class="anim-area" id="anim-ch5"><canvas></canvas></div>
+  <p class="interact-hint">🌀 Watch matter spiral into the black hole!</p>
+  <div class="chapter-btns">
+    <button class="chapter-btn" onclick="goChapter(4)">← Previous</button>
+    <button class="chapter-btn" onclick="goChapter(6)">Next Chapter →</button>
+  </div>
+</div>
+</section>
+
+<!-- CHAPTER 6 -->
+<section class="chapter" id="ch6" data-chapter="6">
+<div class="chapter-inner">
+  <div class="einstein-container">
+    <div class="einstein excited">
+      <div class="e-hair"><div class="e-hair-mid"></div></div>
+      <div class="e-head"></div>
+      <div class="e-eyes"><div class="e-eye"></div><div class="e-eye"></div></div>
+      <div class="e-mustache"></div>
+      <div class="e-smile"></div>
+      <div class="e-body"></div>
+      <div class="e-arm-l"></div>
+      <div class="e-arm-r"></div>
+    </div>
+  </div>
+  <h2>Chapter 6: Gravitational Waves</h2>
+  <h3>Ripples in the Fabric of the Universe</h3>
+  <div class="speech-bubble">
+    When massive objects spiral into each other — like two black holes merging — they send <strong>ripples through spacetime itself!</strong> These are <strong>gravitational waves</strong>. In 2015, scientists finally detected them for the first time. The universe literally <em>jiggles</em>! 🌊
+  </div>
+  <div class="anim-area" id="anim-ch6"><canvas></canvas></div>
+  <p class="interact-hint">🌊 Watch two objects spiral together and create spacetime ripples!</p>
+  <div class="chapter-btns">
+    <button class="chapter-btn" onclick="goChapter(5)">← Previous</button>
+    <button class="chapter-btn" onclick="goChapter(1)">🔄 Start Over</button>
+  </div>
+  <div style="margin-top:40px;padding:24px;background:rgba(240,192,64,.1);border-radius:16px;border:1px solid rgba(240,192,64,.3)">
+    <p style="font-size:1.2rem;color:#f0c040;margin-bottom:8px">🎉 You made it!</p>
+    <p style="color:rgba(255,255,255,.7)">Now you understand the basics of General Relativity — how gravity is really curved spacetime, how time slows near massive objects, how light bends, what black holes are, and how spacetime itself can ripple! Not bad for a cartoon, eh? 😄</p>
+  </div>
+</div>
+</section>
+
+</div>
+
+<div id="footer">Made with 💛 and curved spacetime — <a href="https://github.com/bobbyfeeno/einstein-relativity">GitHub</a></div>
+
+<script>
+// ===== STARS BACKGROUND =====
+(function(){
+  const c=document.getElementById('stars-canvas'),ctx=c.getContext('2d');
+  let W,H,stars=[];
+  function resize(){W=c.width=innerWidth;H=c.height=innerHeight;stars=[];for(let i=0;i<200;i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.8+.3,a:Math.random(),da:Math.random()*.02+.005})}
+  resize();addEventListener('resize',resize);
+  function draw(){ctx.clearRect(0,0,W,H);for(const s of stars){s.a+=s.da;ctx.globalAlpha=.3+Math.sin(s.a)*.4;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;requestAnimationFrame(draw)}
+  draw();
+})();
+
+// ===== LOADER =====
+window.addEventListener('load',()=>setTimeout(()=>document.getElementById('loader').classList.add('hidden'),2200));
+
+// ===== CHAPTER NAV =====
+const chapters=['What is Gravity?','Space-Time Fabric','Time Dilation','Light Bends','Black Holes','Gravitational Waves'];
+const navEl=document.getElementById('chapter-nav');
+chapters.forEach((name,i)=>{
+  const d=document.createElement('div');d.className='nav-dot';d.innerHTML=`<span class="tooltip">${name}</span>`;
+  d.onclick=()=>goChapter(i+1);navEl.appendChild(d);
+});
+const dots=[...navEl.querySelectorAll('.nav-dot')];
+
+function goChapter(n){document.getElementById('ch'+n).scrollIntoView({behavior:'smooth'})}
+
+// ===== INTERSECTION OBSERVER FOR CHAPTERS =====
+const chEls=document.querySelectorAll('.chapter');
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      const n=+e.target.dataset.chapter;
+      dots.forEach((d,i)=>d.classList.toggle('active',i===n-1));
+      document.getElementById('progress-fill').style.width=(n/6*100)+'%';
+    }
+  });
+},{threshold:.3});
+chEls.forEach(el=>obs.observe(el));
+
+// ===== UTILITY =====
+function getCanvas(id){const area=document.getElementById(id);const c=area.querySelector('canvas');const r=area.getBoundingClientRect();c.width=r.width*devicePixelRatio;c.height=r.height*devicePixelRatio;const ctx=c.getContext('2d');ctx.scale(devicePixelRatio,devicePixelRatio);return{c,ctx,w:r.width,h:r.height}}
+
+// ===== CHAPTER 1: APPLE & GRID =====
+(function(){
+  const{ctx,w,h}=getCanvas('anim-ch1');
+  let t=0;
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    t+=0.016;
+    const phase=t%8;
+
+    if(phase<4){
+      // Newton's apple
+      ctx.save();
+      // Tree
+      ctx.fillStyle='#6b4226';ctx.fillRect(w*.35,h*.3,20,h*.5);
+      ctx.fillStyle='#4a8c3f';ctx.beginPath();ctx.arc(w*.35+10,h*.28,50,0,Math.PI*2);ctx.fill();
+      // Ground
+      ctx.fillStyle='#3a7a30';ctx.fillRect(0,h*.78,w,h*.22);
+      // Apple
+      const appleY=Math.min(h*.28+phase*phase*30,h*.72);
+      ctx.fillStyle='#ff4444';ctx.beginPath();ctx.arc(w*.42,appleY,12,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#5a3';ctx.fillRect(w*.42-2,appleY-16,4,8);
+      // Newton
+      ctx.fillStyle='#ffe0c0';ctx.beginPath();ctx.arc(w*.5,h*.62,18,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#333';ctx.fillRect(w*.5-15,h*.68,30,40);
+      // Label
+      ctx.fillStyle='rgba(255,255,255,.7)';ctx.font='bold 16px sans-serif';ctx.textAlign='center';
+      ctx.fillText("Newton's View: \"A force pulls it down!\"",w*.5,h*.15);
+      ctx.restore();
+    }else{
+      // Einstein's grid
+      ctx.save();
+      ctx.fillStyle='rgba(255,255,255,.7)';ctx.font='bold 16px sans-serif';ctx.textAlign='center';
+      ctx.fillText("Einstein's View: Space itself is curved!",w*.5,h*.1);
+      // Draw grid
+      const cx=w*.5,cy=h*.5,mass=40+Math.sin(t)*5;
+      ctx.strokeStyle='rgba(100,180,255,.4)';ctx.lineWidth=1;
+      for(let row=-10;row<=10;row++){
+        ctx.beginPath();
+        for(let col=-20;col<=20;col++){
+          let gx=cx+col*25,gy=cy+row*25;
+          const dx=gx-cx,dy=gy-cy,dist=Math.sqrt(dx*dx+dy*dy)+1;
+          const pull=mass*80/(dist*dist+200);
+          gy+=pull*Math.max(0,1-dist/300)*40;
+          col===-20?ctx.moveTo(gx,gy):ctx.lineTo(gx,gy);
+        }
+        ctx.stroke();
+      }
+      for(let col=-20;col<=20;col++){
+        ctx.beginPath();
+        for(let row=-10;row<=10;row++){
+          let gx=cx+col*25,gy=cy+row*25;
+          const dx=gx-cx,dy=gy-cy,dist=Math.sqrt(dx*dx+dy*dy)+1;
+          const pull=mass*80/(dist*dist+200);
+          gy+=pull*Math.max(0,1-dist/300)*40;
+          row===-10?ctx.moveTo(gx,gy):ctx.lineTo(gx,gy);
+        }
+        ctx.stroke();
+      }
+      // Heavy ball
+      const grad=ctx.createRadialGradient(cx,cy-10,5,cx,cy,30);
+      grad.addColorStop(0,'#ffd700');grad.addColorStop(1,'#ff8c00');
+      ctx.fillStyle=grad;ctx.beginPath();ctx.arc(cx,cy,25,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ===== CHAPTER 2: INTERACTIVE GRID =====
+(function(){
+  const area=document.getElementById('anim-ch2');
+  const{ctx,w,h}=getCanvas('anim-ch2');
+  let mx=w/2,my=h/2,t=0;
+  let balls=[{x:w*.3,y:h*.3,vx:1,vy:0.5},{x:w*.7,y:h*.4,vx:-0.5,vy:1},{x:w*.5,y:h*.2,vx:0.8,vy:-0.3}];
+
+  area.addEventListener('mousemove',e=>{const r=area.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top});
+  area.addEventListener('touchmove',e=>{e.preventDefault();const r=area.getBoundingClientRect();const touch=e.touches[0];mx=touch.clientX-r.left;my=touch.clientY-r.top},{passive:false});
+
+  function draw(){
+    ctx.clearRect(0,0,w,h);t+=0.01;
+    // Grid with distortion
+    ctx.strokeStyle='rgba(160,100,255,.35)';ctx.lineWidth=1;
+    const spacing=30;
+    for(let row=0;row<=h;row+=spacing){
+      ctx.beginPath();
+      for(let col=0;col<=w;col+=5){
+        let gy=row;
+        const dx=col-mx,dy=row-my,dist=Math.sqrt(dx*dx+dy*dy)+1;
+        gy+=4000/(dist+30);
+        col===0?ctx.moveTo(col,gy):ctx.lineTo(col,gy);
+      }
+      ctx.stroke();
+    }
+    for(let col=0;col<=w;col+=spacing){
+      ctx.beginPath();
+      for(let row=0;row<=h;row+=5){
+        let gx=col,gy=row;
+        const dx=col-mx,dy=row-my,dist=Math.sqrt(dx*dx+dy*dy)+1;
+        gy+=4000/(dist+30);
+        row===0?ctx.moveTo(gx,gy):ctx.lineTo(gx,gy);
+      }
+      ctx.stroke();
+    }
+    // Big planet at mouse
+    const pg=ctx.createRadialGradient(mx,my-5,5,mx,my,35);
+    pg.addColorStop(0,'#ff9f43');pg.addColorStop(1,'#ee5a24');
+    ctx.fillStyle=pg;ctx.beginPath();ctx.arc(mx,my,30,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.15)';ctx.beginPath();ctx.arc(mx-8,my-10,8,0,Math.PI*2);ctx.fill();
+
+    // Small balls rolling toward mass
+    for(const b of balls){
+      const dx=mx-b.x,dy=my-b.y,dist=Math.sqrt(dx*dx+dy*dy)+1;
+      const f=200/(dist*dist);
+      b.vx+=dx/dist*f;b.vy+=dy/dist*f;
+      b.vx*=0.995;b.vy*=0.995;
+      b.x+=b.vx;b.y+=b.vy;
+      if(dist<35){b.x=Math.random()*w;b.y=Math.random()*h;b.vx=(Math.random()-.5)*2;b.vy=(Math.random()-.5)*2}
+      if(b.x<0||b.x>w){b.x=Math.random()*w;b.vx*=-1}
+      if(b.y<0||b.y>h){b.y=Math.random()*h;b.vy*=-1}
+      ctx.fillStyle='#74b9ff';ctx.beginPath();ctx.arc(b.x,b.y,8,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,.3)';ctx.beginPath();ctx.arc(b.x-2,b.y-3,3,0,Math.PI*2);ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ===== CHAPTER 3: TIME DILATION =====
+(function(){
+  const{ctx,w,h}=getCanvas('anim-ch3');
+  let t=0;
+  function drawClock(x,y,r,angle,label,color){
+    ctx.save();ctx.translate(x,y);
+    // Clock face
+    ctx.fillStyle='rgba(255,255,255,.08)';ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=color;ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.stroke();
+    // Ticks
+    for(let i=0;i<12;i++){
+      ctx.save();ctx.rotate(i*Math.PI/6);
+      ctx.fillStyle=color;ctx.fillRect(-2,-r+5,4,12);
+      ctx.restore();
+    }
+    // Hand
+    ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(0,0);
+    ctx.lineTo(Math.cos(angle-Math.PI/2)*(r-15),Math.sin(angle-Math.PI/2)*(r-15));
+    ctx.stroke();
+    // Center dot
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,5,0,Math.PI*2);ctx.fill();
+    // Label
+    ctx.fillStyle=color;ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.fillText(label,0,r+25);
+    ctx.restore();
+  }
+  function draw(){
+    ctx.clearRect(0,0,w,h);t+=0.03;
+    // Background elements
+    // Earth side
+    ctx.fillStyle='rgba(100,200,100,.1)';ctx.fillRect(0,0,w/2,h);
+    // Black hole side
+    ctx.fillStyle='rgba(80,0,120,.15)';ctx.fillRect(w/2,0,w/2,h);
+    // Labels
+    ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='16px sans-serif';ctx.textAlign='center';
+    ctx.fillText('🌍 On Earth',w*.25,30);
+    ctx.fillText('🕳️ Near Black Hole',w*.75,30);
+
+    // Earth clock - normal speed
+    drawClock(w*.25,h*.45,60,t,'Normal Time','#55efc4');
+    // Black hole clock - slow
+    drawClock(w*.75,h*.45,60,t*0.3,'Slow Time!','#fd79a8');
+
+    // Black hole visual
+    const bhx=w*.75,bhy=h*.8;
+    for(let i=5;i>0;i--){
+      ctx.fillStyle=`rgba(100,0,180,${0.05*i})`;ctx.beginPath();ctx.arc(bhx,bhy,20+i*15,0,Math.PI*2);ctx.fill();
+    }
+    ctx.fillStyle='#000';ctx.beginPath();ctx.arc(bhx,bhy,18,0,Math.PI*2);ctx.fill();
+
+    // Earth visual
+    const eg=ctx.createRadialGradient(w*.25,h*.82,5,w*.25,h*.82,22);
+    eg.addColorStop(0,'#74b9ff');eg.addColorStop(1,'#00b894');
+    ctx.fillStyle=eg;ctx.beginPath();ctx.arc(w*.25,h*.82,20,0,Math.PI*2);ctx.fill();
+
+    // Time comparison text
+    const earthTicks=Math.floor(t/(Math.PI*2)*12);
+    const bhTicks=Math.floor(t*0.3/(Math.PI*2)*12);
+    ctx.fillStyle='#f0c040';ctx.font='bold 13px sans-serif';ctx.textAlign='center';
+    ctx.fillText(`Earth ticks: ${earthTicks}`,w*.25,h-20);
+    ctx.fillText(`Black hole ticks: ${bhTicks}`,w*.75,h-20);
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ===== CHAPTER 4: GRAVITATIONAL LENSING =====
+(function(){
+  const{ctx,w,h}=getCanvas('anim-ch4');
+  let t=0;
+  function draw(){
+    ctx.clearRect(0,0,w,h);t+=0.015;
+    const cx=w/2,cy=h/2;
+
+    // Background stars
+    for(let i=0;i<50;i++){
+      const sx=(Math.sin(i*127.1+i)*0.5+0.5)*w;
+      const sy=(Math.cos(i*311.7+i)*0.5+0.5)*h;
+      ctx.fillStyle=`rgba(255,255,255,${0.3+Math.sin(t+i)*0.2})`;
+      ctx.beginPath();ctx.arc(sx,sy,1,0,Math.PI*2);ctx.fill();
+    }
+
+    // Hidden star (behind)
+    const starX=cx,starY=cy-5;
+    ctx.fillStyle='rgba(255,255,100,.2)';ctx.beginPath();ctx.arc(starX,starY,15,0,Math.PI*2);ctx.fill();
+
+    // Massive object
+    const mg=ctx.createRadialGradient(cx,cy,10,cx,cy,50);
+    mg.addColorStop(0,'#6c5ce7');mg.addColorStop(1,'rgba(108,92,231,0)');
+    ctx.fillStyle=mg;ctx.beginPath();ctx.arc(cx,cy,45,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#2d1b69';ctx.beginPath();ctx.arc(cx,cy,25,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.1)';ctx.beginPath();ctx.arc(cx-8,cy-8,8,0,Math.PI*2);ctx.fill();
+
+    // Light rays bending around
+    const numRays=8;
+    for(let i=0;i<numRays;i++){
+      const angle=(i/numRays)*Math.PI*2+t;
+      ctx.strokeStyle=`hsla(${50+i*20},100%,70%,${0.4+Math.sin(t*2+i)*0.2})`;
+      ctx.lineWidth=2;ctx.beginPath();
+      // Light comes from behind, bends around
+      const startR=200,endR=80;
+      for(let s=0;s<=30;s++){
+        const frac=s/30;
+        const r=startR-frac*(startR-endR);
+        const bendAngle=angle+Math.sin(frac*Math.PI)*0.8;
+        const px=cx+Math.cos(bendAngle)*r;
+        const py=cy+Math.sin(bendAngle)*r;
+        s===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+      }
+      ctx.stroke();
+    }
+
+    // Lensed images of star (Einstein ring effect)
+    for(let i=0;i<6;i++){
+      const a=t*0.5+i*Math.PI/3;
+      const lx=cx+Math.cos(a)*55;
+      const ly=cy+Math.sin(a)*55;
+      ctx.fillStyle=`rgba(255,255,100,${0.5+Math.sin(t*3+i)*0.3})`;
+      ctx.beginPath();ctx.arc(lx,ly,4+Math.sin(t*2+i)*2,0,Math.PI*2);ctx.fill();
+    }
+
+    // Labels
+    ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='13px sans-serif';ctx.textAlign='center';
+    ctx.fillText('Massive Object',cx,cy+70);
+    ctx.fillText('★ Hidden Star',cx,cy-65);
+    ctx.fillText('Light bends around, making the star visible!',cx,h-20);
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ===== CHAPTER 5: BLACK HOLE =====
+(function(){
+  const{ctx,w,h}=getCanvas('anim-ch5');
+  let t=0;
+  let particles=[];
+  for(let i=0;i<80;i++){
+    const a=Math.random()*Math.PI*2;
+    const r=80+Math.random()*150;
+    particles.push({a,r,speed:0.3+Math.random()*0.5,size:1+Math.random()*2,hue:Math.random()*60+10});
+  }
+  function draw(){
+    ctx.clearRect(0,0,w,h);t+=0.02;
+    const cx=w/2,cy=h/2;
+
+    // Accretion disk glow
+    for(let i=5;i>0;i--){
+      ctx.fillStyle=`rgba(255,${100+i*20},0,${0.03*i})`;
+      ctx.beginPath();ctx.ellipse(cx,cy,120+i*15,40+i*8,0.3,0,Math.PI*2);ctx.fill();
+    }
+
+    // Particles spiraling in
+    for(const p of particles){
+      p.a+=p.speed/p.r*2;
+      p.r-=0.15;
+      if(p.r<15){p.r=80+Math.random()*150;p.a=Math.random()*Math.PI*2}
+      const px=cx+Math.cos(p.a)*p.r;
+      const py=cy+Math.sin(p.a)*p.r*0.4;
+      ctx.fillStyle=`hsla(${p.hue},100%,${60+p.r/3}%,${Math.min(1,p.r/60)})`;
+      ctx.beginPath();ctx.arc(px,py,p.size*(p.r/100),0,Math.PI*2);ctx.fill();
+    }
+
+    // Event horizon
+    const bhg=ctx.createRadialGradient(cx,cy,0,cx,cy,40);
+    bhg.addColorStop(0,'#000');bhg.addColorStop(0.7,'#000');bhg.addColorStop(1,'rgba(60,0,100,0)');
+    ctx.fillStyle=bhg;ctx.beginPath();ctx.arc(cx,cy,40,0,Math.PI*2);ctx.fill();
+
+    // Photon ring
+    ctx.strokeStyle=`rgba(255,200,50,${0.3+Math.sin(t*3)*0.15})`;ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(cx,cy,43,0,Math.PI*2);ctx.stroke();
+
+    // Light being pulled in
+    for(let i=0;i<5;i++){
+      const la=t+i*1.2;
+      const lr=45+Math.sin(la*3)*3;
+      const lx=cx+Math.cos(la)*lr;
+      const ly=cy+Math.sin(la)*lr*0.4;
+      ctx.fillStyle='rgba(255,255,200,.6)';ctx.beginPath();ctx.arc(lx,ly,1.5,0,Math.PI*2);ctx.fill();
+    }
+
+    // Labels
+    ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='12px sans-serif';ctx.textAlign='center';
+    ctx.fillText('Event Horizon',cx,cy+60);
+    ctx.fillText('Accretion Disk',cx+130,cy-20);
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ===== CHAPTER 6: GRAVITATIONAL WAVES =====
+(function(){
+  const{ctx,w,h}=getCanvas('anim-ch6');
+  let t=0;
+  function draw(){
+    ctx.clearRect(0,0,w,h);t+=0.02;
+    const cx=w/2,cy=h/2;
+
+    // Spacetime grid with wave ripples
+    ctx.strokeStyle='rgba(100,180,255,.2)';ctx.lineWidth=1;
+    const spacing=25;
+    for(let row=0;row<=h;row+=spacing){
+      ctx.beginPath();
+      for(let col=0;col<=w;col+=4){
+        let gy=row;
+        const dx=col-cx,dy=row-cy,dist=Math.sqrt(dx*dx+dy*dy);
+        // Ripple effect
+        const ripple=Math.sin(dist*0.05-t*3)*8*Math.max(0,1-dist/(w*0.6));
+        gy+=ripple;
+        col===0?ctx.moveTo(col,gy):ctx.lineTo(col,gy);
+      }
+      ctx.stroke();
+    }
+
+    // Two spiraling objects
+    const spiralR=30+Math.sin(t*0.5)*20;
+    const o1x=cx+Math.cos(t*2)*spiralR;
+    const o1y=cy+Math.sin(t*2)*spiralR;
+    const o2x=cx+Math.cos(t*2+Math.PI)*spiralR;
+    const o2y=cy+Math.sin(t*2+Math.PI)*spiralR;
+
+    // Trails
+    ctx.strokeStyle='rgba(255,100,100,.3)';ctx.lineWidth=2;ctx.beginPath();
+    for(let i=0;i<40;i++){
+      const tt=t*2-i*0.08;
+      const sr=30+Math.sin((t-i*0.04)*0.5)*20;
+      const px=cx+Math.cos(tt)*sr;
+      const py=cy+Math.sin(tt)*sr;
+      i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+    }
+    ctx.stroke();
+    ctx.strokeStyle='rgba(100,100,255,.3)';ctx.beginPath();
+    for(let i=0;i<40;i++){
+      const tt=t*2+Math.PI-i*0.08;
+      const sr=30+Math.sin((t-i*0.04)*0.5)*20;
+      const px=cx+Math.cos(tt)*sr;
+      const py=cy+Math.sin(tt)*sr;
+      i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+    }
+    ctx.stroke();
+
+    // Object 1
+    const g1=ctx.createRadialGradient(o1x,o1y,3,o1x,o1y,18);
+    g1.addColorStop(0,'#ff6b6b');g1.addColorStop(1,'#c0392b');
+    ctx.fillStyle=g1;ctx.beginPath();ctx.arc(o1x,o1y,15,0,Math.PI*2);ctx.fill();
+
+    // Object 2
+    const g2=ctx.createRadialGradient(o2x,o2y,3,o2x,o2y,18);
+    g2.addColorStop(0,'#74b9ff');g2.addColorStop(1,'#0984e3');
+    ctx.fillStyle=g2;ctx.beginPath();ctx.arc(o2x,o2y,15,0,Math.PI*2);ctx.fill();
+
+    // Expanding wave rings
+    for(let i=0;i<6;i++){
+      const ringR=(t*80+i*60)%300;
+      ctx.strokeStyle=`rgba(200,180,255,${Math.max(0,.4-ringR/400)})`;
+      ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,cy,ringR,0,Math.PI*2);ctx.stroke();
+    }
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ===== HANDLE CANVAS RESIZE =====
+let resizeTimeout;
+window.addEventListener('resize',()=>{
+  clearTimeout(resizeTimeout);
+  resizeTimeout=setTimeout(()=>location.reload(),300);
+});
+</script>
+</body>
+</html>
