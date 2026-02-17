@@ -818,74 +818,393 @@ function drawWarmVignette(ctx, w, h) {
 function initCanvas1(){
   const canvas=document.getElementById('canvas1');if(!canvas)return;
   const ctx=canvas.getContext('2d');
-  let W,H;function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight}
+  let W,H;
+  function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;groundY=H*.78;treeX=W*.25;treeTrunkTop=groundY-90;canopyY=treeTrunkTop-30;appleStartY=canopyY+18;resetApple();}
+  let groundY,treeX,treeTrunkTop,canopyY,appleStartY;
   resize();window.addEventListener('resize',resize);
+
   let time=0;
-  const apple={x:0,y:0,vy:0,phase:'fall',squash:1,stretch:1,bounceCount:0};
-  function resetApple(){apple.x=W*.3;apple.y=30;apple.vy=0;apple.phase='fall';apple.squash=1;apple.stretch=1;apple.bounceCount=0}
-  resetApple();
-  const groundY=H*.7;
+  // Apple state
+  const apple={x:0,y:0,vy:0,phase:'hanging',timer:0,squashX:1,squashY:1};
+  // Newton expression: 0=relaxed looking up, 1=surprised
+  let newtonExpr=0;
+
+  function resetApple(){
+    apple.x=treeX+12;apple.y=appleStartY;apple.vy=0;apple.phase='hanging';apple.timer=0;apple.squashX=1;apple.squashY=1;newtonExpr=0;
+  }
+
+  // ========== LEFT SIDE: Newton's View ==========
+
+  function drawSkyGradient(){
+    const half=W/2;
+    const g=ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#87ceeb');g.addColorStop(.4,'#a8d8f0');g.addColorStop(.7,'#c8e8c0');g.addColorStop(1,'#8ab858');
+    ctx.fillStyle=g;ctx.fillRect(0,0,half,H);
+  }
+
+  function drawGrass(){
+    const half=W/2;
+    // Main grass
+    const g=ctx.createLinearGradient(0,groundY,0,H);
+    g.addColorStop(0,'#5a9e3a');g.addColorStop(.3,'#4a8a2e');g.addColorStop(1,'#3a7020');
+    ctx.fillStyle=g;ctx.fillRect(0,groundY,half,H-groundY);
+    // Grass tufts
+    ctx.strokeStyle='#6ab848';ctx.lineWidth=1.5;
+    for(let i=0;i<20;i++){
+      const gx=((i*37+13)%Math.floor(half));const gy=groundY;
+      ctx.beginPath();ctx.moveTo(gx,gy);ctx.quadraticCurveTo(gx-3,gy-8-((i*7)%6),gx-2,gy-12-((i*5)%5));ctx.stroke();
+      ctx.beginPath();ctx.moveTo(gx,gy);ctx.quadraticCurveTo(gx+4,gy-9-((i*3)%5),gx+3,gy-11-((i*11)%4));ctx.stroke();
+    }
+  }
+
+  function drawTree(){
+    // Trunk — tapered
+    ctx.beginPath();
+    ctx.moveTo(treeX-10,groundY);ctx.lineTo(treeX-7,treeTrunkTop);
+    ctx.lineTo(treeX+7,treeTrunkTop);ctx.lineTo(treeX+10,groundY);ctx.closePath();
+    const tg=ctx.createLinearGradient(treeX-10,0,treeX+10,0);
+    tg.addColorStop(0,'#5a3a1a');tg.addColorStop(.3,'#7a5230');tg.addColorStop(.7,'#6a4425');tg.addColorStop(1,'#4a2e12');
+    ctx.fillStyle=tg;ctx.fill();
+    // Bark texture lines
+    ctx.strokeStyle='rgba(40,20,5,.2)';ctx.lineWidth=.8;
+    for(let i=0;i<5;i++){
+      const bx=treeX-5+i*2.5;
+      ctx.beginPath();ctx.moveTo(bx,groundY);ctx.quadraticCurveTo(bx+(i%2?1:-1),treeTrunkTop+(groundY-treeTrunkTop)*.5,bx,treeTrunkTop+5);ctx.stroke();
+    }
+    // Branch stubs
+    ctx.strokeStyle='#5a3a1a';ctx.lineWidth=4;
+    ctx.beginPath();ctx.moveTo(treeX-4,treeTrunkTop+15);ctx.quadraticCurveTo(treeX-25,treeTrunkTop+5,treeX-30,treeTrunkTop-5);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(treeX+4,treeTrunkTop+10);ctx.quadraticCurveTo(treeX+22,treeTrunkTop,treeX+28,treeTrunkTop-10);ctx.stroke();
+
+    // Canopy — overlapping circles with gradient
+    const leaves=[
+      {x:treeX,y:canopyY,r:38},{x:treeX-22,y:canopyY+8,r:30},{x:treeX+22,y:canopyY+8,r:30},
+      {x:treeX-12,y:canopyY-18,r:28},{x:treeX+12,y:canopyY-18,r:28},
+      {x:treeX,y:canopyY-28,r:24},{x:treeX-28,y:canopyY-5,r:22},{x:treeX+28,y:canopyY-5,r:22},
+    ];
+    // Shadow under canopy
+    ctx.beginPath();ctx.ellipse(treeX,canopyY+15,44,12,0,0,Math.PI*2);ctx.fillStyle='rgba(20,60,10,.15)';ctx.fill();
+    // Leaves
+    leaves.forEach(l=>{
+      const lg=ctx.createRadialGradient(l.x-l.r*.2,l.y-l.r*.3,l.r*.1,l.x,l.y,l.r);
+      lg.addColorStop(0,'#6cc848');lg.addColorStop(.4,'#4aa830');lg.addColorStop(.7,'#3a8a22');lg.addColorStop(1,'#2a6a18');
+      ctx.beginPath();ctx.arc(l.x,l.y,l.r,0,Math.PI*2);ctx.fillStyle=lg;ctx.fill();
+    });
+    // Leaf highlights
+    leaves.slice(0,4).forEach(l=>{
+      ctx.beginPath();ctx.arc(l.x-l.r*.15,l.y-l.r*.2,l.r*.45,0,Math.PI*2);
+      ctx.fillStyle='rgba(140,230,100,.12)';ctx.fill();
+    });
+  }
+
   function drawApple(x,y,sx,sy){
     ctx.save();ctx.translate(x,y);ctx.scale(sx,sy);
-    ctx.beginPath();ctx.arc(0,0,14,0,Math.PI*2);
-    const g=ctx.createRadialGradient(-4,-4,2,0,0,14);g.addColorStop(0,'#ff4444');g.addColorStop(.7,'#cc0000');g.addColorStop(1,'#880000');
-    ctx.fillStyle=g;ctx.shadowColor='rgba(255,0,0,.3)';ctx.shadowBlur=15;ctx.fill();ctx.shadowBlur=0;
-    ctx.beginPath();ctx.moveTo(-1,-14);ctx.quadraticCurveTo(2,-22,4,-18);ctx.strokeStyle='#5a3a1a';ctx.lineWidth=2;ctx.stroke();
-    ctx.beginPath();ctx.moveTo(2,-14);ctx.quadraticCurveTo(8,-16,10,-12);ctx.fillStyle='#2d8a2d';ctx.fill();
+    ctx.beginPath();ctx.arc(0,0,10,0,Math.PI*2);
+    const g=ctx.createRadialGradient(-3,-3,1,0,0,10);
+    g.addColorStop(0,'#ff5555');g.addColorStop(.5,'#dd2222');g.addColorStop(1,'#990000');
+    ctx.fillStyle=g;ctx.fill();
+    // Highlight
+    ctx.beginPath();ctx.arc(-3,-3,4,0,Math.PI*2);ctx.fillStyle='rgba(255,200,200,.35)';ctx.fill();
+    // Stem
+    ctx.beginPath();ctx.moveTo(0,-10);ctx.quadraticCurveTo(2,-16,3,-14);ctx.strokeStyle='#5a3a1a';ctx.lineWidth=1.5;ctx.stroke();
+    // Leaf on stem
+    ctx.beginPath();ctx.moveTo(1,-12);ctx.quadraticCurveTo(6,-14,7,-10);ctx.fillStyle='#3a8a22';ctx.fill();
     ctx.restore();
   }
-  function drawGrid(cx,cy,mass,t){
-    const spacing=30,rows=Math.ceil(H/spacing),cols=Math.ceil(W/spacing);
-    ctx.strokeStyle='rgba(220,180,120,.2)';ctx.lineWidth=.8;
-    for(let r=0;r<=rows;r++){
+
+  function drawNewton(){
+    const nx=treeX+2, ny=groundY;
+    ctx.save();ctx.translate(nx,ny);
+
+    // Legs stretched out
+    ctx.fillStyle='#3a3a5a';
+    ctx.beginPath();ctx.ellipse(18,-6,22,6,-.1,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(14,-8,20,5,.1,0,Math.PI*2);ctx.fill();
+    // Shoes
+    ctx.fillStyle='#2a1a0a';
+    ctx.beginPath();ctx.ellipse(38,-5,8,5,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(32,-7,7,4,.15,0,Math.PI*2);ctx.fill();
+
+    // Body — long coat, sitting, leaning against trunk
+    ctx.fillStyle='#4a6a8a';
+    ctx.beginPath();
+    ctx.moveTo(-8,-10);ctx.quadraticCurveTo(-12,-30,-10,-48);
+    ctx.lineTo(12,-48);ctx.quadraticCurveTo(14,-30,10,-10);ctx.closePath();ctx.fill();
+    // Coat details
+    ctx.strokeStyle='rgba(30,50,70,.3)';ctx.lineWidth=.8;
+    ctx.beginPath();ctx.moveTo(1,-48);ctx.lineTo(1,-10);ctx.stroke();
+    // Buttons
+    ctx.fillStyle='#c8b060';
+    [  -42,-36,-30,-24].forEach(by=>{ctx.beginPath();ctx.arc(1,by,1.5,0,Math.PI*2);ctx.fill();});
+
+    // Arms
+    ctx.strokeStyle='#4a6a8a';ctx.lineWidth=7;ctx.lineCap='round';
+    // Left arm resting on lap
+    ctx.beginPath();ctx.moveTo(-8,-40);ctx.quadraticCurveTo(-14,-28,4,-14);ctx.stroke();
+    // Right arm resting
+    ctx.beginPath();ctx.moveTo(10,-40);ctx.quadraticCurveTo(16,-28,12,-14);ctx.stroke();
+    // Hands
+    ctx.fillStyle='#f0c898';
+    ctx.beginPath();ctx.arc(4,-13,4,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(12,-13,4,0,Math.PI*2);ctx.fill();
+
+    // Wig — white curls
+    const headY=-60;
+    ctx.fillStyle='#e8e0d4';
+    // Side curls
+    [{x:-14,y:headY+6,r:7},{x:16,y:headY+6,r:7},{x:-12,y:headY-2,r:6},{x:14,y:headY-2,r:6}].forEach(c=>{
+      ctx.beginPath();ctx.arc(c.x,c.y,c.r,0,Math.PI*2);ctx.fill();
+    });
+    // Top curls
+    [{x:-6,y:headY-12,r:7},{x:4,y:headY-14,r:7},{x:10,y:headY-10,r:6},{x:-2,y:headY-10,r:8}].forEach(c=>{
+      ctx.beginPath();ctx.arc(c.x,c.y,c.r,0,Math.PI*2);ctx.fill();
+    });
+
+    // Head
+    const hg=ctx.createRadialGradient(-2,headY-2,3,1,headY,16);
+    hg.addColorStop(0,'#fde8cc');hg.addColorStop(.7,'#f0c898');hg.addColorStop(1,'#dba56a');
+    ctx.beginPath();ctx.arc(1,headY,15,0,Math.PI*2);ctx.fillStyle=hg;ctx.fill();
+
+    // Rosy cheeks
+    ctx.fillStyle='rgba(255,120,100,.2)';
+    ctx.beginPath();ctx.arc(-9,headY+4,5,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(11,headY+4,5,0,Math.PI*2);ctx.fill();
+
+    // Eyes — expression changes
+    if(newtonExpr<.5){
+      // Relaxed, looking up
+      ctx.fillStyle='white';
+      ctx.beginPath();ctx.ellipse(-5,headY-2,5,5.5,0,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.ellipse(7,headY-2,5,5.5,0,0,Math.PI*2);ctx.fill();
+      // Pupils looking up
+      ctx.fillStyle='#2a1808';
+      ctx.beginPath();ctx.arc(-5,headY-4,2.5,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(7,headY-4,2.5,0,Math.PI*2);ctx.fill();
+      // Highlights
+      ctx.fillStyle='white';
+      ctx.beginPath();ctx.arc(-4,headY-5,1.2,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(8,headY-5,1.2,0,Math.PI*2);ctx.fill();
+      // Relaxed mouth — slight smile
+      ctx.beginPath();ctx.moveTo(-4,headY+8);ctx.quadraticCurveTo(1,headY+12,6,headY+8);
+      ctx.strokeStyle='rgba(140,80,40,.5)';ctx.lineWidth=1.5;ctx.stroke();
+    } else {
+      // Surprised/hurt — big round eyes, open mouth
+      ctx.fillStyle='white';
+      ctx.beginPath();ctx.ellipse(-5,headY-2,6,7,0,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.ellipse(7,headY-2,6,7,0,0,Math.PI*2);ctx.fill();
+      // Tiny pupils (shock)
+      ctx.fillStyle='#2a1808';
+      ctx.beginPath();ctx.arc(-5,headY-2,2,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(7,headY-2,2,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='white';
+      ctx.beginPath();ctx.arc(-4,headY-3,1,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(8,headY-3,1,0,Math.PI*2);ctx.fill();
+      // Open surprised mouth
+      ctx.beginPath();ctx.ellipse(1,headY+9,5,4,0,0,Math.PI*2);
+      ctx.fillStyle='rgba(80,30,20,.6)';ctx.fill();
+      // Stars around head
+      const starT=time*3;
+      ctx.fillStyle='#ffd700';
+      for(let s=0;s<3;s++){
+        const sa=starT+s*Math.PI*2/3;
+        const sx=1+Math.cos(sa)*22, sy=headY-14+Math.sin(sa)*8;
+        ctx.font='10px serif';ctx.fillText('✦',sx-4,sy+4);
+      }
+    }
+
+    // Nose
+    ctx.beginPath();ctx.moveTo(1,headY);ctx.quadraticCurveTo(4,headY+5,1,headY+5);
+    ctx.strokeStyle='rgba(180,120,60,.4)';ctx.lineWidth=1.2;ctx.stroke();
+
+    // Eyebrows
+    if(newtonExpr<.5){
+      ctx.strokeStyle='rgba(100,70,35,.6)';ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(-10,headY-8);ctx.quadraticCurveTo(-5,headY-11,0,headY-8);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(2,headY-8);ctx.quadraticCurveTo(7,headY-11,12,headY-8);ctx.stroke();
+    } else {
+      // Raised eyebrows (surprise)
+      ctx.strokeStyle='rgba(100,70,35,.7)';ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(-10,headY-11);ctx.quadraticCurveTo(-5,headY-15,0,headY-11);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(2,headY-11);ctx.quadraticCurveTo(7,headY-15,12,headY-11);ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  // ========== RIGHT SIDE: Einstein's curved spacetime ==========
+
+  // Orbiting dots
+  const orbiters=[];
+  for(let i=0;i<5;i++){
+    orbiters.push({angle:i*Math.PI*2/5, radius:50+i*18, speed:.3+i*.08, size:2+Math.random()*2});
+  }
+
+  function drawRightSide(){
+    const half=W/2;
+    const rW=W-half;
+    // Dark space background
+    const bg=ctx.createLinearGradient(half,0,W,H);
+    bg.addColorStop(0,'#12051f');bg.addColorStop(.5,'#1a0a2e');bg.addColorStop(1,'#0a0312');
+    ctx.fillStyle=bg;ctx.fillRect(half,0,rW,H);
+
+    // Stars
+    ctx.save();ctx.beginPath();ctx.rect(half,0,rW,H);ctx.clip();
+    for(let i=0;i<80;i++){
+      const sx=half+(Math.sin(i*127.1+i*311.7)*.5+.5)*rW;
+      const sy=(Math.sin(i*269.5+i*183.3)*.5+.5)*H;
+      const twinkle=.3+.7*Math.sin(time*1.5+i*2.3);
+      const sr=.5+1.2*(i%4===0?1:.4);
+      ctx.beginPath();ctx.arc(sx,sy,sr,0,Math.PI*2);
+      ctx.fillStyle=`rgba(200,200,255,${twinkle*.4})`;ctx.fill();
+    }
+    ctx.restore();
+
+    // Curved spacetime grid
+    const gridCx=half+rW*.5, gridCy=H*.55;
+    const spacing=28;
+    const gridW=Math.ceil(rW/spacing)+2, gridH=Math.ceil(H/spacing)+2;
+    const mass=1.2+.2*Math.sin(time*.8);
+    const warpR=160;
+
+    ctx.save();ctx.beginPath();ctx.rect(half,0,rW,H);ctx.clip();
+    ctx.strokeStyle='rgba(100,140,220,.22)';ctx.lineWidth=.8;
+
+    // Horizontal grid lines
+    for(let r=0;r<=gridH;r++){
       ctx.beginPath();
-      for(let c=0;c<=cols;c++){
-        let gx=c*spacing,gy=r*spacing+H*.4;
-        const d=dist(gx,gy,cx,cy);
-        if(d<300){const pull=mass*40/(d+20);const angle=Math.atan2(cy-gy,cx-gx);gx+=Math.cos(angle)*pull;gy+=Math.sin(angle)*pull}
+      for(let c=0;c<=gridW;c++){
+        let gx=half+c*spacing-spacing;
+        let gy=r*spacing+H*.2;
+        const d=dist(gx,gy,gridCx,gridCy);
+        if(d<warpR){
+          const pull=mass*50/(d+25);
+          const angle=Math.atan2(gridCy-gy,gridCx-gx);
+          gx+=Math.cos(angle)*pull;gy+=Math.sin(angle)*pull;
+        }
         c===0?ctx.moveTo(gx,gy):ctx.lineTo(gx,gy);
       }
       ctx.stroke();
     }
-    for(let c=0;c<=cols;c++){
+    // Vertical grid lines
+    for(let c=0;c<=gridW;c++){
       ctx.beginPath();
-      for(let r=0;r<=rows;r++){
-        let gx=c*spacing,gy=r*spacing+H*.4;
-        const d=dist(gx,gy,cx,cy);
-        if(d<300){const pull=mass*40/(d+20);const angle=Math.atan2(cy-gy,cx-gx);gx+=Math.cos(angle)*pull;gy+=Math.sin(angle)*pull}
+      for(let r=0;r<=gridH;r++){
+        let gx=half+c*spacing-spacing;
+        let gy=r*spacing+H*.2;
+        const d=dist(gx,gy,gridCx,gridCy);
+        if(d<warpR){
+          const pull=mass*50/(d+25);
+          const angle=Math.atan2(gridCy-gy,gridCx-gx);
+          gx+=Math.cos(angle)*pull;gy+=Math.sin(angle)*pull;
+        }
         r===0?ctx.moveTo(gx,gy):ctx.lineTo(gx,gy);
       }
       ctx.stroke();
     }
-    // Glowing planet
-    ctx.beginPath();ctx.arc(cx,cy,20+3*Math.sin(t*2),0,Math.PI*2);
-    const pg=ctx.createRadialGradient(cx-5,cy-5,3,cx,cy,25);pg.addColorStop(0,'#ffee88');pg.addColorStop(.5,'#ffaa33');pg.addColorStop(1,'rgba(255,100,0,0)');
-    ctx.fillStyle=pg;ctx.shadowColor='#ffaa33';ctx.shadowBlur=30;ctx.fill();ctx.shadowBlur=0;
+
+    // Central mass / planet
+    const pR=18+2*Math.sin(time*1.5);
+    const pg=ctx.createRadialGradient(gridCx-4,gridCy-4,3,gridCx,gridCy,pR+8);
+    pg.addColorStop(0,'#aaccff');pg.addColorStop(.3,'#6688cc');pg.addColorStop(.7,'#3355aa');pg.addColorStop(1,'rgba(30,40,80,0)');
+    ctx.beginPath();ctx.arc(gridCx,gridCy,pR+8,0,Math.PI*2);ctx.fillStyle=pg;ctx.fill();
+    ctx.beginPath();ctx.arc(gridCx,gridCy,pR,0,Math.PI*2);
+    const pg2=ctx.createRadialGradient(gridCx-5,gridCy-5,2,gridCx,gridCy,pR);
+    pg2.addColorStop(0,'#ddeeff');pg2.addColorStop(.5,'#8899cc');pg2.addColorStop(1,'#445588');
+    ctx.fillStyle=pg2;ctx.fill();
+
+    // Orbiting dots rolling along curved grid
+    orbiters.forEach(o=>{
+      o.angle+=o.speed*.016;
+      const ox=gridCx+Math.cos(o.angle)*o.radius;
+      const oy=gridCy+Math.sin(o.angle)*o.radius*.5; // elliptical
+      // Warp pull toward center
+      const d=dist(ox,oy,gridCx,gridCy);
+      const pull=mass*15/(d+30);
+      const a2=Math.atan2(gridCy-oy,gridCx-ox);
+      const fx=ox+Math.cos(a2)*pull;
+      const fy=oy+Math.sin(a2)*pull;
+      // Trail
+      ctx.beginPath();ctx.arc(fx,fy,o.size+1,0,Math.PI*2);ctx.fillStyle='rgba(140,180,255,.1)';ctx.fill();
+      ctx.beginPath();ctx.arc(fx,fy,o.size,0,Math.PI*2);
+      ctx.fillStyle='rgba(180,210,255,.7)';ctx.fill();
+    });
+
+    ctx.restore();
+
+    // "Einstein's View — 1915" label
+    ctx.font='bold 13px Georgia, serif';ctx.textAlign='center';
+    ctx.fillStyle='rgba(140,160,220,.7)';
+    ctx.fillText("Einstein's View — 1915",half+rW*.5,24);
   }
+
+  // ========== DIVIDER ==========
+  function drawDivider(){
+    const half=W/2;
+    const dg=ctx.createLinearGradient(half-8,0,half+8,0);
+    dg.addColorStop(0,'rgba(90,140,70,.0)');dg.addColorStop(.3,'rgba(60,70,90,.4)');
+    dg.addColorStop(.5,'rgba(100,120,160,.6)');dg.addColorStop(.7,'rgba(60,70,90,.4)');
+    dg.addColorStop(1,'rgba(30,20,60,.0)');
+    ctx.fillStyle=dg;ctx.fillRect(half-8,0,16,H);
+  }
+
+  // Newton's head Y for apple targeting
+  function newtonHeadY(){return groundY-60;}
+
   function animate(){
     time+=.016;ctx.clearRect(0,0,W,H);
-    drawStars(ctx,W,H,60,time);drawWarmVignette(ctx,W,H);
-    // Apple animation (left half)
-    if(apple.phase==='fall'){
-      apple.vy+=.3;apple.y+=apple.vy;
-      if(apple.y>=groundY){apple.y=groundY;apple.phase='impact';apple.squash=1.4;apple.stretch=.6}
-    }else if(apple.phase==='impact'){
-      apple.squash=lerp(apple.squash,1,.08);apple.stretch=lerp(apple.stretch,1,.08);
-      if(Math.abs(apple.squash-1)<.02){
-        apple.bounceCount++;
-        if(apple.bounceCount<3){apple.vy=-6+apple.bounceCount*2;apple.phase='fall'}
-        else{apple.phase='rest';setTimeout(resetApple,2000)}
+
+    // === LEFT SIDE ===
+    ctx.save();ctx.beginPath();ctx.rect(0,0,W/2,H);ctx.clip();
+    drawSkyGradient();
+    drawGrass();
+    drawTree();
+
+    // Apple animation
+    const headHitY=newtonHeadY()-15;
+    if(apple.phase==='hanging'){
+      apple.timer+=.016;
+      // Gentle sway while hanging
+      apple.x=treeX+12+Math.sin(time*2)*1.5;
+      apple.y=appleStartY+Math.sin(time*3)*.5;
+      if(apple.timer>2.0){apple.phase='fall';apple.timer=0;apple.vy=0;}
+    } else if(apple.phase==='fall'){
+      apple.vy+=.25; // gravity acceleration
+      apple.y+=apple.vy;
+      if(apple.y>=headHitY){
+        apple.y=headHitY;
+        apple.phase='impact';apple.timer=0;
+        apple.squashX=1.5;apple.squashY=.6;
+        newtonExpr=1;
+      }
+    } else if(apple.phase==='impact'){
+      apple.timer+=.016;
+      apple.squashX=lerp(apple.squashX,1,.06);
+      apple.squashY=lerp(apple.squashY,1,.06);
+      // Apple sits on Newton's head briefly
+      apple.x=treeX+2;apple.y=headHitY;
+      if(apple.timer>2.5){
+        apple.phase='hanging';apple.timer=0;
+        apple.squashX=1;apple.squashY=1;
+        apple.x=treeX+12;apple.y=appleStartY;
+        newtonExpr=0;
       }
     }
-    // Ground line — warm earth tone
-    ctx.strokeStyle='rgba(160,130,80,.3)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,groundY+14);ctx.lineTo(W*.5,groundY+14);ctx.stroke();
-    // Tree — warm, painterly
-    ctx.fillStyle='#6a4828';ctx.fillRect(W*.3-4,groundY-60+14,8,60);
-    ctx.beginPath();ctx.arc(W*.3,groundY-65+14,30,0,Math.PI*2);ctx.fillStyle='#4a7a3a';ctx.fill();
-    drawApple(apple.x,apple.y,apple.squash,apple.stretch);
-    // Grid warp (right half)
-    const gridCx=W*.7,gridCy=H*.65;
-    drawGrid(gridCx,gridCy,1+.3*Math.sin(time),time);
+
+    drawApple(apple.x,apple.y,apple.squashX,apple.squashY);
+    drawNewton();
+
+    // "Newton's View — 1687" label
+    ctx.font='bold 13px Georgia, serif';ctx.textAlign='center';
+    ctx.fillStyle='rgba(60,40,20,.6)';
+    ctx.fillText("Newton's View — 1687",W*.25,24);
+    ctx.restore();
+
+    // === RIGHT SIDE ===
+    drawRightSide();
+
+    // === DIVIDER ===
+    drawDivider();
+
     requestAnimationFrame(animate);
   }
   animate();
