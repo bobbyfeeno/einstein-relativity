@@ -821,23 +821,21 @@ function initCanvas1(){
   const canvas=document.getElementById('canvas1');if(!canvas)return;
   const ctx=canvas.getContext('2d');
   let W,H;
-  function resize(){
-    W=canvas.offsetWidth||700;H=canvas.offsetHeight||400;
-    canvas.width=W;canvas.height=H;
-    groundY=H*.78;treeX=W*.25;treeTrunkTop=groundY-90;canopyY=treeTrunkTop-30;appleStartY=canopyY+18;resetApple();
-  }
-  let groundY,treeX,treeTrunkTop,canopyY,appleStartY;
-  resize();window.addEventListener('resize',resize);
-
+    let groundY,treeX,treeTrunkTop,canopyY,appleStartY;
   let time=0;
-  // Apple state
   const apple={x:0,y:0,vy:0,phase:'hanging',timer:0,squashX:1,squashY:1};
-  // Newton expression: 0=relaxed looking up, 1=surprised
   let newtonExpr=0;
 
   function resetApple(){
     apple.x=treeX+12;apple.y=appleStartY;apple.vy=0;apple.phase='hanging';apple.timer=0;apple.squashX=1;apple.squashY=1;newtonExpr=0;
   }
+
+  function resize(){
+    W=canvas.offsetWidth||700;H=canvas.offsetHeight||400;
+    canvas.width=W;canvas.height=H;
+    groundY=H*.78;treeX=W*.25;treeTrunkTop=groundY-90;canopyY=treeTrunkTop-30;appleStartY=canopyY+18;resetApple();
+  }
+  resize();window.addEventListener('resize',resize);
 
   // ========== LEFT SIDE: Newton's View ==========
 
