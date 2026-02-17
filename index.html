@@ -820,7 +820,11 @@ function initCanvas1(){
   const canvas=document.getElementById('canvas1');if(!canvas)return;
   const ctx=canvas.getContext('2d');
   let W,H;
-  function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;groundY=H*.78;treeX=W*.25;treeTrunkTop=groundY-90;canopyY=treeTrunkTop-30;appleStartY=canopyY+18;resetApple();}
+  function resize(){
+    W=canvas.offsetWidth||700;H=canvas.offsetHeight||400;
+    canvas.width=W;canvas.height=H;
+    groundY=H*.78;treeX=W*.25;treeTrunkTop=groundY-90;canopyY=treeTrunkTop-30;appleStartY=canopyY+18;resetApple();
+  }
   let groundY,treeX,treeTrunkTop,canopyY,appleStartY;
   resize();window.addEventListener('resize',resize);
 
@@ -2399,7 +2403,7 @@ function initCanvasAnimations(){
     entries.forEach(e=>{
       if(e.isIntersecting&&!started.has(e.target.id)){
         started.add(e.target.id);
-        if(inits[e.target.id])inits[e.target.id]();
+        if(inits[e.target.id]){try{inits[e.target.id]()}catch(err){console.error('Canvas init error:',e.target.id,err)}}
       }
     });
   },{threshold:.1});
