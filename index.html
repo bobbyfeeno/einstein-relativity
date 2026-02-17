@@ -906,24 +906,26 @@ function initCanvas2(){
   let grid=null; // grid[row][col] = {x, y} in screen coords
 
   function buildGrid(){
-    // Fake 3D perspective: vanishing point at top-center,
-    // lines converge and get closer together toward the top.
-    const vx=W*0.5, vy=0; // vanishing point at top-center
-    const bottomLeft={x:0, y:H};
-    const bottomRight={x:W, y:H};
+    // 3D-looking grid that fills the full canvas as a rectangle
+    // Horizontal lines get closer together toward the top (perspective foreshortening)
+    // Vertical lines are evenly spaced but slightly converge toward the top
     grid=[];
+    const margin=0; // edge to edge
     for(let r=0;r<LINES;r++){
       const row=[];
-      // t=0 is bottom (near), t=1 is top (far/vanishing point)
-      // Use power curve so lines bunch up near the top (perspective)
-      const t=Math.pow(r/(LINES-1), 0.7);
+      // t=0 is bottom (near viewer), t=1 is top (far)
+      const t=r/(LINES-1);
+      // Perspective: rows bunch up toward the top
+      const perspT=Math.pow(t, 0.6);
+      const rowY=H-margin-(H-2*margin)*perspT;
+      // Slight horizontal convergence toward top for depth feel
+      const squeeze=1-t*0.3; // top row is 70% width, bottom is 100%
+      const rowLeft=W/2-W/2*squeeze;
+      const rowRight=W/2+W/2*squeeze;
       for(let c=0;c<LINES;c++){
         const s=c/(LINES-1);
-        // Interpolate bottom edge position
-        const bx=bottomLeft.x+(bottomRight.x-bottomLeft.x)*s;
-        const by=bottomLeft.y+(bottomRight.y-bottomLeft.y)*s;
-        // Lerp toward vanishing point
-        row.push({x:bx+(vx-bx)*t, y:by+(vy-by)*t});
+        const px=rowLeft+(rowRight-rowLeft)*s;
+        row.push({x:px, y:rowY});
       }
       grid.push(row);
     }
