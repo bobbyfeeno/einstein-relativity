@@ -908,9 +908,9 @@ function initCanvas2(){
   function buildGrid(){
     // Fake 3D perspective: vanishing point at top-center,
     // lines converge and get closer together toward the top.
-    const vx=W*0.5, vy=H*0.08; // vanishing point
-    const bottomLeft={x:W*-0.15, y:H*0.95};
-    const bottomRight={x:W*1.15, y:H*0.95};
+    const vx=W*0.5, vy=0; // vanishing point at top-center
+    const bottomLeft={x:0, y:H};
+    const bottomRight={x:W, y:H};
     grid=[];
     for(let r=0;r<LINES;r++){
       const row=[];
