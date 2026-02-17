@@ -1106,98 +1106,155 @@ function initCanvas3(){
 }
 
 /* ============================================================
-   CHAPTER 4: LIGHT BENDS — NASA-style Gravitational Lensing
+   CHAPTER 4: LIGHT BENDS — 3D Perspective Gravitational Lensing
    ============================================================ */
 function initCanvas4(){
   const canvas=document.getElementById('canvas4');if(!canvas)return;
   const ctx=canvas.getContext('2d');
   let W,H;
-  let gridH=[],gridV=[],beamPath=[];
-  const GRID_SPACING=32,MASS_STRENGTH=2500;
-  let mx,my;
 
-  function resize(){
+  // 3D config
+  const GRID=21; // grid lines each direction
+  const GRID_EXTENT=280; // half-size of grid in world units
+  const DEPRESSION_DEPTH=90;
+  const DEPRESSION_RADIUS=120;
+  const CAM_DIST=500;
+  const CAM_PITCH=0.55; // radians (~32 degrees)
+  const cosPitch=Math.cos(CAM_PITCH), sinPitch=Math.sin(CAM_PITCH);
+
+  // Sun position in 3D world (center of grid, slight offset)
+  const sunX3=0, sunZ3=0;
+
+  // Pre-computed projected grids
+  let gridRows=[], gridCols=[], beamScreen=[], sunScreen={x:0,y:0};
+  let fov;
+
+  function depress(x3,z3){
+    const dx=x3-sunX3, dz=z3-sunZ3;
+    const d=Math.sqrt(dx*dx+dz*dz);
+    if(d>DEPRESSION_RADIUS) return 0;
+    const f=1-d/DEPRESSION_RADIUS;
+    return DEPRESSION_DEPTH*f*f;
+  }
+
+  function project(x3,y3,z3){
+    // Rotate around X axis (pitch)
+    const yr=y3*cosPitch-z3*sinPitch;
+    const zr=y3*sinPitch+z3*cosPitch;
+    const scale=fov/(zr+CAM_DIST);
+    return {x:W/2+x3*scale, y:H*0.4+yr*scale};
+  }
+
+  function rebuild(){
     W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;
-    mx=W*.38;my=H*.45;
-    // Warped grid
-    gridH=[];gridV=[];
-    for(let gy=0;gy<=H+GRID_SPACING;gy+=GRID_SPACING){
+    fov=Math.min(W,H)*0.9;
+
+    // Build grid rows (constant z, varying x)
+    gridRows=[];
+    for(let r=0;r<GRID;r++){
+      const z3=(r/(GRID-1)-0.5)*GRID_EXTENT*2;
       const row=[];
-      for(let gx=0;gx<=W+GRID_SPACING;gx+=4){
-        const dx=gx-mx,dy=gy-my,d=Math.sqrt(dx*dx+dy*dy)+1;
-        const pull=Math.min(MASS_STRENGTH/(d*d),0.35);
-        row.push({x:gx-dx*pull,y:gy-dy*pull});
+      for(let c=0;c<GRID*3;c++){
+        const x3=(c/(GRID*3-1)-0.5)*GRID_EXTENT*2;
+        const y3=depress(x3,z3);
+        row.push(project(x3,y3,z3));
       }
-      gridH.push(row);
+      gridRows.push(row);
     }
-    for(let gx=0;gx<=W+GRID_SPACING;gx+=GRID_SPACING){
+    // Build grid cols (constant x, varying z)
+    gridCols=[];
+    for(let c=0;c<GRID;c++){
+      const x3=(c/(GRID-1)-0.5)*GRID_EXTENT*2;
       const col=[];
-      for(let gy=0;gy<=H+GRID_SPACING;gy+=4){
-        const dx=gx-mx,dy=gy-my,d=Math.sqrt(dx*dx+dy*dy)+1;
-        const pull=Math.min(MASS_STRENGTH/(d*d),0.35);
-        col.push({x:gx-dx*pull,y:gy-dy*pull});
+      for(let r=0;r<GRID*3;r++){
+        const z3=(r/(GRID*3-1)-0.5)*GRID_EXTENT*2;
+        const y3=depress(x3,z3);
+        col.push(project(x3,y3,z3));
       }
-      gridV.push(col);
+      gridCols.push(col);
     }
-    // Single light beam path
-    beamPath=[];
-    const steps=200;
-    const startX=mx+55,startY=H+20,endX=startX-60,endY=-20;
-    const cp1x=startX,cp1y=H*.7;
-    const cp2x=startX-(mx-startX)*.7,cp2y=H*.3;
-    for(let i=0;i<=steps;i++){
-      const t=i/steps;const u=1-t;
-      const x=u*u*u*startX+3*u*u*t*cp1x+3*u*t*t*cp2x+t*t*t*endX;
-      const y=u*u*u*startY+3*u*u*t*cp1y+3*u*t*t*cp2y+t*t*t*endY;
-      beamPath.push({x,y});
+
+    // Sun screen position (at bottom of depression)
+    sunScreen=project(sunX3,DEPRESSION_DEPTH,sunZ3);
+
+    // Light beam path in 3D: enters from back-right, curves around depression, exits front-left
+    beamScreen=[];
+    const BEAM_STEPS=250;
+    const beamStartX=GRID_EXTENT*1.2, beamStartZ=-GRID_EXTENT*1.0;
+    const beamEndX=-GRID_EXTENT*0.8, beamEndZ=GRID_EXTENT*0.8;
+    // Bezier control points to curve around the sun
+    const cp1x=GRID_EXTENT*0.6, cp1z=-GRID_EXTENT*0.2;
+    const cp2x=-GRID_EXTENT*0.1, cp2z=GRID_EXTENT*0.4;
+    // Closest approach offset to avoid going through sun
+    const passOffset=55;
+    for(let i=0;i<=BEAM_STEPS;i++){
+      const t=i/BEAM_STEPS; const u=1-t;
+      let bx=u*u*u*beamStartX+3*u*u*t*cp1x+3*u*t*t*cp2x+t*t*t*beamEndX;
+      let bz=u*u*u*beamStartZ+3*u*u*t*cp1z+3*u*t*t*cp2z+t*t*t*beamEndZ;
+      // Push beam slightly away from sun center so it doesn't intersect
+      const dx=bx-sunX3, dz=bz-sunZ3;
+      const bd=Math.sqrt(dx*dx+dz*dz)+1;
+      if(bd<passOffset){
+        const push=(passOffset-bd)/bd;
+        bx+=dx*push; bz+=dz*push;
+      }
+      // Beam follows the surface of the depression
+      const by=depress(bx,bz)*0.15; // ride slightly above surface
+      beamScreen.push(project(bx,by,bz));
     }
   }
-  resize();window.addEventListener('resize',resize);
+  rebuild();window.addEventListener('resize',rebuild);
 
   let time=0;
   function animate(){
     time+=.016;
-    // Clean background
     ctx.fillStyle='#12051f';ctx.fillRect(0,0,W,H);
-    // Warped grid — horizontal
-    ctx.lineWidth=.8;ctx.strokeStyle='rgba(140,150,220,0.22)';
-    for(let i=0;i<gridH.length;i++){
-      const row=gridH[i];ctx.beginPath();ctx.moveTo(row[0].x,row[0].y);
-      for(let j=1;j<row.length;j++)ctx.lineTo(row[j].x,row[j].y);
+
+    // Draw grid — horizontal lines (rows)
+    ctx.lineWidth=0.8;ctx.strokeStyle='rgba(140,150,220,0.20)';
+    for(let i=0;i<gridRows.length;i++){
+      const row=gridRows[i];ctx.beginPath();ctx.moveTo(row[0].x,row[0].y);
+      for(let j=1;j<row.length;j++) ctx.lineTo(row[j].x,row[j].y);
       ctx.stroke();
     }
-    // Vertical
-    for(let i=0;i<gridV.length;i++){
-      const col=gridV[i];ctx.beginPath();ctx.moveTo(col[0].x,col[0].y);
-      for(let j=1;j<col.length;j++)ctx.lineTo(col[j].x,col[j].y);
+    // Vertical lines (cols)
+    for(let i=0;i<gridCols.length;i++){
+      const col=gridCols[i];ctx.beginPath();ctx.moveTo(col[0].x,col[0].y);
+      for(let j=1;j<col.length;j++) ctx.lineTo(col[j].x,col[j].y);
       ctx.stroke();
     }
-    // Single light beam — faint path
-    const len=beamPath.length;
-    ctx.beginPath();ctx.moveTo(beamPath[0].x,beamPath[0].y);
-    for(let i=1;i<len;i++)ctx.lineTo(beamPath[i].x,beamPath[i].y);
-    ctx.strokeStyle='rgba(232,200,64,0.08)';ctx.lineWidth=2.5;ctx.stroke();
+
+    // Faint beam path
+    const len=beamScreen.length;
+    ctx.beginPath();ctx.moveTo(beamScreen[0].x,beamScreen[0].y);
+    for(let i=1;i<len;i++) ctx.lineTo(beamScreen[i].x,beamScreen[i].y);
+    ctx.strokeStyle='rgba(232,200,64,0.07)';ctx.lineWidth=2.5;ctx.stroke();
+
     // Photon moving along path
-    const photonT=((time*.18)%1);
+    const photonT=((time*.15)%1);
     const idx=Math.floor(photonT*(len-1));
-    const px=beamPath[idx].x,py=beamPath[idx].y;
+    const px=beamScreen[idx].x, py=beamScreen[idx].y;
+
     // Glowing trail
-    const trailLen=50;const trailStart=Math.max(0,idx-trailLen);
-    ctx.beginPath();ctx.moveTo(beamPath[trailStart].x,beamPath[trailStart].y);
-    for(let i=trailStart+1;i<=idx;i++)ctx.lineTo(beamPath[i].x,beamPath[i].y);
+    const trailLen=55;const trailStart=Math.max(0,idx-trailLen);
+    ctx.beginPath();ctx.moveTo(beamScreen[trailStart].x,beamScreen[trailStart].y);
+    for(let i=trailStart+1;i<=idx;i++) ctx.lineTo(beamScreen[i].x,beamScreen[i].y);
     ctx.strokeStyle='rgba(255,215,80,0.45)';ctx.lineWidth=2.5;
     ctx.shadowColor='#e8c840';ctx.shadowBlur=10;ctx.stroke();ctx.shadowBlur=0;
+
     // Photon dot
     ctx.beginPath();ctx.arc(px,py,4,0,6.283);
     ctx.fillStyle='#fff0c0';ctx.shadowColor='#e8c840';ctx.shadowBlur=15;ctx.fill();ctx.shadowBlur=0;
-    // Sun/mass — simple radial gradient
-    const sunR=45;
-    const sg=ctx.createRadialGradient(mx,my,0,mx,my,sunR);
+
+    // Sun at bottom of depression
+    const sunR=40;
+    const sg=ctx.createRadialGradient(sunScreen.x,sunScreen.y,0,sunScreen.x,sunScreen.y,sunR);
     sg.addColorStop(0,'rgba(255,250,230,0.95)');
     sg.addColorStop(.25,'rgba(255,215,0,0.7)');
     sg.addColorStop(.6,'rgba(255,180,60,0.15)');
     sg.addColorStop(1,'rgba(200,120,40,0)');
-    ctx.beginPath();ctx.arc(mx,my,sunR,0,6.283);ctx.fillStyle=sg;ctx.fill();
+    ctx.beginPath();ctx.arc(sunScreen.x,sunScreen.y,sunR,0,6.283);ctx.fillStyle=sg;ctx.fill();
+
     requestAnimationFrame(animate);
   }
   animate();
