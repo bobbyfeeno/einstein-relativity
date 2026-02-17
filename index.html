@@ -67,7 +67,7 @@ body{font-family:'Georgia','Times New Roman',serif;background:#12051f;color:#f0e
 .ch-1{background:linear-gradient(180deg,#12051f 0%,#1a0a2e 30%,#22103a 50%,#1a0a2e 70%,#12051f 100%)}
 .ch-2{background:linear-gradient(180deg,#0f0818 0%,#18102a 30%,#201638 50%,#18102a 70%,#0f0818 100%)}
 .ch-3{background:linear-gradient(180deg,#100a1a 0%,#1c1230 30%,#261a3e 50%,#1c1230 70%,#100a1a 100%)}
-.ch-4{background:linear-gradient(180deg,#140820 0%,#200e35 30%,#2a1445 50%,#200e35 70%,#140820 100%)}
+.ch-4{background:#12051f}
 .ch-5{background:linear-gradient(180deg,#0a0510 0%,#120a1e 30%,#180e28 50%,#120a1e 70%,#0a0510 100%)}
 .ch-6{background:linear-gradient(180deg,#0e0a18 0%,#1a1430 30%,#221a3e 50%,#1a1430 70%,#0e0a18 100%)}
 .ch-7{background:linear-gradient(180deg,#130a1c 0%,#221235 30%,#2e1a45 50%,#221235 70%,#130a1c 100%)}
@@ -1112,17 +1112,14 @@ function initCanvas4(){
   const canvas=document.getElementById('canvas4');if(!canvas)return;
   const ctx=canvas.getContext('2d');
   let W,H;
-  /* --- Pre-computed data (rebuilt on resize) --- */
-  let stars=[],gridH=[],gridV=[],beamPaths=[];
+  let gridH=[],gridV=[],beamPath=[];
   const GRID_SPACING=32,MASS_STRENGTH=9000;
-  let mx,my; // mass center
+  let mx,my;
 
   function resize(){
     W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;
     mx=W*.38;my=H*.45;
-    // Stars
-    stars=[];for(let i=0;i<120;i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:.4+Math.random()*1.2,phase:Math.random()*6.28,speed:.5+Math.random()*1.5});
-    // Pre-compute warped grid positions
+    // Warped grid
     gridH=[];gridV=[];
     for(let gy=0;gy<=H+GRID_SPACING;gy+=GRID_SPACING){
       const row=[];
@@ -1142,23 +1139,17 @@ function initCanvas4(){
       }
       gridV.push(col);
     }
-    // Pre-compute light beam paths (3 beams at different distances)
-    beamPaths=[];
-    const offsets=[mx+55, mx+100, mx+160]; // x-offsets from left (closer=more bend)
-    const bendAmounts=[1.0, 0.55, 0.25];
-    for(let b=0;b<3;b++){
-      const path=[];const steps=200;
-      const startX=offsets[b],startY=H+20,endX=offsets[b]-bendAmounts[b]*60,endY=-20;
-      // Control points for bezier — bend toward mass
-      const cp1x=startX,cp1y=H*.7;
-      const cp2x=startX-(mx-startX)*bendAmounts[b]*.7,cp2y=H*.3;
-      for(let i=0;i<=steps;i++){
-        const t=i/steps;const u=1-t;
-        const x=u*u*u*startX+3*u*u*t*cp1x+3*u*t*t*cp2x+t*t*t*endX;
-        const y=u*u*u*startY+3*u*u*t*cp1y+3*u*t*t*cp2y+t*t*t*endY;
-        path.push({x,y});
-      }
-      beamPaths.push(path);
+    // Single light beam path
+    beamPath=[];
+    const steps=200;
+    const startX=mx+55,startY=H+20,endX=startX-60,endY=-20;
+    const cp1x=startX,cp1y=H*.7;
+    const cp2x=startX-(mx-startX)*.7,cp2y=H*.3;
+    for(let i=0;i<=steps;i++){
+      const t=i/steps;const u=1-t;
+      const x=u*u*u*startX+3*u*u*t*cp1x+3*u*t*t*cp2x+t*t*t*endX;
+      const y=u*u*u*startY+3*u*u*t*cp1y+3*u*t*t*cp2y+t*t*t*endY;
+      beamPath.push({x,y});
     }
   }
   resize();window.addEventListener('resize',resize);
@@ -1166,71 +1157,47 @@ function initCanvas4(){
   let time=0;
   function animate(){
     time+=.016;
-    // Deep purple-black background matching app aesthetic
+    // Clean background
     ctx.fillStyle='#12051f';ctx.fillRect(0,0,W,H);
-    // Subtle purple atmospheric depth
-    const atmo=ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,W*.6);
-    atmo.addColorStop(0,'rgba(60,30,90,0.15)');atmo.addColorStop(.5,'rgba(30,15,60,0.08)');atmo.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=atmo;ctx.fillRect(0,0,W,H);
-    // Stars with twinkle
-    for(let i=0;i<stars.length;i++){
-      const s=stars[i];
-      const alpha=.3+.5*(.5+.5*Math.sin(time*s.speed+s.phase));
-      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.283);
-      ctx.fillStyle=`rgba(220,210,255,${alpha})`;ctx.fill();
-    }
-    // Warped grid — horizontal lines (soft blue-purple like Ch2)
+    // Warped grid — horizontal
     ctx.lineWidth=.8;ctx.strokeStyle='rgba(140,150,220,0.22)';
     for(let i=0;i<gridH.length;i++){
       const row=gridH[i];ctx.beginPath();ctx.moveTo(row[0].x,row[0].y);
       for(let j=1;j<row.length;j++)ctx.lineTo(row[j].x,row[j].y);
       ctx.stroke();
     }
-    // Vertical lines
+    // Vertical
     for(let i=0;i<gridV.length;i++){
       const col=gridV[i];ctx.beginPath();ctx.moveTo(col[0].x,col[0].y);
       for(let j=1;j<col.length;j++)ctx.lineTo(col[j].x,col[j].y);
       ctx.stroke();
     }
-    // Light beam trails + photons
-    const beamColor='#e8c840';
-    for(let b=0;b<beamPaths.length;b++){
-      const path=beamPaths[b];const len=path.length;
-      // Draw full faint beam path
-      ctx.beginPath();ctx.moveTo(path[0].x,path[0].y);
-      for(let i=1;i<len;i++)ctx.lineTo(path[i].x,path[i].y);
-      ctx.strokeStyle=`rgba(232,200,64,${0.07+b*0.02})`;ctx.lineWidth=3-b*.6;ctx.stroke();
-      // Animated photon position (loop)
-      const speed=.18+b*.04;
-      const photonT=((time*speed+b*.33)%1);
-      const idx=Math.floor(photonT*(len-1));
-      const px=path[idx].x,py=path[idx].y;
-      // Glowing trail behind photon
-      const trailLen=50;const trailStart=Math.max(0,idx-trailLen);
-      ctx.beginPath();ctx.moveTo(path[trailStart].x,path[trailStart].y);
-      for(let i=trailStart+1;i<=idx;i++)ctx.lineTo(path[i].x,path[i].y);
-      ctx.strokeStyle='rgba(255,215,80,0.45)';ctx.lineWidth=2.5-b*.5;
-      ctx.shadowColor=beamColor;ctx.shadowBlur=12;ctx.stroke();ctx.shadowBlur=0;
-      // Photon dot
-      ctx.beginPath();ctx.arc(px,py,4-b*.8,0,6.283);
-      ctx.fillStyle='#fff0c0';ctx.shadowColor=beamColor;ctx.shadowBlur=20;ctx.fill();ctx.shadowBlur=0;
-    }
-    // Massive glowing star — center-left
-    const pulse=1+.06*Math.sin(time*1.5);
-    const outerR=70*pulse;
-    // Corona / halo
-    const cg=ctx.createRadialGradient(mx,my,5,mx,my,outerR);
-    cg.addColorStop(0,'rgba(255,248,220,0.95)');
-    cg.addColorStop(.15,'rgba(255,215,0,0.6)');
-    cg.addColorStop(.4,'rgba(255,180,60,0.2)');
-    cg.addColorStop(.7,'rgba(200,120,60,0.06)');
-    cg.addColorStop(1,'rgba(120,60,40,0)');
-    ctx.beginPath();ctx.arc(mx,my,outerR,0,6.283);ctx.fillStyle=cg;ctx.fill();
-    // Bright gold core
-    const core=ctx.createRadialGradient(mx,my,0,mx,my,12*pulse);
-    core.addColorStop(0,'#fffef0');core.addColorStop(.5,'#ffd700');core.addColorStop(1,'#e8a830');
-    ctx.beginPath();ctx.arc(mx,my,12*pulse,0,6.283);ctx.fillStyle=core;
-    ctx.shadowColor='#ffd700';ctx.shadowBlur=30*pulse;ctx.fill();ctx.shadowBlur=0;
+    // Single light beam — faint path
+    const len=beamPath.length;
+    ctx.beginPath();ctx.moveTo(beamPath[0].x,beamPath[0].y);
+    for(let i=1;i<len;i++)ctx.lineTo(beamPath[i].x,beamPath[i].y);
+    ctx.strokeStyle='rgba(232,200,64,0.08)';ctx.lineWidth=2.5;ctx.stroke();
+    // Photon moving along path
+    const photonT=((time*.18)%1);
+    const idx=Math.floor(photonT*(len-1));
+    const px=beamPath[idx].x,py=beamPath[idx].y;
+    // Glowing trail
+    const trailLen=50;const trailStart=Math.max(0,idx-trailLen);
+    ctx.beginPath();ctx.moveTo(beamPath[trailStart].x,beamPath[trailStart].y);
+    for(let i=trailStart+1;i<=idx;i++)ctx.lineTo(beamPath[i].x,beamPath[i].y);
+    ctx.strokeStyle='rgba(255,215,80,0.45)';ctx.lineWidth=2.5;
+    ctx.shadowColor='#e8c840';ctx.shadowBlur=10;ctx.stroke();ctx.shadowBlur=0;
+    // Photon dot
+    ctx.beginPath();ctx.arc(px,py,4,0,6.283);
+    ctx.fillStyle='#fff0c0';ctx.shadowColor='#e8c840';ctx.shadowBlur=15;ctx.fill();ctx.shadowBlur=0;
+    // Sun/mass — simple radial gradient
+    const sunR=45;
+    const sg=ctx.createRadialGradient(mx,my,0,mx,my,sunR);
+    sg.addColorStop(0,'rgba(255,250,230,0.95)');
+    sg.addColorStop(.25,'rgba(255,215,0,0.7)');
+    sg.addColorStop(.6,'rgba(255,180,60,0.15)');
+    sg.addColorStop(1,'rgba(200,120,40,0)');
+    ctx.beginPath();ctx.arc(mx,my,sunR,0,6.283);ctx.fillStyle=sg;ctx.fill();
     requestAnimationFrame(animate);
   }
   animate();
