@@ -896,7 +896,7 @@ function initCanvas1(){
    ============================================================ */
 function initCanvas2(){
   const canvas=document.getElementById('canvas2');if(!canvas)return;
-  const dpr=window.devicePixelRatio||1;
+  const dpr=Math.min(window.devicePixelRatio||1, 2);
   const ctx=canvas.getContext('2d');
   let W,H;
   function resize(){
@@ -910,7 +910,7 @@ function initCanvas2(){
   let warpStrength=0;
 
   // 3D grid parameters
-  const gridSize=20;
+  const gridSize=14;
   const gridSpacing=1.0;
   const halfGrid=gridSize*gridSpacing/2;
 
@@ -981,9 +981,20 @@ function initCanvas2(){
 
   // Precompute warp constants
   const warpRadius=3.5;
-  const invR2=1/(warpRadius*warpRadius);
+  const r2=warpRadius*warpRadius;
+  const invR2=1/r2;
+
+  // IntersectionObserver: only animate when visible
+  let ch2Visible=false;
+  let animId=null;
+  const ch2Observer=new IntersectionObserver(entries=>{
+    ch2Visible=entries[0].isIntersecting;
+    if(ch2Visible&&!animId) animId=requestAnimationFrame(animate);
+  },{threshold:0.05});
+  ch2Observer.observe(canvas);
 
   function animate(){
+    animId=null;
     ctx.clearRect(0,0,W,H);
 
     if(!touching) warpStrength*=.93;
@@ -992,23 +1003,19 @@ function initCanvas2(){
     const depth=3.0*ws;
     const wgx=smoothWarpGX, wgz=smoothWarpGZ;
 
-    // Inline getY
-    // getY(gx,gz) = doWarp ? depth*exp(-((gx-wgx)^2+(gz-wgz)^2)*invR2) : 0
-
-    // Draw grid — batch by alpha groups to minimize state changes
+    // Draw grid — single strokeStyle, single beginPath/stroke per direction
     ctx.lineWidth=1;
+    ctx.strokeStyle='rgba(140,150,220,0.22)';
 
-    // Lines along Z
+    // Lines along Z (one beginPath, all lines, one stroke)
+    ctx.beginPath();
     for(let ix=0;ix<=gridSize;ix++){
       const gx=ix*gridSpacing-halfGrid;
-      const t=Math.abs(ix-gridSize/2)/gridSize;
-      const alpha=0.12+0.16*(1-t);
-      ctx.strokeStyle=`rgba(140,150,220,${alpha})`;
-      ctx.beginPath();
       let started=false;
       for(let iz=0;iz<=gridSize;iz++){
         const gz=iz*gridSpacing-halfGrid;
-        const gy=doWarp?depth*Math.exp(-((gx-wgx)**2+(gz-wgz)**2)*invR2):0;
+        let gy=0;
+        if(doWarp){const dx=gx-wgx,dz=gz-wgz,d2=dx*dx+dz*dz;if(d2<r2){const f=1-d2*invR2;gy=depth*f*f;}}
         const ry=gy*cosA-gz*sinA;
         const tz=gy*sinA+gz*cosA+camDist;
         if(tz<0.1){started=false;continue;}
@@ -1017,20 +1024,18 @@ function initCanvas2(){
         if(!started){ctx.moveTo(px,py);started=true;}
         else ctx.lineTo(px,py);
       }
-      ctx.stroke();
     }
+    ctx.stroke();
 
-    // Lines along X
+    // Lines along X (one beginPath, all lines, one stroke)
+    ctx.beginPath();
     for(let iz=0;iz<=gridSize;iz++){
       const gz=iz*gridSpacing-halfGrid;
-      const t=Math.abs(iz-gridSize/2)/gridSize;
-      const alpha=0.12+0.16*(1-t);
-      ctx.strokeStyle=`rgba(140,150,220,${alpha})`;
-      ctx.beginPath();
       let started=false;
       for(let ix=0;ix<=gridSize;ix++){
         const gx=ix*gridSpacing-halfGrid;
-        const gy=doWarp?depth*Math.exp(-((gx-wgx)**2+(gz-wgz)**2)*invR2):0;
+        let gy=0;
+        if(doWarp){const dx=gx-wgx,dz=gz-wgz,d2=dx*dx+dz*dz;if(d2<r2){const f=1-d2*invR2;gy=depth*f*f;}}
         const ry=gy*cosA-gz*sinA;
         const tz=gy*sinA+gz*cosA+camDist;
         if(tz<0.1){started=false;continue;}
@@ -1039,26 +1044,10 @@ function initCanvas2(){
         if(!started){ctx.moveTo(px,py);started=true;}
         else ctx.lineTo(px,py);
       }
-      ctx.stroke();
     }
+    ctx.stroke();
 
-    // Subtle glow at warp point
-    if(ws>.01){
-      const gy=depth*Math.exp(0); // at warp center d2=0
-      const ry2=gy*cosA-wgz*sinA;
-      const tz2=gy*sinA+wgz*cosA+camDist;
-      if(tz2>0.1){
-        const s2=fov/tz2;
-        const cpx=W/2+wgx*s2, cpy=H*0.42+ry2*s2;
-        const grad=ctx.createRadialGradient(cpx,cpy,0,cpx,cpy,60*ws);
-        grad.addColorStop(0,`rgba(160,140,255,${0.12*ws})`);
-        grad.addColorStop(1,'rgba(160,140,255,0)');
-        ctx.fillStyle=grad;
-        ctx.fillRect(cpx-80,cpy-80,160,160);
-      }
-    }
-
-    requestAnimationFrame(animate);
+    if(ch2Visible) animId=requestAnimationFrame(animate);
   }
   animate();
 }
