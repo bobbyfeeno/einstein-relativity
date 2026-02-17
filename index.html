@@ -1357,7 +1357,7 @@ function initCanvas7(){
   function animate(){
     time+=.016;
     speed=(.5+.5*Math.sin(time*.4))*.95;// oscillate speed
-    ctx.fillStyle='rgba(10,8,30,.3)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(18,5,31,.3)';ctx.fillRect(0,0,W,H);
     // Star streaks
     bgStars.forEach(s=>{
       const streak=1+speed*50*s.z;
@@ -1400,7 +1400,7 @@ function initCanvas7(){
     drawRocket(W*.35,H/2,speed);
     requestAnimationFrame(animate);
   }
-  ctx.fillStyle='#0a0820';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#12051f';ctx.fillRect(0,0,W,H);
   animate();
 }
 
