@@ -1181,7 +1181,7 @@ function initCanvas4(){
     beamScreen=[];
     {
       const dt=0.3;
-      const MAX_STEPS=2000;
+      const MAX_STEPS=4000;
       const PHOTON_SPEED=2.5;
       const IMPACT_PARAM=GRID_EXTENT*0.35; // closest approach distance
       // Start photon coming from bottom, offset to the right of the mass
@@ -1212,7 +1212,7 @@ function initCanvas4(){
         vz=vz/newSpeed*PHOTON_SPEED;
         px+=vx*dt;
         pz+=vz*dt;
-        if(Math.abs(px)>GRID_EXTENT*3||Math.abs(pz)>GRID_EXTENT*3) break;
+        if(Math.abs(px)>GRID_EXTENT*5||pz>GRID_EXTENT*5||pz<-GRID_EXTENT*3) break;
         const py=depress(px,pz)*0.85;
         beamScreen.push(project(px,py,pz));
       }
