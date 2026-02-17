@@ -1180,41 +1180,34 @@ function initCanvas4(){
     // Light beam path via gravitational simulation — photon curves around mass
     beamScreen=[];
     {
-      const dt=0.15;
-      const MAX_STEPS=6000;
+      const dt=0.01;
+      const MAX_STEPS=80000;
       const PHOTON_SPEED=2.5;
-      const IMPACT_PARAM=GRID_EXTENT*0.5; // closest approach distance
-      // Start photon coming from bottom, offset to the right of the mass
+      const GM=10;
+      const IMPACT_PARAM=GRID_EXTENT*0.5;
       let px=IMPACT_PARAM, pz=-GRID_EXTENT*1.8;
-      let vx=0, vz=PHOTON_SPEED; // moving straight up initially
+      let vx=0, vz=PHOTON_SPEED;
+      let stepsSaved=0;
       for(let i=0;i<MAX_STEPS;i++){
         const dx=sunX3-px, dz=sunZ3-pz;
         const dist2=dx*dx+dz*dz;
         const d=Math.sqrt(dist2);
-        if(d<0.3) break;
-        // GR-accurate deflection: perpendicular force only (no speed change)
-        // This ensures the photon maintains constant speed and only bends its direction
-        const speed=Math.sqrt(vx*vx+vz*vz);
-        // Unit vector toward mass
+        if(d<0.2) break;
         const ux=dx/d, uz=dz/d;
-        // Component of velocity toward mass
-        const vDot=vx*ux+vz*uz;
-        // Perpendicular component of gravitational pull
-        // Only apply the component that changes direction, not speed
-        const GM=8;
-        const accel=GM/(dist2);
-        // Apply full gravitational acceleration but renormalize speed after
+        const accel=GM/dist2;
         vx+=ux*accel*dt;
         vz+=uz*accel*dt;
-        // Renormalize to constant photon speed (photons don't speed up/slow down)
         const newSpeed=Math.sqrt(vx*vx+vz*vz);
         vx=vx/newSpeed*PHOTON_SPEED;
         vz=vz/newSpeed*PHOTON_SPEED;
         px+=vx*dt;
         pz+=vz*dt;
         if(Math.abs(px)>GRID_EXTENT*5||pz>GRID_EXTENT*5) break;
-        const py=depress(px,pz)*0.85;
-        beamScreen.push(project(px,py,pz));
+        // Only save every 10th point for rendering
+        if(i%10===0){
+          const py=depress(px,pz)*0.85;
+          beamScreen.push(project(px,py,pz));
+        }
       }
     }
   }
