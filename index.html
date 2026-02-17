@@ -1180,32 +1180,35 @@ function initCanvas4(){
     // Light beam path via gravitational simulation — photon curves around mass
     beamScreen=[];
     {
-      const dt=0.01;
-      const MAX_STEPS=80000;
-      const PHOTON_SPEED=2.5;
-      const GM=10;
-      const IMPACT_PARAM=GRID_EXTENT*0.5;
+      // Photon follows the grid's own curvature — deflected by the gradient of depress()
+      const dt=0.02;
+      const MAX_STEPS=40000;
+      const PHOTON_SPEED=2.0;
+      const DEFLECT_STRENGTH=0.08; // how strongly the surface slope deflects the photon
+      const IMPACT_PARAM=GRID_EXTENT*0.45;
       let px=IMPACT_PARAM, pz=-GRID_EXTENT*1.8;
       let vx=0, vz=PHOTON_SPEED;
-      let stepsSaved=0;
       for(let i=0;i<MAX_STEPS;i++){
-        const dx=sunX3-px, dz=sunZ3-pz;
-        const dist2=dx*dx+dz*dz;
-        const d=Math.sqrt(dist2);
-        if(d<0.2) break;
-        const ux=dx/d, uz=dz/d;
-        const accel=GM/dist2;
-        vx+=ux*accel*dt;
-        vz+=uz*accel*dt;
-        const newSpeed=Math.sqrt(vx*vx+vz*vz);
-        vx=vx/newSpeed*PHOTON_SPEED;
-        vz=vz/newSpeed*PHOTON_SPEED;
+        // Compute gradient of depress() at current position (slope of the grid surface)
+        const eps=0.1;
+        const dHere=depress(px,pz);
+        const dRight=depress(px+eps,pz);
+        const dFwd=depress(px,pz+eps);
+        const gradX=(dRight-dHere)/eps; // slope in X direction
+        const gradZ=(dFwd-dHere)/eps;   // slope in Z direction
+        // Deflect photon velocity toward the downhill direction (into the dip)
+        vx+=gradX*DEFLECT_STRENGTH;
+        vz+=gradZ*DEFLECT_STRENGTH;
+        // Renormalize to constant speed
+        const ns=Math.sqrt(vx*vx+vz*vz);
+        vx=vx/ns*PHOTON_SPEED;
+        vz=vz/ns*PHOTON_SPEED;
         px+=vx*dt;
         pz+=vz*dt;
         if(Math.abs(px)>GRID_EXTENT*5||pz>GRID_EXTENT*5) break;
-        // Only save every 10th point for rendering
-        if(i%10===0){
-          const py=depress(px,pz)*0.85;
+        // Save every 20th point
+        if(i%20===0){
+          const py=depress(px,pz);
           beamScreen.push(project(px,py,pz));
         }
       }
