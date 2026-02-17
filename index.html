@@ -1157,6 +1157,7 @@ function initCanvas1(){
   function newtonHeadY(){return groundY-60;}
 
   function animate(){
+  try{
     time+=.016;ctx.clearRect(0,0,W,H);
 
     // === LEFT SIDE ===
@@ -1211,6 +1212,10 @@ function initCanvas1(){
     // === DIVIDER ===
     drawDivider();
 
+  }catch(err){
+    var d=document.createElement('div');d.style.cssText='position:fixed;bottom:0;left:0;right:0;background:red;color:white;padding:12px;z-index:99999;font-size:12px;word-break:break-all;';
+    d.textContent='CH1 ERR: '+err.message+' | W='+W+' H='+H;document.body.appendChild(d);return;
+  }
     requestAnimationFrame(animate);
   }
   animate();
