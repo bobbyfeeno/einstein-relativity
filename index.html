@@ -906,25 +906,13 @@ function initCanvas2(){
   let grid=null; // grid[row][col] = {x, y} in screen coords
 
   function buildGrid(){
-    // 3D-looking grid that fills the full canvas as a rectangle
-    // Horizontal lines get closer together toward the top (perspective foreshortening)
-    // Vertical lines are evenly spaced but slightly converge toward the top
+    // Simple 2D symmetrical rectangular grid filling the full canvas
     grid=[];
-    const margin=0; // edge to edge
     for(let r=0;r<LINES;r++){
       const row=[];
-      // t=0 is bottom (near viewer), t=1 is top (far)
-      const t=r/(LINES-1);
-      // Perspective: rows bunch up toward the top
-      const perspT=Math.pow(t, 0.6);
-      const rowY=H-margin-(H-2*margin)*perspT;
-      // Slight horizontal convergence toward top for depth feel
-      const squeeze=1-t*0.3; // top row is 70% width, bottom is 100%
-      const rowLeft=W/2-W/2*squeeze;
-      const rowRight=W/2+W/2*squeeze;
+      const rowY=r/(LINES-1)*H;
       for(let c=0;c<LINES;c++){
-        const s=c/(LINES-1);
-        const px=rowLeft+(rowRight-rowLeft)*s;
+        const px=c/(LINES-1)*W;
         row.push({x:px, y:rowY});
       }
       grid.push(row);
