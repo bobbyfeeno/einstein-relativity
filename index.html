@@ -3,24 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Einstein's Relativity — A Disney-Quality Interactive Journey</title>
+<title>Einstein's Relativity — A Pixar-Quality Interactive Journey</title>
 <style>
 /* ============================================================
    GLOBAL RESET & BASE
    ============================================================ */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth;overflow-x:hidden}
-body{font-family:'Georgia','Times New Roman',serif;background:#0a0a2e;color:#e8e8f0;overflow-x:hidden;line-height:1.7}
+body{font-family:'Georgia','Times New Roman',serif;background:#1a120a;color:#f0e8dc;overflow-x:hidden;line-height:1.7}
 
 /* ============================================================
    LOADING SCREEN
    ============================================================ */
-#loader{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0a0a2e 0%,#1a1a4e 50%,#0a0a2e 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s ease,visibility .8s ease}
+#loader{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#1a120a 0%,#2d1e10 50%,#1a120a 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1s ease,visibility 1s ease}
 #loader.hidden{opacity:0;visibility:hidden;pointer-events:none}
-#loader h2{color:#ffd700;font-size:1.6rem;margin-top:30px;letter-spacing:2px;animation:loaderPulse 1.5s ease-in-out infinite}
+#loader h2{color:#f0c060;font-size:1.6rem;margin-top:30px;letter-spacing:2px;animation:loaderPulse 1.5s ease-in-out infinite;text-shadow:0 0 20px rgba(240,180,80,.4)}
 @keyframes loaderPulse{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}}
 #loader-bar-wrap{width:260px;height:8px;background:rgba(255,255,255,.15);border-radius:4px;margin-top:20px;overflow:hidden}
-#loader-bar{height:100%;width:0%;background:linear-gradient(90deg,#ffd700,#ff6b6b,#a855f7);border-radius:4px;transition:width .3s ease}
+#loader-bar{height:100%;width:0%;background:linear-gradient(90deg,#f0c060,#e88840,#c06030);border-radius:4px;transition:width .3s ease}
 
 /* Bouncing Einstein loader */
 .loader-einstein{width:100px;height:140px;position:relative;animation:loaderBounce 1s ease-in-out infinite}
@@ -30,63 +30,63 @@ body{font-family:'Georgia','Times New Roman',serif;background:#0a0a2e;color:#e8e
 /* ============================================================
    PROGRESS BAR (top)
    ============================================================ */
-#progress-bar{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,#ffd700,#ff6b6b,#a855f7,#00d4ff);z-index:1000;transition:width .15s ease;border-radius:0 2px 2px 0;box-shadow:0 0 10px rgba(255,215,0,.5)}
+#progress-bar{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,#f0c060,#e88840,#d06838,#c05828);z-index:1000;transition:width .15s ease;border-radius:0 2px 2px 0;box-shadow:0 0 10px rgba(240,180,80,.5)}
 
 /* ============================================================
    NAV DOTS
    ============================================================ */
 #nav-dots{position:fixed;right:20px;top:50%;transform:translateY(-50%);z-index:900;display:flex;flex-direction:column;gap:14px}
-.nav-dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.25);cursor:pointer;transition:all .3s ease;position:relative;border:2px solid transparent}
-.nav-dot:hover,.nav-dot.active{background:#ffd700;border-color:#fff;transform:scale(1.3);box-shadow:0 0 12px rgba(255,215,0,.6)}
-.nav-dot .tooltip{position:absolute;right:24px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.85);color:#ffd700;padding:4px 12px;border-radius:6px;font-size:.75rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s ease;backdrop-filter:blur(4px)}
+.nav-dot{width:14px;height:14px;border-radius:50%;background:rgba(240,200,140,.25);cursor:pointer;transition:all .3s ease;position:relative;border:2px solid transparent}
+.nav-dot:hover,.nav-dot.active{background:#f0c060;border-color:rgba(255,240,200,.8);transform:scale(1.3);box-shadow:0 0 12px rgba(240,180,80,.5)}
+.nav-dot .tooltip{position:absolute;right:24px;top:50%;transform:translateY(-50%);background:rgba(30,20,10,.9);color:#f0c060;padding:4px 12px;border-radius:6px;font-size:.75rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s ease;backdrop-filter:blur(4px)}
 .nav-dot:hover .tooltip{opacity:1}
 
 /* ============================================================
    SCROLL INDICATOR
    ============================================================ */
 #scroll-indicator{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:800;display:flex;flex-direction:column;align-items:center;gap:6px;opacity:1;transition:opacity .5s ease;pointer-events:none}
-#scroll-indicator span{color:rgba(255,255,255,.6);font-size:.8rem;letter-spacing:1px}
-#scroll-indicator .arrow{width:24px;height:24px;border-right:2px solid rgba(255,255,255,.6);border-bottom:2px solid rgba(255,255,255,.6);transform:rotate(45deg);animation:scrollBounce 2s ease-in-out infinite}
+#scroll-indicator span{color:rgba(240,200,140,.6);font-size:.8rem;letter-spacing:1px}
+#scroll-indicator .arrow{width:24px;height:24px;border-right:2px solid rgba(240,200,140,.6);border-bottom:2px solid rgba(240,200,140,.6);transform:rotate(45deg);animation:scrollBounce 2s ease-in-out infinite}
 @keyframes scrollBounce{0%,100%{transform:rotate(45deg) translateY(0);opacity:.4}50%{transform:rotate(45deg) translateY(8px);opacity:1}}
 
 /* ============================================================
    CHAPTER SECTIONS
    ============================================================ */
 .chapter{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px 80px;position:relative;overflow:hidden}
-.chapter .chapter-inner{opacity:0;transform:translateY(30px);transition:opacity .8s ease,transform .8s ease}
+.chapter .chapter-inner{opacity:0;transform:translateY(30px);transition:opacity 1s cubic-bezier(.25,.46,.45,.94),transform 1s cubic-bezier(.25,.46,.45,.94)}
 .chapter.in-view .chapter-inner{opacity:1;transform:translateY(0)}
 .chapter-inner{max-width:800px;width:100%;text-align:center;position:relative;z-index:2}
-.chapter-number{font-size:.85rem;color:rgba(255,215,0,.7);letter-spacing:4px;text-transform:uppercase;margin-bottom:8px}
-.chapter h2{font-size:2.4rem;color:#ffd700;margin-bottom:6px;text-shadow:0 0 30px rgba(255,215,0,.3);line-height:1.2}
-.chapter h3{font-size:1.1rem;color:rgba(255,255,255,.5);font-weight:normal;font-style:italic;margin-bottom:30px}
+.chapter-number{font-size:.85rem;color:rgba(240,180,80,.7);letter-spacing:4px;text-transform:uppercase;margin-bottom:8px}
+.chapter h2{font-size:2.4rem;color:#f0c060;margin-bottom:6px;text-shadow:0 0 30px rgba(240,180,80,.35),0 2px 4px rgba(0,0,0,.3);line-height:1.2}
+.chapter h3{font-size:1.1rem;color:rgba(240,220,180,.45);font-weight:normal;font-style:italic;margin-bottom:30px}
 
 /* Parallax background layer */
 .chapter .bg-layer{position:absolute;inset:0;z-index:0;opacity:.3}
 
-/* Chapter backgrounds */
-.ch-1{background:linear-gradient(180deg,#1a0a2e 0%,#2d1b69 50%,#1a0a2e 100%)}
-.ch-2{background:linear-gradient(180deg,#0a1628 0%,#162d50 50%,#0a1628 100%)}
-.ch-3{background:linear-gradient(180deg,#1a1a3e 0%,#0d2137 50%,#1a1a3e 100%)}
-.ch-4{background:linear-gradient(180deg,#1a0a28 0%,#2d1050 50%,#1a0a28 100%)}
-.ch-5{background:linear-gradient(180deg,#050510 0%,#0a0a20 50%,#050510 100%)}
-.ch-6{background:linear-gradient(180deg,#0a1a2e 0%,#1a3050 50%,#0a1a2e 100%)}
-.ch-7{background:linear-gradient(180deg,#1a1040 0%,#301a60 50%,#1a1040 100%)}
-.ch-8{background:linear-gradient(180deg,#2e0a0a 0%,#4a1a1a 50%,#2e0a0a 100%)}
-.ch-9{background:linear-gradient(180deg,#0a2e1a 0%,#1a5030 50%,#0a2e1a 100%)}
-.ch-10{background:linear-gradient(180deg,#2e1a0a 0%,#4a3020 50%,#1a1040 100%)}
+/* Chapter backgrounds — warm Ratatouille palette */
+.ch-1{background:linear-gradient(180deg,#1a120a 0%,#2d1a10 30%,#3a2218 50%,#2d1a10 70%,#1a120a 100%)}
+.ch-2{background:linear-gradient(180deg,#12100a 0%,#1e1a14 30%,#2a2418 50%,#1e1a14 70%,#12100a 100%)}
+.ch-3{background:linear-gradient(180deg,#14100e 0%,#261c16 30%,#32261e 50%,#261c16 70%,#14100e 100%)}
+.ch-4{background:linear-gradient(180deg,#18100a 0%,#2e1a12 30%,#3a2218 50%,#2e1a12 70%,#18100a 100%)}
+.ch-5{background:linear-gradient(180deg,#0a0806 0%,#141010 30%,#1a1412 50%,#141010 70%,#0a0806 100%)}
+.ch-6{background:linear-gradient(180deg,#10120e 0%,#1e2218 30%,#2a2e22 50%,#1e2218 70%,#10120e 100%)}
+.ch-7{background:linear-gradient(180deg,#16100e 0%,#2a1c16 30%,#382820 50%,#2a1c16 70%,#16100e 100%)}
+.ch-8{background:linear-gradient(180deg,#1e0e0a 0%,#381812 30%,#4a2218 50%,#381812 70%,#1e0e0a 100%)}
+.ch-9{background:linear-gradient(180deg,#0e1410 0%,#1a2a1e 30%,#223628 50%,#1a2a1e 70%,#0e1410 100%)}
+.ch-10{background:linear-gradient(180deg,#1a140e 0%,#302418 30%,#3e3020 50%,#302418 70%,#1a140e 100%)}
 
 /* ============================================================
    SPEECH BUBBLE
    ============================================================ */
-.speech-bubble{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:24px 30px;margin:20px auto;max-width:600px;position:relative;backdrop-filter:blur(8px);font-size:1.05rem;line-height:1.8;color:rgba(255,255,255,.85);text-align:left}
-.speech-bubble::after{content:'';position:absolute;top:-12px;left:50%;transform:translateX(-50%);border:12px solid transparent;border-bottom-color:rgba(255,255,255,.08)}
-.speech-bubble .typewriter{overflow:hidden;border-right:2px solid rgba(255,215,0,.6)}
+.speech-bubble{background:rgba(60,40,25,.5);border:1px solid rgba(240,200,140,.15);border-radius:20px;padding:24px 30px;margin:20px auto;max-width:600px;position:relative;backdrop-filter:blur(8px);font-size:1.05rem;line-height:1.8;color:rgba(255,240,220,.85);text-align:left;box-shadow:0 4px 20px rgba(0,0,0,.3),inset 0 1px 0 rgba(240,200,140,.08)}
+.speech-bubble::after{content:'';position:absolute;top:-12px;left:50%;transform:translateX(-50%);border:12px solid transparent;border-bottom-color:rgba(60,40,25,.5)}
+.speech-bubble .typewriter{overflow:hidden;border-right:2px solid rgba(240,180,80,.6)}
 .speech-bubble .typewriter.done{border-right-color:transparent}
 
 /* ============================================================
    CANVAS
    ============================================================ */
-.anim-canvas{width:100%;max-width:700px;height:400px;border-radius:16px;margin:20px auto;display:block;background:rgba(0,0,0,.3);box-shadow:0 8px 32px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.05)}
+.anim-canvas{width:100%;max-width:700px;height:400px;border-radius:16px;margin:20px auto;display:block;background:rgba(15,10,5,.5);box-shadow:0 8px 32px rgba(0,0,0,.5),inset 0 1px 0 rgba(240,200,140,.06),0 0 60px rgba(180,120,40,.06)}
 
 /* ============================================================
    EINSTEIN SVG CHARACTER
@@ -124,47 +124,49 @@ body{font-family:'Georgia','Times New Roman',serif;background:#0a0a2e;color:#e8e
 <div id="loader">
   <div class="loader-einstein">
     <svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg">
-      <!-- Simplified loader Einstein -->
-      <ellipse cx="50" cy="50" rx="28" ry="32" fill="#f5d5a0"/>
-      <ellipse cx="50" cy="50" rx="28" ry="32" fill="url(#loaderSkinGrad)"/>
-      <!-- Hair -->
-      <path d="M22 38 Q10 15 30 20 Q25 5 50 10 Q75 5 70 20 Q90 15 78 38" fill="#e8e8e8" stroke="#d0d0d0" stroke-width=".5"/>
-      <path d="M20 42 Q8 30 18 25" fill="none" stroke="#e8e8e8" stroke-width="5" stroke-linecap="round"/>
-      <path d="M80 42 Q92 30 82 25" fill="none" stroke="#e8e8e8" stroke-width="5" stroke-linecap="round"/>
-      <!-- Eyes -->
-      <ellipse cx="38" cy="48" rx="8" ry="9" fill="white"/>
-      <ellipse cx="62" cy="48" rx="8" ry="9" fill="white"/>
-      <circle cx="39" cy="49" r="4.5" fill="#5a3a1a"/>
-      <circle cx="63" cy="49" r="4.5" fill="#5a3a1a"/>
-      <circle cx="39" cy="49" r="2.2" fill="#1a1a1a"/>
-      <circle cx="63" cy="49" r="2.2" fill="#1a1a1a"/>
-      <circle cx="41" cy="46" r="1.5" fill="white" opacity=".9"/>
-      <circle cx="65" cy="46" r="1.5" fill="white" opacity=".9"/>
-      <!-- Eyebrows -->
-      <path d="M28 38 Q38 32 48 37" fill="none" stroke="#666" stroke-width="2.5" stroke-linecap="round"/>
-      <path d="M52 37 Q62 32 72 38" fill="none" stroke="#666" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- Nose & mouth -->
-      <path d="M48 56 Q50 62 52 56" fill="none" stroke="#c4956a" stroke-width="1.5" stroke-linecap="round"/>
-      <path d="M38 68 Q50 76 62 68" fill="none" stroke="#c4956a" stroke-width="2" stroke-linecap="round"/>
-      <!-- Cheeks -->
-      <circle cx="28" cy="58" r="6" fill="#ffb3b3" opacity=".3"/>
-      <circle cx="72" cy="58" r="6" fill="#ffb3b3" opacity=".3"/>
-      <!-- Mustache -->
-      <path d="M36 63 Q43 60 50 65 Q57 60 64 63" fill="#b0b0b0" stroke="#999" stroke-width=".5"/>
-      <!-- Body -->
-      <rect x="30" y="82" width="40" height="50" rx="8" fill="white" stroke="#ddd" stroke-width=".5"/>
-      <!-- Bowtie -->
-      <polygon points="44,86 50,90 56,86 56,94 50,90 44,94" fill="#c0392b"/>
-      <circle cx="50" cy="90" r="2.5" fill="#e74c3c"/>
+      <!-- Simplified loader Einstein — warm Pixar style -->
       <defs>
-        <radialGradient id="loaderSkinGrad" cx="40%" cy="35%">
-          <stop offset="0%" stop-color="#fce4c0"/>
-          <stop offset="100%" stop-color="#e8b878"/>
+        <radialGradient id="loaderSkinGrad" cx="38%" cy="32%">
+          <stop offset="0%" stop-color="#fde8cc"/>
+          <stop offset="100%" stop-color="#dda868"/>
         </radialGradient>
       </defs>
+      <circle cx="50" cy="65" r="50" fill="rgba(240,180,80,.05)"/>
+      <ellipse cx="50" cy="50" rx="28" ry="32" fill="url(#loaderSkinGrad)"/>
+      <!-- Hair -->
+      <path d="M22 38 Q10 15 30 20 Q25 5 50 10 Q75 5 70 20 Q90 15 78 38" fill="#e8ddd0" stroke="rgba(180,170,150,.3)" stroke-width=".5"/>
+      <path d="M20 42 Q8 30 18 25" fill="none" stroke="#e0d5c5" stroke-width="5" stroke-linecap="round"/>
+      <path d="M80 42 Q92 30 82 25" fill="none" stroke="#e0d5c5" stroke-width="5" stroke-linecap="round"/>
+      <!-- Eyes — big, warm -->
+      <ellipse cx="38" cy="48" rx="9" ry="10" fill="white"/>
+      <ellipse cx="62" cy="48" rx="9" ry="10" fill="white"/>
+      <circle cx="39" cy="49" r="5" fill="#6b4420"/>
+      <circle cx="63" cy="49" r="5" fill="#6b4420"/>
+      <circle cx="39" cy="49" r="2.5" fill="#1a0e05"/>
+      <circle cx="63" cy="49" r="2.5" fill="#1a0e05"/>
+      <circle cx="41" cy="46" r="2" fill="white" opacity=".9"/>
+      <circle cx="65" cy="46" r="2" fill="white" opacity=".9"/>
+      <circle cx="37" cy="51" r="1" fill="white" opacity=".5"/>
+      <circle cx="61" cy="51" r="1" fill="white" opacity=".5"/>
+      <!-- Eyebrows -->
+      <path d="M28 38 Q38 32 48 37" fill="none" stroke="rgba(140,110,70,.7)" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M52 37 Q62 32 72 38" fill="none" stroke="rgba(140,110,70,.7)" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Nose & mouth -->
+      <path d="M46 57 Q50 63 54 57" fill="none" stroke="rgba(180,120,70,.5)" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M38 68 Q50 76 62 68" fill="none" stroke="rgba(180,110,70,.6)" stroke-width="2" stroke-linecap="round"/>
+      <!-- Rosy cheeks -->
+      <circle cx="26" cy="58" r="7" fill="#ff9988" opacity=".3"/>
+      <circle cx="74" cy="58" r="7" fill="#ff9988" opacity=".3"/>
+      <!-- Mustache -->
+      <path d="M36 63 Q43 60 50 65 Q57 60 64 63" fill="rgba(180,170,155,.8)" stroke="rgba(150,140,125,.4)" stroke-width=".5"/>
+      <!-- Body -->
+      <rect x="30" y="82" width="40" height="50" rx="8" fill="#f0e4d0" stroke="rgba(180,150,110,.3)" stroke-width=".5"/>
+      <!-- Bowtie -->
+      <polygon points="44,86 50,90 56,86 56,94 50,90 44,94" fill="#8b2020"/>
+      <circle cx="50" cy="90" r="2.5" fill="#c83838"/>
     </svg>
   </div>
-  <h2>Warping Space-Time...</h2>
+  <h2>Warming Up the Universe...</h2>
   <div id="loader-bar-wrap"><div id="loader-bar"></div></div>
 </div>
 
@@ -382,74 +384,136 @@ function createEinstein(containerId, pose='wave') {
     present:  {lArm:'M25,105 Q10,85 12,75',rArm:'M75,105 Q105,80 100,68',lHand:'M10,73',rHand:'M99,66',brow1:'M28,36 Q38,30 48,36',brow2:'M52,36 Q62,30 72,36',mouth:'M38,67 Q50,76 62,67'}
   };
   const p = poses[pose]||poses.wave;
+  const lhx=p.lHand.split(',')[0].replace('M',''), lhy=p.lHand.split(',')[1];
+  const rhx=p.rHand.split(',')[0].replace('M',''), rhy=p.rHand.split(',')[1];
   c.innerHTML = `<svg class="einstein-svg" viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <radialGradient id="skinGrad${containerId}" cx="40%" cy="35%"><stop offset="0%" stop-color="#fce4c0"/><stop offset="100%" stop-color="#e8b878"/></radialGradient>
-      <radialGradient id="cheekGrad${containerId}" cx="50%" cy="50%"><stop offset="0%" stop-color="#ffaaaa" stop-opacity=".45"/><stop offset="100%" stop-color="#ffaaaa" stop-opacity="0"/></radialGradient>
-      <linearGradient id="coatGrad${containerId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#e8e8e8"/></linearGradient>
-      <filter id="glow${containerId}"><feGaussianBlur stdDeviation="1.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <radialGradient id="skinGrad${containerId}" cx="38%" cy="32%"><stop offset="0%" stop-color="#fde8cc"/><stop offset="40%" stop-color="#f5d0a0"/><stop offset="100%" stop-color="#dda868"/></radialGradient>
+      <radialGradient id="skinShadow${containerId}" cx="55%" cy="70%"><stop offset="0%" stop-color="transparent"/><stop offset="60%" stop-color="transparent"/><stop offset="100%" stop-color="rgba(160,90,40,.15)"/></radialGradient>
+      <radialGradient id="cheekGrad${containerId}" cx="50%" cy="40%"><stop offset="0%" stop-color="#ff9988" stop-opacity=".5"/><stop offset="100%" stop-color="#ff9988" stop-opacity="0"/></radialGradient>
+      <linearGradient id="coatGrad${containerId}" x1="0" y1="0" x2=".2" y2="1"><stop offset="0%" stop-color="#fff8ee"/><stop offset="50%" stop-color="#f0e8d8"/><stop offset="100%" stop-color="#d8c8b0"/></linearGradient>
+      <linearGradient id="coatShadow${containerId}" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="rgba(120,80,40,.1)"/><stop offset="50%" stop-color="transparent"/><stop offset="100%" stop-color="rgba(120,80,40,.1)"/></linearGradient>
+      <radialGradient id="hairGrad${containerId}" cx="50%" cy="40%"><stop offset="0%" stop-color="#f5f0e8"/><stop offset="50%" stop-color="#e0d8cc"/><stop offset="100%" stop-color="#c8bcaa"/></radialGradient>
+      <radialGradient id="eyeWhite${containerId}" cx="45%" cy="40%"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#f0e8e0"/></radialGradient>
+      <radialGradient id="irisGrad${containerId}" cx="42%" cy="38%"><stop offset="0%" stop-color="#8b6834"/><stop offset="40%" stop-color="#6b4420"/><stop offset="100%" stop-color="#3a2210"/></radialGradient>
+      <filter id="warmGlow${containerId}"><feGaussianBlur stdDeviation="2" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter>
+      <filter id="softShadow${containerId}"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(80,40,10,.2)"/></filter>
     </defs>
+    <!-- Warm ambient glow behind character -->
+    <circle cx="50" cy="70" r="65" fill="none" stroke="rgba(240,180,80,.06)" stroke-width="8"/>
+    <circle cx="50" cy="70" r="55" fill="rgba(240,180,80,.03)"/>
     <!-- Lab Coat Body -->
-    <path d="M28,88 L22,135 L78,135 L72,88 Q50,82 28,88Z" fill="url(#coatGrad${containerId})" stroke="#d5d5d5" stroke-width=".5"/>
-    <!-- Coat collar -->
-    <path d="M35,86 Q50,80 65,86 L62,92 Q50,87 38,92Z" fill="#f0f0f0" stroke="#ddd" stroke-width=".4"/>
-    <!-- Coat pockets -->
-    <rect x="32" y="108" width="12" height="8" rx="2" fill="none" stroke="#d0d0d0" stroke-width=".6"/>
-    <rect x="56" y="108" width="12" height="8" rx="2" fill="none" stroke="#d0d0d0" stroke-width=".6"/>
-    <!-- Coat buttons -->
-    <circle cx="50" cy="100" r="1.5" fill="#d0d0d0"/><circle cx="50" cy="110" r="1.5" fill="#d0d0d0"/><circle cx="50" cy="120" r="1.5" fill="#d0d0d0"/>
-    <!-- Bowtie -->
-    <polygon points="42,87 50,91 58,87 58,95 50,91 42,95" fill="#c0392b"/>
-    <circle cx="50" cy="91" r="2.8" fill="#e74c3c"/>
-    <circle cx="50" cy="91" r="1.2" fill="#a93226"/>
-    <!-- Arms -->
-    <path d="${p.lArm}" fill="none" stroke="white" stroke-width="8" stroke-linecap="round"/>
-    <path d="${p.rArm}" fill="none" stroke="white" stroke-width="8" stroke-linecap="round"/>
-    <!-- Hands -->
-    <circle cx="${p.lHand.split(',')[0].replace('M','')}" cy="${p.lHand.split(',')[1]}" r="5" fill="#f0c890"/>
-    <circle cx="${p.rHand.split(',')[0].replace('M','')}" cy="${p.rHand.split(',')[1]}" r="5" fill="#f0c890"/>
-    <!-- Head -->
-    <ellipse cx="50" cy="52" rx="28" ry="32" fill="url(#skinGrad${containerId})"/>
-    <!-- Hair - wild and flowing -->
-    <g class="hair-strand" style="transform-origin:50px 25px">
-      <path d="M22 42 Q8 20 25 18 Q18 5 40 8 Q35 -2 55 2 Q50 -5 65 5 Q60 0 78 12 Q90 8 82 25 Q95 22 80 40" fill="#e8e8e8" stroke="#d8d8d8" stroke-width=".5"/>
-      <!-- Extra flowing strands -->
-      <path d="M18 38 Q4 28 12 18 Q8 10 22 12" fill="none" stroke="#e0e0e0" stroke-width="4" stroke-linecap="round"/>
-      <path d="M82 38 Q96 28 88 18 Q92 10 78 12" fill="none" stroke="#e0e0e0" stroke-width="4" stroke-linecap="round"/>
-      <path d="M15 45 Q2 35 10 22" fill="none" stroke="#ddd" stroke-width="3" stroke-linecap="round"/>
-      <path d="M85 45 Q98 35 90 22" fill="none" stroke="#ddd" stroke-width="3" stroke-linecap="round"/>
-      <path d="M25 20 Q20 8 30 5" fill="none" stroke="#e5e5e5" stroke-width="2.5" stroke-linecap="round"/>
-      <path d="M75 20 Q80 8 70 5" fill="none" stroke="#e5e5e5" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M28,88 L22,135 L78,135 L72,88 Q50,82 28,88Z" fill="url(#coatGrad${containerId})" stroke="rgba(180,150,110,.4)" stroke-width=".5" filter="url(#softShadow${containerId})"/>
+    <path d="M28,88 L22,135 L78,135 L72,88 Q50,82 28,88Z" fill="url(#coatShadow${containerId})"/>
+    <!-- Coat collar — soft, rounded -->
+    <path d="M34,86 Q50,79 66,86 L63,93 Q50,87 37,93Z" fill="#f8f0e0" stroke="rgba(180,150,110,.3)" stroke-width=".4"/>
+    <!-- Coat lapel lines -->
+    <path d="M38,92 Q42,105 40,120" fill="none" stroke="rgba(180,150,110,.15)" stroke-width=".6"/>
+    <path d="M62,92 Q58,105 60,120" fill="none" stroke="rgba(180,150,110,.15)" stroke-width=".6"/>
+    <!-- Coat pockets — rounded -->
+    <rect x="32" y="108" width="12" height="8" rx="3" fill="none" stroke="rgba(180,150,110,.25)" stroke-width=".6"/>
+    <rect x="56" y="108" width="12" height="8" rx="3" fill="none" stroke="rgba(180,150,110,.25)" stroke-width=".6"/>
+    <!-- Coat buttons — warm brown -->
+    <circle cx="50" cy="100" r="1.8" fill="#a08060"/><circle cx="50" cy="100" r=".8" fill="#c0a080"/>
+    <circle cx="50" cy="110" r="1.8" fill="#a08060"/><circle cx="50" cy="110" r=".8" fill="#c0a080"/>
+    <circle cx="50" cy="120" r="1.8" fill="#a08060"/><circle cx="50" cy="120" r=".8" fill="#c0a080"/>
+    <!-- Bowtie — warm burgundy with sheen -->
+    <polygon points="42,87 50,91.5 58,87 58,96 50,91.5 42,96" fill="#8b2020"/>
+    <polygon points="43,88 50,91.5 57,88 57,95 50,91.5 43,95" fill="#b03030"/>
+    <polygon points="44.5,89.5 50,91.5 50,91.5 44.5,93.5" fill="rgba(255,200,200,.2)"/>
+    <circle cx="50" cy="91.5" r="3" fill="#c83838"/>
+    <circle cx="50" cy="91.5" r="1.5" fill="#8b2020"/>
+    <circle cx="49" cy="90.5" r=".8" fill="rgba(255,200,200,.3)"/>
+    <!-- Arms — warm coat color -->
+    <path d="${p.lArm}" fill="none" stroke="#f0e4d0" stroke-width="9" stroke-linecap="round"/>
+    <path d="${p.lArm}" fill="none" stroke="rgba(180,150,110,.15)" stroke-width="9" stroke-linecap="round"/>
+    <path d="${p.rArm}" fill="none" stroke="#f0e4d0" stroke-width="9" stroke-linecap="round"/>
+    <path d="${p.rArm}" fill="none" stroke="rgba(180,150,110,.15)" stroke-width="9" stroke-linecap="round"/>
+    <!-- Hands — soft, rounded, warm -->
+    <circle cx="${lhx}" cy="${lhy}" r="6" fill="#f0c890" stroke="#ddb070" stroke-width=".4"/>
+    <circle cx="${lhx}" cy="${lhy}" r="3.5" fill="rgba(255,220,180,.3)"/>
+    <circle cx="${rhx}" cy="${rhy}" r="6" fill="#f0c890" stroke="#ddb070" stroke-width=".4"/>
+    <circle cx="${rhx}" cy="${rhy}" r="3.5" fill="rgba(255,220,180,.3)"/>
+    <!-- Ears — behind head -->
+    <ellipse cx="22" cy="54" rx="6" ry="8" fill="#e8b878" stroke="rgba(180,120,60,.3)" stroke-width=".5"/>
+    <ellipse cx="22" cy="54" rx="3" ry="5" fill="rgba(200,140,80,.2)"/>
+    <ellipse cx="78" cy="54" rx="6" ry="8" fill="#e8b878" stroke="rgba(180,120,60,.3)" stroke-width=".5"/>
+    <ellipse cx="78" cy="54" rx="3" ry="5" fill="rgba(200,140,80,.2)"/>
+    <!-- Head — big, rounded, warm Pixar proportions -->
+    <ellipse cx="50" cy="50" rx="30" ry="34" fill="url(#skinGrad${containerId})"/>
+    <ellipse cx="50" cy="50" rx="30" ry="34" fill="url(#skinShadow${containerId})"/>
+    <!-- Subtle skin warmth on forehead -->
+    <ellipse cx="50" cy="38" rx="18" ry="10" fill="rgba(255,220,180,.15)"/>
+    <!-- Hair - fluffy, volumetric like Gusteau/Linguini -->
+    <g class="hair-strand" style="transform-origin:50px 22px">
+      <!-- Main fluffy mass -->
+      <path d="M20 42 Q5 25 18 15 Q12 2 32 6 Q28 -6 50 -2 Q45 -8 62 -4 Q58 -8 75 2 Q68 -2 82 10 Q92 5 85 22 Q98 18 82 40" fill="url(#hairGrad${containerId})" stroke="rgba(180,170,150,.3)" stroke-width=".5"/>
+      <!-- Fluffy volume highlights -->
+      <path d="M25 30 Q15 18 22 12 Q18 4 35 6" fill="rgba(255,255,245,.2)" stroke="none"/>
+      <path d="M75 30 Q85 18 78 12 Q82 4 65 6" fill="rgba(255,255,245,.15)" stroke="none"/>
+      <!-- Wispy strands — soft, not sharp -->
+      <path d="M16 40 Q2 30 10 18" fill="none" stroke="rgba(220,210,195,.7)" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M84 40 Q98 30 90 18" fill="none" stroke="rgba(220,210,195,.7)" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M14 46 Q0 36 8 20" fill="none" stroke="rgba(210,200,185,.5)" stroke-width="3" stroke-linecap="round"/>
+      <path d="M86 46 Q100 36 92 20" fill="none" stroke="rgba(210,200,185,.5)" stroke-width="3" stroke-linecap="round"/>
+      <!-- Top flyaway wisps -->
+      <path d="M30 8 Q25 -4 34 -2" fill="none" stroke="rgba(230,220,205,.5)" stroke-width="2" stroke-linecap="round"/>
+      <path d="M50 -1 Q48 -10 55 -7" fill="none" stroke="rgba(230,220,205,.4)" stroke-width="2" stroke-linecap="round"/>
+      <path d="M70 8 Q75 -4 66 -2" fill="none" stroke="rgba(230,220,205,.5)" stroke-width="2" stroke-linecap="round"/>
     </g>
-    <!-- Eyes with Disney detail -->
+    <!-- Eyes — BIG Pixar eyes with detailed reflections -->
     <g class="blink" style="transform-origin:50px 48px">
-      <ellipse cx="38" cy="48" rx="9" ry="10" fill="white" stroke="#ccc" stroke-width=".3"/>
-      <ellipse cx="62" cy="48" rx="9" ry="10" fill="white" stroke="#ccc" stroke-width=".3"/>
-      <circle cx="39" cy="49" r="5" fill="#5a3a1a"/>
-      <circle cx="63" cy="49" r="5" fill="#5a3a1a"/>
-      <circle cx="39" cy="49" r="2.5" fill="#1a1a1a"/>
-      <circle cx="63" cy="49" r="2.5" fill="#1a1a1a"/>
-      <!-- Eye highlights -->
-      <circle cx="42" cy="46" r="2" fill="white" opacity=".9"/>
-      <circle cx="66" cy="46" r="2" fill="white" opacity=".9"/>
-      <circle cx="37" cy="51" r="1" fill="white" opacity=".5"/>
-      <circle cx="61" cy="51" r="1" fill="white" opacity=".5"/>
+      <!-- Eye whites with warm shadow at top -->
+      <ellipse cx="37" cy="48" rx="10" ry="11.5" fill="url(#eyeWhite${containerId})"/>
+      <ellipse cx="37" cy="44" rx="9" ry="5" fill="rgba(180,140,100,.06)"/>
+      <ellipse cx="63" cy="48" rx="10" ry="11.5" fill="url(#eyeWhite${containerId})"/>
+      <ellipse cx="63" cy="44" rx="9" ry="5" fill="rgba(180,140,100,.06)"/>
+      <!-- Iris — warm brown with radial detail -->
+      <circle cx="38" cy="49" r="6" fill="url(#irisGrad${containerId})"/>
+      <circle cx="64" cy="49" r="6" fill="url(#irisGrad${containerId})"/>
+      <!-- Iris detail ring -->
+      <circle cx="38" cy="49" r="5.2" fill="none" stroke="rgba(140,100,40,.3)" stroke-width=".4"/>
+      <circle cx="64" cy="49" r="5.2" fill="none" stroke="rgba(140,100,40,.3)" stroke-width=".4"/>
+      <!-- Iris spokes (subtle) -->
+      <line x1="38" y1="44" x2="38" y2="54" stroke="rgba(120,80,30,.08)" stroke-width=".5"/>
+      <line x1="33" y1="49" x2="43" y2="49" stroke="rgba(120,80,30,.08)" stroke-width=".5"/>
+      <line x1="64" y1="44" x2="64" y2="54" stroke="rgba(120,80,30,.08)" stroke-width=".5"/>
+      <line x1="59" y1="49" x2="69" y2="49" stroke="rgba(120,80,30,.08)" stroke-width=".5"/>
+      <!-- Pupils — deep, warm -->
+      <circle cx="38" cy="49" r="3" fill="#1a0e05"/>
+      <circle cx="64" cy="49" r="3" fill="#1a0e05"/>
+      <!-- PRIMARY highlight — big, warm (upper right) -->
+      <circle cx="41" cy="46" r="2.5" fill="white" opacity=".92"/>
+      <circle cx="67" cy="46" r="2.5" fill="white" opacity=".92"/>
+      <!-- SECONDARY highlight — smaller (lower left) -->
+      <circle cx="36" cy="52" r="1.2" fill="white" opacity=".55"/>
+      <circle cx="62" cy="52" r="1.2" fill="white" opacity=".55"/>
+      <!-- TERTIARY warm reflection — golden lamplight -->
+      <circle cx="40" cy="50" r=".8" fill="#ffd080" opacity=".4"/>
+      <circle cx="66" cy="50" r=".8" fill="#ffd080" opacity=".4"/>
+      <!-- Soft eye outline -->
+      <ellipse cx="37" cy="48" rx="10" ry="11.5" fill="none" stroke="rgba(140,100,60,.15)" stroke-width=".6"/>
+      <ellipse cx="63" cy="48" rx="10" ry="11.5" fill="none" stroke="rgba(140,100,60,.15)" stroke-width=".6"/>
     </g>
-    <!-- Eyebrows -->
-    <path d="${p.brow1}" fill="none" stroke="#777" stroke-width="2.8" stroke-linecap="round"/>
-    <path d="${p.brow2}" fill="none" stroke="#777" stroke-width="2.8" stroke-linecap="round"/>
-    <!-- Cheeks -->
-    <circle cx="26" cy="58" r="7" fill="url(#cheekGrad${containerId})"/>
-    <circle cx="74" cy="58" r="7" fill="url(#cheekGrad${containerId})"/>
-    <!-- Nose -->
-    <path d="M47 55 Q50 63 53 55" fill="none" stroke="#c4956a" stroke-width="1.8" stroke-linecap="round"/>
-    <!-- Mustache -->
-    <path d="M34 64 Q42 60 50 66 Q58 60 66 64 Q58 67 50 63 Q42 67 34 64Z" fill="#c0c0c0" stroke="#aaa" stroke-width=".3"/>
-    <!-- Mouth -->
-    <path d="${p.mouth}" fill="none" stroke="#c4956a" stroke-width="2" stroke-linecap="round"/>
-    <!-- Ears -->
-    <ellipse cx="22" cy="54" rx="5" ry="7" fill="#e8b878" stroke="#d4a060" stroke-width=".5"/>
-    <ellipse cx="78" cy="54" rx="5" ry="7" fill="#e8b878" stroke="#d4a060" stroke-width=".5"/>
+    <!-- Eyebrows — soft, warm -->
+    <path d="${p.brow1}" fill="none" stroke="rgba(140,110,70,.7)" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="${p.brow2}" fill="none" stroke="rgba(140,110,70,.7)" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Rosy cheeks — warm, prominent like Ratatouille -->
+    <circle cx="24" cy="58" r="8" fill="url(#cheekGrad${containerId})"/>
+    <circle cx="76" cy="58" r="8" fill="url(#cheekGrad${containerId})"/>
+    <!-- Nose — round, Pixar-style -->
+    <ellipse cx="50" cy="58" rx="4.5" ry="3.5" fill="rgba(220,170,120,.3)"/>
+    <path d="M46 57 Q50 64 54 57" fill="none" stroke="rgba(180,120,70,.5)" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Subtle nose bridge highlight -->
+    <ellipse cx="50" cy="54" rx="2" ry="4" fill="rgba(255,230,200,.15)"/>
+    <!-- Laugh/smile lines -->
+    <path d="M30 60 Q28 64 30 68" fill="none" stroke="rgba(180,120,70,.15)" stroke-width=".8" stroke-linecap="round"/>
+    <path d="M70 60 Q72 64 70 68" fill="none" stroke="rgba(180,120,70,.15)" stroke-width=".8" stroke-linecap="round"/>
+    <!-- Mustache — warm gray with volume -->
+    <path d="M34 65 Q42 61 50 67 Q58 61 66 65 Q58 68 50 64 Q42 68 34 65Z" fill="rgba(180,170,155,.8)" stroke="rgba(150,140,125,.4)" stroke-width=".3"/>
+    <path d="M36 65 Q42 62 48 66" fill="none" stroke="rgba(200,190,175,.3)" stroke-width=".8"/>
+    <!-- Mouth — warm, expressive -->
+    <path d="${p.mouth}" fill="none" stroke="rgba(180,110,70,.6)" stroke-width="2" stroke-linecap="round"/>
   </svg>`;
 }
 
@@ -462,10 +526,30 @@ function drawStars(ctx, w, h, count, time) {
     const y=(Math.sin(i*269.5+i*183.3)*.5+.5)*h;
     const twinkle=.4+.6*Math.sin(time*2+i*1.7);
     const r=.5+1.5*(i%3===0?1:.5);
+    // Warm-tinted stars — golden/amber like Parisian lamplight
+    const warmth=((i*73)%100)/100;
+    const sr=220+Math.floor(warmth*35);
+    const sg=200+Math.floor((1-warmth)*40);
+    const sb=160+Math.floor(warmth*20);
     ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(255,255,255,${twinkle*.7})`;
+    ctx.fillStyle=`rgba(${sr},${sg},${sb},${twinkle*.5})`;
     ctx.fill();
+    // Subtle warm bloom on brighter stars
+    if(i%5===0&&twinkle>.7){
+      ctx.beginPath();ctx.arc(x,y,r*3,0,Math.PI*2);
+      ctx.fillStyle=`rgba(240,200,140,${(twinkle-.7)*.15})`;
+      ctx.fill();
+    }
   }
+}
+
+/* Warm ambient vignette overlay — Ratatouille lamplight feel */
+function drawWarmVignette(ctx, w, h) {
+  const vg=ctx.createRadialGradient(w*.5,h*.4,w*.15,w*.5,h*.5,w*.7);
+  vg.addColorStop(0,'rgba(240,180,80,.04)');
+  vg.addColorStop(.5,'rgba(0,0,0,0)');
+  vg.addColorStop(1,'rgba(10,5,0,.2)');
+  ctx.fillStyle=vg;ctx.fillRect(0,0,w,h);
 }
 
 /* ============================================================
@@ -492,7 +576,7 @@ function initCanvas1(){
   }
   function drawGrid(cx,cy,mass,t){
     const spacing=30,rows=Math.ceil(H/spacing),cols=Math.ceil(W/spacing);
-    ctx.strokeStyle='rgba(100,150,255,.25)';ctx.lineWidth=.8;
+    ctx.strokeStyle='rgba(220,180,120,.2)';ctx.lineWidth=.8;
     for(let r=0;r<=rows;r++){
       ctx.beginPath();
       for(let c=0;c<=cols;c++){
@@ -520,7 +604,7 @@ function initCanvas1(){
   }
   function animate(){
     time+=.016;ctx.clearRect(0,0,W,H);
-    drawStars(ctx,W,H,60,time);
+    drawStars(ctx,W,H,60,time);drawWarmVignette(ctx,W,H);
     // Apple animation (left half)
     if(apple.phase==='fall'){
       apple.vy+=.3;apple.y+=apple.vy;
@@ -533,11 +617,11 @@ function initCanvas1(){
         else{apple.phase='rest';setTimeout(resetApple,2000)}
       }
     }
-    // Ground line
-    ctx.strokeStyle='rgba(100,200,100,.3)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,groundY+14);ctx.lineTo(W*.5,groundY+14);ctx.stroke();
-    // Tree
-    ctx.fillStyle='#5a3a1a';ctx.fillRect(W*.3-4,groundY-60+14,8,60);
-    ctx.beginPath();ctx.arc(W*.3,groundY-65+14,30,0,Math.PI*2);ctx.fillStyle='#2d6a2d';ctx.fill();
+    // Ground line — warm earth tone
+    ctx.strokeStyle='rgba(160,130,80,.3)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,groundY+14);ctx.lineTo(W*.5,groundY+14);ctx.stroke();
+    // Tree — warm, painterly
+    ctx.fillStyle='#6a4828';ctx.fillRect(W*.3-4,groundY-60+14,8,60);
+    ctx.beginPath();ctx.arc(W*.3,groundY-65+14,30,0,Math.PI*2);ctx.fillStyle='#4a7a3a';ctx.fill();
     drawApple(apple.x,apple.y,apple.squash,apple.stretch);
     // Grid warp (right half)
     const gridCx=W*.7,gridCy=H*.65;
@@ -560,13 +644,13 @@ function initCanvas2(){
   canvas.addEventListener('touchmove',e=>{const r=canvas.getBoundingClientRect();const t=e.touches[0];mx=t.clientX-r.left;my=t.clientY-r.top;e.preventDefault()},{passive:false});
   let time=0;
   const planets=[
-    {angle:0,dist:120,speed:.4,r:8,color:'#4488ff',trail:[]},
-    {angle:2.1,dist:180,speed:.25,r:6,color:'#ff8844',trail:[]},
-    {angle:4.2,dist:70,speed:.7,r:5,color:'#44ff88',trail:[]}
+    {angle:0,dist:120,speed:.4,r:8,color:'#e0a050',trail:[]},
+    {angle:2.1,dist:180,speed:.25,r:6,color:'#c87040',trail:[]},
+    {angle:4.2,dist:70,speed:.7,r:5,color:'#d4b870',trail:[]}
   ];
   function animate(){
     time+=.016;ctx.clearRect(0,0,W,H);
-    drawStars(ctx,W,H,80,time);
+    drawStars(ctx,W,H,80,time);drawWarmVignette(ctx,W,H);
     const spacing=35,rows=Math.ceil(H/spacing)+1,cols=Math.ceil(W/spacing)+1;
     // Draw warped grid
     ctx.lineWidth=.7;
@@ -581,7 +665,7 @@ function initCanvas2(){
           gx+=Math.cos(angle)*pull*20;gy+=Math.sin(angle)*pull*20;
         }
         const intensity=clamp(1-d/350,0,1);
-        ctx.strokeStyle=`rgba(${80+175*intensity},${120+135*intensity},255,${.15+.35*intensity})`;
+        ctx.strokeStyle=`rgba(${200+55*intensity},${160+60*intensity},${100+50*intensity},${.15+.35*intensity})`;
         c===0?ctx.moveTo(gx,gy):ctx.lineTo(gx,gy);
       }
       ctx.stroke();
@@ -597,7 +681,7 @@ function initCanvas2(){
       ctx.stroke();
     }
     // Central mass glow at mouse
-    const mg=ctx.createRadialGradient(mx,my,5,mx,my,60);mg.addColorStop(0,'rgba(255,220,100,.6)');mg.addColorStop(.5,'rgba(255,150,50,.2)');mg.addColorStop(1,'rgba(255,100,0,0)');
+    const mg=ctx.createRadialGradient(mx,my,5,mx,my,60);mg.addColorStop(0,'rgba(255,220,140,.5)');mg.addColorStop(.5,'rgba(240,170,80,.2)');mg.addColorStop(1,'rgba(200,120,40,0)');
     ctx.beginPath();ctx.arc(mx,my,60,0,Math.PI*2);ctx.fillStyle=mg;ctx.fill();
     ctx.beginPath();ctx.arc(mx,my,12,0,Math.PI*2);
     const cg=ctx.createRadialGradient(mx-3,my-3,2,mx,my,12);cg.addColorStop(0,'#fff8e0');cg.addColorStop(.5,'#ffcc44');cg.addColorStop(1,'#ff8800');
@@ -657,43 +741,43 @@ function initCanvas3(){
     const hrAngle=time*speed*Math.PI*2/43200-Math.PI/2;
     // Hour
     ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(hrAngle)*radius*.5,cy+Math.sin(hrAngle)*radius*.5);
-    ctx.strokeStyle='#ffd700';ctx.lineWidth=3.5;ctx.lineCap='round';ctx.stroke();
+    ctx.strokeStyle='#e0b050';ctx.lineWidth=3.5;ctx.lineCap='round';ctx.stroke();
     // Minute
     ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(minAngle)*radius*.7,cy+Math.sin(minAngle)*radius*.7);
-    ctx.strokeStyle='#ffffff';ctx.lineWidth=2.5;ctx.stroke();
+    ctx.strokeStyle='#f0e0c8';ctx.lineWidth=2.5;ctx.stroke();
     // Second
     ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(secAngle)*radius*.8,cy+Math.sin(secAngle)*radius*.8);
-    ctx.strokeStyle='#ff4444';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.strokeStyle='#c06040';ctx.lineWidth=1.5;ctx.stroke();
     // Center dot
-    ctx.beginPath();ctx.arc(cx,cy,4,0,Math.PI*2);ctx.fillStyle='#ffd700';ctx.fill();
+    ctx.beginPath();ctx.arc(cx,cy,4,0,Math.PI*2);ctx.fillStyle='#e0b050';ctx.fill();
     // Label
     ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='14px Georgia';ctx.textAlign='center';ctx.fillText(label,cx,cy+radius+25);
   }
   function animate(){
     time+=.016;ctx.clearRect(0,0,W,H);
-    drawStars(ctx,W,H,50,time);
+    drawStars(ctx,W,H,50,time);drawWarmVignette(ctx,W,H);
     // Divider
-    ctx.beginPath();ctx.moveTo(W/2,20);ctx.lineTo(W/2,H-20);ctx.strokeStyle='rgba(255,255,255,.1)';ctx.lineWidth=1;ctx.setLineDash([5,5]);ctx.stroke();ctx.setLineDash([]);
+    ctx.beginPath();ctx.moveTo(W/2,20);ctx.lineTo(W/2,H-20);ctx.strokeStyle='rgba(240,200,140,.1)';ctx.lineWidth=1;ctx.setLineDash([5,5]);ctx.stroke();ctx.setLineDash([]);
     // Earth side label
-    ctx.fillStyle='rgba(100,200,255,.4)';ctx.font='12px Georgia';ctx.textAlign='center';ctx.fillText('🌍 Earth Surface',W*.25,30);
-    ctx.fillStyle='rgba(200,100,255,.4)';ctx.fillText('🕳️ Near Black Hole',W*.75,30);
+    ctx.fillStyle='rgba(220,180,120,.4)';ctx.font='12px Georgia';ctx.textAlign='center';ctx.fillText('🌍 Earth Surface',W*.25,30);
+    ctx.fillStyle='rgba(200,160,100,.4)';ctx.fillText('🕳️ Near Black Hole',W*.75,30);
     const r=Math.min(W*.18,H*.35);
-    drawClock(W*.25,H*.48,r,1,'Normal Time','#0a1a30');
-    drawClock(W*.75,H*.48,r,.3,'Dilated Time','#1a0a30');
+    drawClock(W*.25,H*.48,r,1,'Normal Time','#1a1410');
+    drawClock(W*.75,H*.48,r,.3,'Dilated Time','#1a1210');
     // Time particles - fast around left clock, slow around right
     for(let i=0;i<4;i++){
       const a=time*2+i*Math.PI/2;const pr=r+20+8*Math.sin(time*3+i);
       const px=W*.25+Math.cos(a)*pr;const py=H*.48+Math.sin(a)*pr;
-      ctx.beginPath();ctx.arc(px,py,2,0,Math.PI*2);ctx.fillStyle='rgba(100,200,255,.4)';ctx.shadowColor='rgba(100,200,255,.5)';ctx.shadowBlur=6;ctx.fill();ctx.shadowBlur=0;
+      ctx.beginPath();ctx.arc(px,py,2,0,Math.PI*2);ctx.fillStyle='rgba(240,200,120,.4)';ctx.shadowColor='rgba(240,200,120,.4)';ctx.shadowBlur=6;ctx.fill();ctx.shadowBlur=0;
     }
     for(let i=0;i<4;i++){
       const a=time*.6+i*Math.PI/2;const pr2=r+20+8*Math.sin(time+i);
       const px=W*.75+Math.cos(a)*pr2;const py=H*.48+Math.sin(a)*pr2;
-      ctx.beginPath();ctx.arc(px,py,2,0,Math.PI*2);ctx.fillStyle='rgba(200,100,255,.3)';ctx.shadowColor='rgba(200,100,255,.4)';ctx.shadowBlur=6;ctx.fill();ctx.shadowBlur=0;
+      ctx.beginPath();ctx.arc(px,py,2,0,Math.PI*2);ctx.fillStyle='rgba(200,150,80,.3)';ctx.shadowColor='rgba(200,150,80,.3)';ctx.shadowBlur=6;ctx.fill();ctx.shadowBlur=0;
     }
     // Gravity well visual near right clock
     const wellG=ctx.createRadialGradient(W*.75,H*.48,r+5,W*.75,H*.48,r+60);
-    wellG.addColorStop(0,'rgba(150,50,255,.08)');wellG.addColorStop(1,'rgba(0,0,0,0)');
+    wellG.addColorStop(0,'rgba(180,120,40,.08)');wellG.addColorStop(1,'rgba(0,0,0,0)');
     ctx.beginPath();ctx.arc(W*.75,H*.48,r+60,0,Math.PI*2);ctx.fillStyle=wellG;ctx.fill();
     requestAnimationFrame(animate);
   }
@@ -711,7 +795,7 @@ function initCanvas4(){
   let time=0;
   function animate(){
     time+=.016;ctx.clearRect(0,0,W,H);
-    drawStars(ctx,W,H,100,time);
+    drawStars(ctx,W,H,100,time);drawWarmVignette(ctx,W,H);
     const cx=W/2,cy=H/2;
     // Einstein ring
     for(let r=0;r<3;r++){
@@ -804,10 +888,10 @@ function initCanvas5(){
       ctx.lineWidth=3;ctx.shadowColor=`hsla(${hue},90%,${lightness}%,.4)`;ctx.shadowBlur=10;
       ctx.stroke();ctx.shadowBlur=0;
     }
-    // Relativistic jets
+    // Relativistic jets — warm amber
     for(let j=-1;j<=1;j+=2){
       const jetG=ctx.createLinearGradient(cx,cy,cx,cy+j*H*.45);
-      jetG.addColorStop(0,'rgba(100,150,255,.8)');jetG.addColorStop(.3,'rgba(150,100,255,.4)');jetG.addColorStop(1,'rgba(150,100,255,0)');
+      jetG.addColorStop(0,'rgba(255,200,100,.7)');jetG.addColorStop(.3,'rgba(240,150,80,.35)');jetG.addColorStop(1,'rgba(200,100,50,0)');
       ctx.beginPath();
       ctx.moveTo(cx-8,cy);
       ctx.quadraticCurveTo(cx-15+5*Math.sin(time*4),cy+j*H*.2,cx-3,cy+j*H*.45);
@@ -840,11 +924,11 @@ function initCanvas6(){
   const ripples=[];
   function animate(){
     time+=.016;ctx.clearRect(0,0,W,H);
-    drawStars(ctx,W,H,70,time);
+    drawStars(ctx,W,H,70,time);drawWarmVignette(ctx,W,H);
     const cx=W/2,cy=H/2;
     // Spacetime grid
     const spacing=40;
-    ctx.strokeStyle='rgba(80,130,200,.12)';ctx.lineWidth=.5;
+    ctx.strokeStyle='rgba(200,160,100,.12)';ctx.lineWidth=.5;
     for(let r=0;r<H/spacing;r++){
       ctx.beginPath();
       for(let c=0;c<=W/spacing;c++){
@@ -870,10 +954,10 @@ function initCanvas6(){
       // Draw trails
       [trails1,trails2].forEach((trail,idx)=>{
         ctx.beginPath();trail.forEach((p,i)=>{p.a*=.97;i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y)});
-        ctx.strokeStyle=idx===0?'rgba(100,200,255,.4)':'rgba(255,150,100,.4)';ctx.lineWidth=2;ctx.stroke();
+        ctx.strokeStyle=idx===0?'rgba(240,180,80,.35)':'rgba(210,130,60,.35)';ctx.lineWidth=2;ctx.stroke();
       });
-      // Draw objects
-      [[x1,y1,'#4488ff'],[x2,y2,'#ff8844']].forEach(([ox,oy,col])=>{
+      // Draw objects — warm amber tones
+      [[x1,y1,'#e8a040'],[x2,y2,'#d07030']].forEach(([ox,oy,col])=>{
         ctx.beginPath();ctx.arc(ox,oy,8+2*Math.sin(time*5),0,Math.PI*2);
         ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=20;ctx.fill();ctx.shadowBlur=0;
       });
@@ -888,13 +972,13 @@ function initCanvas6(){
       ripples.forEach(rp=>{
         for(let i=0;i<3;i++){
           ctx.beginPath();ctx.arc(cx,cy,rp.r+i*15,0,Math.PI*2);
-          ctx.strokeStyle=`rgba(100,200,255,${rp.amp*.03})`;ctx.lineWidth=2;ctx.stroke();
+          ctx.strokeStyle=`rgba(240,200,120,${rp.amp*.03})`;ctx.lineWidth=2;ctx.stroke();
         }
       });
       // Merged object
       ctx.beginPath();ctx.arc(cx,cy,12+2*Math.sin(time*3),0,Math.PI*2);
-      const mg=ctx.createRadialGradient(cx,cy,2,cx,cy,14);mg.addColorStop(0,'#ffffff');mg.addColorStop(.5,'#aaccff');mg.addColorStop(1,'rgba(100,150,255,0)');
-      ctx.fillStyle=mg;ctx.shadowColor='#aaccff';ctx.shadowBlur=25;ctx.fill();ctx.shadowBlur=0;
+      const mg=ctx.createRadialGradient(cx,cy,2,cx,cy,14);mg.addColorStop(0,'#ffffff');mg.addColorStop(.5,'#ffd090');mg.addColorStop(1,'rgba(240,180,80,0)');
+      ctx.fillStyle=mg;ctx.shadowColor='#ffd090';ctx.shadowBlur=25;ctx.fill();ctx.shadowBlur=0;
       if(ripples.length&&ripples[0].r>Math.max(W,H)){
         mergePhase=0;spiralDist=120;trails1.length=0;trails2.length=0;ripples.length=0;
       }
@@ -945,14 +1029,14 @@ function initCanvas7(){
       s.x-=(.001+speed*.02)*s.z;
       if(s.x<0)s.x=1;
       ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx+streak,sy);
-      ctx.strokeStyle=`rgba(255,255,255,${.3+speed*.5})`;ctx.lineWidth=s.z;ctx.stroke();
+      ctx.strokeStyle=`rgba(255,230,180,${.25+speed*.45})`;ctx.lineWidth=s.z;ctx.stroke();
     });
     // Speed gauge
     const gaugeX=W-80,gaugeY=40,gaugeH=H-80;
     ctx.fillStyle='rgba(255,255,255,.1)';ctx.fillRect(gaugeX,gaugeY,20,gaugeH);
     const fillH=speed*gaugeH;
     const gg=ctx.createLinearGradient(gaugeX,gaugeY+gaugeH-fillH,gaugeX,gaugeY+gaugeH);
-    gg.addColorStop(0,'#ff4444');gg.addColorStop(.5,'#ffaa00');gg.addColorStop(1,'#44ff44');
+    gg.addColorStop(0,'#c84030');gg.addColorStop(.5,'#e0a040');gg.addColorStop(1,'#a0c060');
     ctx.fillStyle=gg;ctx.fillRect(gaugeX,gaugeY+gaugeH-fillH,20,fillH);
     ctx.strokeStyle='rgba(255,255,255,.3)';ctx.strokeRect(gaugeX,gaugeY,20,gaugeH);
     ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='11px Georgia';ctx.textAlign='center';
@@ -960,13 +1044,13 @@ function initCanvas7(){
     // Light barrier visual
     if(speed>.8){
       const barrier=ctx.createRadialGradient(W*.35,H/2,10,W*.35,H/2,100+speed*50);
-      barrier.addColorStop(0,`rgba(100,200,255,${(speed-.8)*2})`);barrier.addColorStop(1,'rgba(100,200,255,0)');
+      barrier.addColorStop(0,`rgba(255,220,140,${(speed-.8)*1.5})`);barrier.addColorStop(1,'rgba(255,200,100,0)');
       ctx.fillStyle=barrier;ctx.fillRect(0,0,W,H);
       // Doppler shift: blue ahead, red behind
       const shiftA=(speed-.8)*3;
-      const blueG=ctx.createLinearGradient(W*.35+50,0,W,0);blueG.addColorStop(0,`rgba(80,120,255,${shiftA*.15})`);blueG.addColorStop(1,'rgba(0,0,0,0)');
+      const blueG=ctx.createLinearGradient(W*.35+50,0,W,0);blueG.addColorStop(0,`rgba(200,220,255,${shiftA*.1})`);blueG.addColorStop(1,'rgba(0,0,0,0)');
       ctx.fillStyle=blueG;ctx.fillRect(W*.35,0,W*.65,H);
-      const redG=ctx.createLinearGradient(W*.35-50,0,0,0);redG.addColorStop(0,`rgba(255,80,60,${shiftA*.1})`);redG.addColorStop(1,'rgba(0,0,0,0)');
+      const redG=ctx.createLinearGradient(W*.35-50,0,0,0);redG.addColorStop(0,`rgba(200,80,40,${shiftA*.08})`);redG.addColorStop(1,'rgba(0,0,0,0)');
       ctx.fillStyle=redG;ctx.fillRect(0,0,W*.35,H);
     }
     // Exhaust particles
@@ -999,7 +1083,7 @@ function initCanvas8(){
   function animate(){
     time+=.016;phaseTime+=.016;
     ctx.fillStyle='rgba(15,5,5,.12)';ctx.fillRect(0,0,W,H);
-    drawStars(ctx,W,H,40,time);
+    drawStars(ctx,W,H,40,time);drawWarmVignette(ctx,W,H);
     const cx=W/2,cy=H/2;
     if(phase===0){
       // Equation appearing with glow
@@ -1010,8 +1094,8 @@ function initCanvas8(){
       let xOff=-90;
       for(let i=0;i<=shown&&i<letters.length;i++){
         const charAlpha=i===shown?clamp((progress*letters.length-shown),0,1):1;
-        ctx.fillStyle=`rgba(255,215,0,${charAlpha})`;
-        ctx.shadowColor='rgba(255,215,0,.6)';ctx.shadowBlur=20;
+        ctx.fillStyle=`rgba(240,190,80,${charAlpha})`;
+        ctx.shadowColor='rgba(240,180,80,.5)';ctx.shadowBlur=20;
         ctx.fillText(letters[i],cx+xOff,cy);
         ctx.shadowBlur=0;
         xOff+=i===6?20:30;
@@ -1025,8 +1109,8 @@ function initCanvas8(){
       const g=ctx.createRadialGradient(cx,cy,1,cx,cy,r);g.addColorStop(0,'#ffffff');g.addColorStop(.5,'#ffdd66');g.addColorStop(1,'rgba(255,100,0,.5)');
       ctx.fillStyle=g;ctx.shadowColor='#ffdd66';ctx.shadowBlur=30;ctx.fill();ctx.shadowBlur=0;
       // Glow intensifies
-      ctx.font='bold 60px Georgia';ctx.textAlign='center';ctx.fillStyle=`rgba(255,215,0,${.3+.7*Math.sin(time*10)})`;
-      ctx.shadowColor='rgba(255,215,0,.8)';ctx.shadowBlur=30;ctx.fillText('E = mc²',cx,cy-80);ctx.shadowBlur=0;
+      ctx.font='bold 60px Georgia';ctx.textAlign='center';ctx.fillStyle=`rgba(240,190,80,${.3+.7*Math.sin(time*10)})`;
+      ctx.shadowColor='rgba(240,180,80,.6)';ctx.shadowBlur=30;ctx.fillText('E = mc²',cx,cy-80);ctx.shadowBlur=0;
       if(phaseTime>2){
         phase=2;phaseTime=0;
         for(let i=0;i<200;i++){const a=rand(0,Math.PI*2);const sp=rand(1,8);particles.push({x:cx,y:cy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,hue:rand(20,60),r:rand(1,4)})}
@@ -1085,8 +1169,8 @@ function initCanvas9(){
     for(let i=0;i<3;i++){
       ctx.beginPath();ctx.arc(10-i*15,0,4.5,0,Math.PI*2);
       const wg=ctx.createRadialGradient(10-i*15,-1,1,10-i*15,0,4.5);
-      wg.addColorStop(0,'#ccffff');wg.addColorStop(1,'#2288cc');
-      ctx.fillStyle=wg;ctx.shadowColor='rgba(100,200,255,.6)';ctx.shadowBlur=8;ctx.fill();ctx.shadowBlur=0;
+      wg.addColorStop(0,'#fff8e0');wg.addColorStop(1,'#c89848');
+      ctx.fillStyle=wg;ctx.shadowColor='rgba(240,200,120,.5)';ctx.shadowBlur=8;ctx.fill();ctx.shadowBlur=0;
     }
     // Fins with gradient
     ctx.beginPath();ctx.moveTo(-30,-12);ctx.lineTo(-42,-25);ctx.lineTo(-22,-12);
@@ -1100,10 +1184,10 @@ function initCanvas9(){
     if(moving){
       const flameLen=15+8*Math.sin(time*18);
       const efg=ctx.createLinearGradient(-30,0,-30-flameLen,0);
-      efg.addColorStop(0,'rgba(100,200,255,.8)');efg.addColorStop(.5,'rgba(150,100,255,.4)');efg.addColorStop(1,'rgba(100,50,255,0)');
+      efg.addColorStop(0,'rgba(255,200,100,.8)');efg.addColorStop(.5,'rgba(240,150,60,.4)');efg.addColorStop(1,'rgba(200,100,40,0)');
       ctx.beginPath();ctx.moveTo(-30,-5);ctx.quadraticCurveTo(-30-flameLen*.7,3*Math.sin(time*12),-30-flameLen,0);
       ctx.quadraticCurveTo(-30-flameLen*.7,-3*Math.sin(time*12),-30,5);
-      ctx.fillStyle=efg;ctx.shadowColor='rgba(100,150,255,.5)';ctx.shadowBlur=12;ctx.fill();ctx.shadowBlur=0;
+      ctx.fillStyle=efg;ctx.shadowColor='rgba(240,180,80,.4)';ctx.shadowBlur=12;ctx.fill();ctx.shadowBlur=0;
     }
     ctx.restore();
   }
@@ -1111,7 +1195,7 @@ function initCanvas9(){
   const streakStars=Array.from({length:50},()=>({x:rand(0,1),y:rand(0,1),z:rand(.5,2)}));
   function animate(){
     time+=.016;ctx.clearRect(0,0,W,H);
-    drawStars(ctx,W,H,60,time);
+    drawStars(ctx,W,H,60,time);drawWarmVignette(ctx,W,H);
     const speed=.5+.45*Math.sin(time*.5);
     const gamma=1/Math.sqrt(1-speed*speed);
     const contraction=1/gamma;
@@ -1120,7 +1204,7 @@ function initCanvas9(){
       const sx=W*.5+s.x*W*.5;const sy=s.y*H;
       const streak=1+speed*25*s.z;
       ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx+streak,sy);
-      ctx.strokeStyle=`rgba(150,200,255,${.15+speed*.3})`;ctx.lineWidth=s.z*.7;ctx.stroke();
+      ctx.strokeStyle=`rgba(240,200,140,${.1+speed*.25})`;ctx.lineWidth=s.z*.7;ctx.stroke();
       s.x-=(.002+speed*.015)*s.z;if(s.x<0)s.x=1;
     });
     // Labels
@@ -1129,11 +1213,11 @@ function initCanvas9(){
     ctx.fillText(`At ${(speed*100).toFixed(0)}% Speed of Light`,W*.75,35);
     // Divider with glow
     ctx.beginPath();ctx.moveTo(W/2,20);ctx.lineTo(W/2,H-20);
-    ctx.strokeStyle='rgba(100,150,255,.15)';ctx.lineWidth=1;ctx.setLineDash([5,5]);ctx.shadowColor='rgba(100,150,255,.2)';ctx.shadowBlur=5;ctx.stroke();ctx.shadowBlur=0;ctx.setLineDash([]);
+    ctx.strokeStyle='rgba(240,200,140,.12)';ctx.lineWidth=1;ctx.setLineDash([5,5]);ctx.shadowColor='rgba(240,200,140,.15)';ctx.shadowBlur=5;ctx.stroke();ctx.shadowBlur=0;ctx.setLineDash([]);
     // Rest ship
-    drawShip(W*.25,H*.45,1,1,'#4488aa',false);
+    drawShip(W*.25,H*.45,1,1,'#8a7060',false);
     // Contracted ship with engine on
-    drawShip(W*.75,H*.45,contraction,1,'#4488aa',true);
+    drawShip(W*.75,H*.45,contraction,1,'#8a7060',true);
     // Length indicator arrows with glow
     const restLen=80,contractLen=80*contraction;
     ctx.shadowColor='rgba(255,215,0,.4)';ctx.shadowBlur=6;
@@ -1174,14 +1258,14 @@ function initCanvas10(){
     const skinLight=lerp(240,210,age);const skinDark=lerp(200,170,age);
     ctx.save();ctx.translate(x,y);
     // Aura glow
-    const auraColor=isTravel?'rgba(100,150,255,.12)':'rgba(255,200,100,.08)';
+    const auraColor=isTravel?'rgba(240,200,120,.1)':'rgba(255,180,80,.08)';
     const ag=ctx.createRadialGradient(0,20,10,0,20,80);ag.addColorStop(0,auraColor);ag.addColorStop(1,'rgba(0,0,0,0)');
     ctx.beginPath();ctx.arc(0,20,80,0,Math.PI*2);ctx.fillStyle=ag;ctx.fill();
     // Body with gradient
     ctx.beginPath();ctx.moveTo(-20,30);ctx.lineTo(-25,80);ctx.lineTo(25,80);ctx.lineTo(20,30);ctx.closePath();
     const bg=ctx.createLinearGradient(0,30,0,80);
-    if(isTravel){bg.addColorStop(0,'#5577cc');bg.addColorStop(1,'#334488')}
-    else{bg.addColorStop(0,age>.5?'#668866':'#5577aa');bg.addColorStop(1,age>.5?'#445544':'#334466')}
+    if(isTravel){bg.addColorStop(0,'#6a7a8a');bg.addColorStop(1,'#3a4a58')}
+    else{bg.addColorStop(0,age>.5?'#7a7060':'#6a6858');bg.addColorStop(1,age>.5?'#504840':'#48443c')}
     ctx.fillStyle=bg;ctx.fill();
     ctx.strokeStyle='rgba(255,255,255,.15)';ctx.lineWidth=.5;ctx.stroke();
     // Head
@@ -1248,7 +1332,7 @@ function initCanvas10(){
   }
   function animate(){
     time+=.016;ctx.clearRect(0,0,W,H);
-    drawStars(ctx,W,H,50,time);
+    drawStars(ctx,W,H,50,time);drawWarmVignette(ctx,W,H);
     const cx=W/2,cy=H/2;
     const ageFactor=.5+.5*Math.sin(time*.3);
     // Floating time dust particles
@@ -1293,7 +1377,7 @@ function initCanvas10(){
     ctx.beginPath();
     ctx.moveTo(W*.7,cy+75);
     ctx.quadraticCurveTo(W*.85,cy-80,W*.7,cy-75);
-    ctx.strokeStyle='rgba(100,150,255,.15)';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
+    ctx.strokeStyle='rgba(240,200,140,.12)';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
     // Tiny rocket on path
     const rocketAngle=time*.8;const rocketT=.5+.5*Math.sin(rocketAngle);
     const rocketX=W*.7+35*Math.cos(rocketAngle);
