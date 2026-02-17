@@ -199,7 +199,7 @@ body{font-family:'Georgia','Times New Roman',serif;background:#12051f;color:#f0e
     <span class="chapter-number">Chapter I</span>
     <h2>What is Gravity?</h2>
     <h3>Newton's apple meets Einstein's curved spacetime</h3>
-    <canvas class="anim-canvas" id="canvas1" style="min-height:280px;border:2px solid red;"></canvas>
+    <canvas class="anim-canvas" id="canvas1"></canvas>
     <div class="speech-bubble">
       <div class="typewriter" data-text="Gravity isn't a force pulling you down — it's the curvature of spacetime itself! Imagine a bowling ball on a trampoline. Everything nearby rolls toward it, not because of a mysterious pull, but because the fabric of space is bent."></div>
     </div>
@@ -2405,14 +2405,29 @@ function initCanvasAnimations(){
     canvas7:initCanvas7,canvas8:initCanvas8,canvas9:initCanvas9,canvas10:initCanvas10
   };
   const started=new Set();
+
+  function tryInit(id){
+    if(started.has(id))return;
+    started.add(id);
+    if(inits[id]){
+      try{inits[id]()}catch(err){
+        console.error('Canvas init error:',id,err);
+        var d=document.createElement('div');d.style.cssText='background:red;color:white;padding:8px;margin:4px;font-size:12px;';
+        d.textContent=id+' ERR: '+err.message;
+        document.getElementById(id).parentNode.insertBefore(d,document.getElementById(id));
+      }
+    }
+  }
+
+  // Always init canvas1 immediately since it's at the top
+  tryInit('canvas1');
+
+  // Use observer for the rest
   const obs=new IntersectionObserver(entries=>{
     entries.forEach(e=>{
-      if(e.isIntersecting&&!started.has(e.target.id)){
-        started.add(e.target.id);
-        if(inits[e.target.id]){try{inits[e.target.id]()}catch(err){console.error('Canvas init error:',e.target.id,err)}}
-      }
+      if(e.isIntersecting)tryInit(e.target.id);
     });
-  },{threshold:.1});
+  },{threshold:.05});
   Object.keys(inits).forEach(id=>{const el=document.getElementById(id);if(el)obs.observe(el)});
 }
 
@@ -2426,6 +2441,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   initTypewriters();
   initEinsteins();
   initCanvasAnimations();
+/* canvas1 direct init removed */
 });
 </script>
 </body>
