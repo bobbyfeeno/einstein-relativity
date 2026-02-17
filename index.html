@@ -1117,7 +1117,7 @@ function initCanvas4(){
   const GRID=21; // grid lines each direction
   const GRID_EXTENT=280; // half-size of grid in world units
   const DEPRESSION_DEPTH=90;
-  const DEPRESSION_RADIUS=120;
+  const DEPRESSION_RADIUS=250;
   const CAM_DIST=500;
   const CAM_PITCH=0.55; // radians (~32 degrees)
   const cosPitch=Math.cos(CAM_PITCH), sinPitch=Math.sin(CAM_PITCH);
@@ -1184,8 +1184,8 @@ function initCanvas4(){
       const dt=0.02;
       const MAX_STEPS=40000;
       const PHOTON_SPEED=2.0;
-      const DEFLECT_STRENGTH=0.08; // how strongly the surface slope deflects the photon
-      const IMPACT_PARAM=GRID_EXTENT*0.45;
+      const DEFLECT_STRENGTH=0.35; // how strongly the surface slope deflects the photon
+      const IMPACT_PARAM=GRID_EXTENT*0.25;
       let px=IMPACT_PARAM, pz=-GRID_EXTENT*1.8;
       let vx=0, vz=PHOTON_SPEED;
       for(let i=0;i<MAX_STEPS;i++){
