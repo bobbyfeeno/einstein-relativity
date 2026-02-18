@@ -589,9 +589,16 @@ function createEinstein(containerId, pose='wave') {
       <radialGradient id="eyeWhite${containerId}" cx="42%" cy="38%">
         <stop offset="0%" stop-color="#ffffff"/><stop offset="80%" stop-color="#f5ede5"/><stop offset="100%" stop-color="#e8ddd0"/>
       </radialGradient>
+      <!-- Multi-layer iris gradient (6 stops for photorealism) -->
       <radialGradient id="irisGrad${containerId}" cx="40%" cy="36%">
-        <stop offset="0%" stop-color="#a08040"/><stop offset="30%" stop-color="#7b5828"/>
-        <stop offset="70%" stop-color="#5a3818"/><stop offset="100%" stop-color="#2a1808"/>
+        <stop offset="0%" stop-color="#c8a050"/><stop offset="15%" stop-color="#a08040"/>
+        <stop offset="35%" stop-color="#7b5828"/><stop offset="55%" stop-color="#5a3818"/>
+        <stop offset="80%" stop-color="#3a2010"/><stop offset="100%" stop-color="#2a1808"/>
+      </radialGradient>
+      <!-- Secondary iris ring gradient -->
+      <radialGradient id="irisInner${containerId}" cx="45%" cy="40%">
+        <stop offset="0%" stop-color="#d4a848" stop-opacity=".4"/><stop offset="50%" stop-color="#8a6030" stop-opacity=".2"/>
+        <stop offset="100%" stop-color="#5a3818" stop-opacity="0"/>
       </radialGradient>
       <filter id="softShadow${containerId}"><feDropShadow dx="0" dy="1.5" stdDeviation="2.5" flood-color="rgba(60,30,5,.22)"/></filter>
       <filter id="charShadow${containerId}"><feDropShadow dx="1" dy="3" stdDeviation="4" flood-color="rgba(40,20,0,.18)"/></filter>
@@ -605,6 +612,26 @@ function createEinstein(containerId, pose='wave') {
         <feTurbulence type="turbulence" baseFrequency="1.2 0.8" numOctaves="2" seed="5" result="weave"/>
         <feDisplacementMap in="SourceGraphic" in2="weave" scale="0.4" xChannelSelector="R" yChannelSelector="G"/>
       </filter>
+      <!-- Pore texture pattern for skin micro-detail -->
+      <pattern id="porePattern${containerId}" width="4" height="4" patternUnits="userSpaceOnUse">
+        <circle cx="1" cy="1" r=".3" fill="rgba(140,90,40,.04)"/>
+        <circle cx="3" cy="3" r=".25" fill="rgba(140,90,40,.03)"/>
+        <circle cx="2.5" cy="0.8" r=".2" fill="rgba(140,90,40,.025)"/>
+        <circle cx="0.5" cy="2.5" r=".22" fill="rgba(140,90,40,.03)"/>
+      </pattern>
+      <!-- Stubble dot pattern for facial hair -->
+      <pattern id="stubblePattern${containerId}" width="3" height="3" patternUnits="userSpaceOnUse">
+        <circle cx="1" cy="1" r=".18" fill="rgba(100,70,35,.08)"/>
+        <circle cx="2.5" cy="2" r=".15" fill="rgba(100,70,35,.06)"/>
+        <circle cx="0.5" cy="2.8" r=".12" fill="rgba(100,70,35,.05)"/>
+      </pattern>
+      <!-- Fabric weave pattern for coat detail -->
+      <pattern id="fabricWeave${containerId}" width="3" height="3" patternUnits="userSpaceOnUse">
+        <line x1="0" y1="0" x2="3" y2="0" stroke="rgba(160,130,90,.04)" stroke-width=".3"/>
+        <line x1="0" y1="1.5" x2="3" y2="1.5" stroke="rgba(160,130,90,.03)" stroke-width=".2"/>
+        <line x1="0" y1="0" x2="0" y2="3" stroke="rgba(140,110,70,.03)" stroke-width=".2"/>
+        <line x1="1.5" y1="0" x2="1.5" y2="3" stroke="rgba(140,110,70,.025)" stroke-width=".15"/>
+      </pattern>
       <!-- Subsurface scattering glow -->
       <radialGradient id="sssEarL${containerId}" cx="80%" cy="50%">
         <stop offset="0%" stop-color="#ff9060" stop-opacity=".25"/><stop offset="100%" stop-color="#ff9060" stop-opacity="0"/>
@@ -617,6 +644,27 @@ function createEinstein(containerId, pose='wave') {
       </radialGradient>
       <radialGradient id="sssCheekL${containerId}" cx="50%" cy="50%">
         <stop offset="0%" stop-color="#ff8860" stop-opacity=".12"/><stop offset="100%" stop-color="#ff8860" stop-opacity="0"/>
+      </radialGradient>
+      <!-- Eyebag shadow gradient -->
+      <radialGradient id="eyebagL${containerId}" cx="50%" cy="30%">
+        <stop offset="0%" stop-color="rgba(120,70,40,.12)"/><stop offset="100%" stop-color="rgba(120,70,40,0)"/>
+      </radialGradient>
+      <radialGradient id="eyebagR${containerId}" cx="50%" cy="30%">
+        <stop offset="0%" stop-color="rgba(120,70,40,.12)"/><stop offset="100%" stop-color="rgba(120,70,40,0)"/>
+      </radialGradient>
+      <!-- Double chin shadow -->
+      <radialGradient id="doubleChin${containerId}" cx="50%" cy="20%">
+        <stop offset="0%" stop-color="rgba(140,80,30,.1)"/><stop offset="100%" stop-color="rgba(140,80,30,0)"/>
+      </radialGradient>
+      <!-- Skin highlight gradients -->
+      <radialGradient id="cheekHighL${containerId}" cx="40%" cy="35%">
+        <stop offset="0%" stop-color="rgba(255,245,225,.2)"/><stop offset="100%" stop-color="rgba(255,245,225,0)"/>
+      </radialGradient>
+      <radialGradient id="cheekHighR${containerId}" cx="60%" cy="35%">
+        <stop offset="0%" stop-color="rgba(255,245,225,.18)"/><stop offset="100%" stop-color="rgba(255,245,225,0)"/>
+      </radialGradient>
+      <radialGradient id="chinHigh${containerId}" cx="50%" cy="40%">
+        <stop offset="0%" stop-color="rgba(255,240,220,.15)"/><stop offset="100%" stop-color="rgba(255,240,220,0)"/>
       </radialGradient>
       <filter id="charOutline${containerId}">
         <feMorphology in="SourceAlpha" result="expanded" operator="dilate" radius="1.2"/>
@@ -654,6 +702,27 @@ function createEinstein(containerId, pose='wave') {
       <path d="M64,92 Q62,104 64,118" fill="none" stroke="rgba(160,120,70,.07)" stroke-width=".5"/>
       <!-- Coat hem shadow -->
       <path d="M28,136 Q50,140 72,136" fill="none" stroke="rgba(140,100,50,.12)" stroke-width="1"/>
+      <!-- Fabric weave texture overlay -->
+      <path d="M24,88 C20,92 18,108 20,125 Q22,135 30,138 L70,138 Q78,135 80,125 C82,108 80,92 76,88
+               Q68,83 50,81 Q32,83 24,88Z" fill="url(#fabricWeave${containerId})"/>
+      <!-- Lint/dust particles on coat -->
+      <circle cx="35" cy="98" r=".4" fill="rgba(200,195,185,.15)"/>
+      <circle cx="62" cy="105" r=".35" fill="rgba(200,195,185,.12)"/>
+      <circle cx="40" cy="120" r=".3" fill="rgba(200,195,185,.1)"/>
+      <circle cx="58" cy="130" r=".38" fill="rgba(200,195,185,.13)"/>
+      <circle cx="45" cy="110" r=".25" fill="rgba(200,195,185,.08)"/>
+      <!-- Wear pattern (shinier at elbows/shoulders) -->
+      <ellipse cx="28" cy="95" rx="4" ry="6" fill="rgba(255,250,240,.04)"/>
+      <ellipse cx="72" cy="95" rx="4" ry="6" fill="rgba(255,250,240,.04)"/>
+      <!-- Thread detail on buttons -->
+      <line x1="49" y1="102" x2="51" y2="104" stroke="rgba(120,90,50,.15)" stroke-width=".2"/>
+      <line x1="51" y1="102" x2="49" y2="104" stroke="rgba(120,90,50,.15)" stroke-width=".2"/>
+      <line x1="49" y1="112" x2="51" y2="114" stroke="rgba(120,90,50,.15)" stroke-width=".2"/>
+      <line x1="51" y1="112" x2="49" y2="114" stroke="rgba(120,90,50,.15)" stroke-width=".2"/>
+      <!-- Button holes -->
+      <ellipse cx="47" cy="103" rx="1.5" ry=".8" fill="none" stroke="rgba(140,110,70,.12)" stroke-width=".3"/>
+      <ellipse cx="47" cy="113" rx="1.5" ry=".8" fill="none" stroke="rgba(140,110,70,.12)" stroke-width=".3"/>
+      <ellipse cx="47" cy="123" rx="1.5" ry=".8" fill="none" stroke="rgba(140,110,70,.12)" stroke-width=".3"/>
       <!-- Stitch marks along seams -->
       <path d="M24,90 L24,92 M24,95 L24,97 M24,100 L24,102 M24,105 L24,107 M24,110 L24,112" fill="none" stroke="rgba(160,130,90,.1)" stroke-width=".4" stroke-linecap="round"/>
       <path d="M76,90 L76,92 M76,95 L76,97 M76,100 L76,102 M76,105 L76,107 M76,110 L76,112" fill="none" stroke="rgba(160,130,90,.1)" stroke-width=".4" stroke-linecap="round"/>
@@ -710,16 +779,47 @@ function createEinstein(containerId, pose='wave') {
     <ellipse cx="50" cy="48" rx="31" ry="36" fill="url(#skinGrad${containerId})" filter="url(#softShadow${containerId})"
       stroke="rgba(140,90,40,.3)" stroke-width="1"/>
     <ellipse cx="50" cy="48" rx="31" ry="36" fill="url(#skinShadow${containerId})"/>
+    <!-- Pore texture overlay on face -->
+    <ellipse cx="50" cy="48" rx="29" ry="34" fill="url(#porePattern${containerId})"/>
     <!-- Forehead warmth -->
     <ellipse cx="50" cy="36" rx="20" ry="12" fill="rgba(255,225,190,.15)"/>
-    <!-- Forehead wrinkle lines (3 creases) -->
+    <!-- Forehead wrinkle lines (5 creases for more realism) -->
+    <path d="M30,27 Q40,24.5 50,27 Q60,24.5 70,27" fill="none" stroke="rgba(160,110,60,.06)" stroke-width=".5" stroke-linecap="round"/>
     <path d="M32,30 Q41,28 50,30 Q59,28 68,30" fill="none" stroke="rgba(160,110,60,.09)" stroke-width=".7" stroke-linecap="round"/>
     <path d="M34,34 Q42,32.5 50,34 Q58,32.5 66,34" fill="none" stroke="rgba(160,110,60,.07)" stroke-width=".6" stroke-linecap="round"/>
     <path d="M36,38 Q43,36.5 50,38 Q57,36.5 64,38" fill="none" stroke="rgba(160,110,60,.06)" stroke-width=".5" stroke-linecap="round"/>
-    <!-- Age spots -->
+    <path d="M38,41 Q44,40 50,41 Q56,40 62,41" fill="none" stroke="rgba(160,110,60,.04)" stroke-width=".4" stroke-linecap="round"/>
+    <!-- Forehead veins (faint blue-green) -->
+    <path d="M34,26 Q36,30 35,34 Q34,37 36,40" fill="none" stroke="rgba(80,120,110,.06)" stroke-width=".5" stroke-linecap="round"/>
+    <path d="M36,28 Q38,31 37,35" fill="none" stroke="rgba(80,120,110,.04)" stroke-width=".35" stroke-linecap="round"/>
+    <path d="M64,27 Q62,31 63,35 Q64,38 62,41" fill="none" stroke="rgba(80,120,110,.05)" stroke-width=".45" stroke-linecap="round"/>
+    <!-- Temple veins -->
+    <path d="M24,38 Q22,34 23,30" fill="none" stroke="rgba(80,120,110,.05)" stroke-width=".4" stroke-linecap="round"/>
+    <path d="M76,38 Q78,34 77,30" fill="none" stroke="rgba(80,120,110,.04)" stroke-width=".35" stroke-linecap="round"/>
+    <!-- Age spots / liver spots / freckles -->
     <circle cx="38" cy="32" r="2" fill="rgba(160,110,50,.06)"/>
     <circle cx="62" cy="34" r="1.5" fill="rgba(160,110,50,.05)"/>
     <circle cx="28" cy="55" r="1.8" fill="rgba(160,110,50,.05)"/>
+    <circle cx="44" cy="28" r="1.2" fill="rgba(160,110,50,.04)"/>
+    <circle cx="56" cy="30" r="1" fill="rgba(155,105,48,.04)"/>
+    <circle cx="33" cy="60" r="1.3" fill="rgba(160,110,50,.05)"/>
+    <circle cx="67" cy="58" r="1.1" fill="rgba(155,105,48,.04)"/>
+    <!-- Moles -->
+    <circle cx="70" cy="55" r=".8" fill="rgba(100,60,25,.12)"/>
+    <circle cx="35" cy="68" r=".6" fill="rgba(100,60,25,.1)"/>
+    <!-- Skin highlight on cheekbones -->
+    <ellipse cx="28" cy="52" rx="7" ry="4" fill="url(#cheekHighL${containerId})"/>
+    <ellipse cx="72" cy="52" rx="7" ry="4" fill="url(#cheekHighR${containerId})"/>
+    <!-- Nose bridge highlight -->
+    <ellipse cx="50" cy="46" rx="3" ry="8" fill="rgba(255,245,230,.1)"/>
+    <!-- Chin highlight -->
+    <ellipse cx="50" cy="74" rx="5" ry="3" fill="url(#chinHigh${containerId})"/>
+    <!-- Eyebag shadows -->
+    <ellipse cx="37" cy="56" rx="8" ry="3.5" fill="url(#eyebagL${containerId})"/>
+    <ellipse cx="63" cy="56" rx="8" ry="3.5" fill="url(#eyebagR${containerId})"/>
+    <!-- Under-eye wrinkle lines -->
+    <path d="M30,55 Q37,58 44,55" fill="none" stroke="rgba(150,100,50,.06)" stroke-width=".4" stroke-linecap="round"/>
+    <path d="M56,55 Q63,58 70,55" fill="none" stroke="rgba(150,100,50,.06)" stroke-width=".4" stroke-linecap="round"/>
     <!-- Chin dimple -->
     <ellipse cx="50" cy="76" rx="2" ry="1.5" fill="rgba(140,80,30,.08)"/>
     <path d="M49,75 Q50,77.5 51,75" fill="none" stroke="rgba(140,80,30,.1)" stroke-width=".5"/>
@@ -727,6 +827,13 @@ function createEinstein(containerId, pose='wave') {
     <path d="M25,60 Q35,78 50,82 Q65,78 75,60" fill="rgba(160,100,40,.12)" stroke="none"/>
     <!-- Chin shadow -->
     <ellipse cx="50" cy="76" rx="12" ry="5" fill="rgba(140,80,30,.08)"/>
+    <!-- Double chin shadow -->
+    <ellipse cx="50" cy="80" rx="16" ry="4" fill="url(#doubleChin${containerId})"/>
+    <path d="M36,78 Q50,83 64,78" fill="none" stroke="rgba(140,80,30,.07)" stroke-width=".6" stroke-linecap="round"/>
+    <!-- Stubble on chin and cheeks -->
+    <ellipse cx="50" cy="72" rx="14" ry="8" fill="url(#stubblePattern${containerId})"/>
+    <ellipse cx="30" cy="62" rx="6" ry="8" fill="url(#stubblePattern${containerId})"/>
+    <ellipse cx="70" cy="62" rx="6" ry="8" fill="url(#stubblePattern${containerId})"/>
 
     <!-- === HAIR — volumetric, many overlapping strands === -->
     <g class="hair-strand" style="transform-origin:50px 18px">
@@ -762,6 +869,15 @@ function createEinstein(containerId, pose='wave') {
       <path d="M72 4 Q78 -8 68 -4" fill="none" stroke="rgba(220,212,198,.5)" stroke-width="2.5" stroke-linecap="round"/>
       <path d="M35 -2 Q30 -12 38 -10" fill="none" stroke="rgba(215,208,195,.4)" stroke-width="1.8" stroke-linecap="round"/>
       <path d="M65 -2 Q70 -12 62 -10" fill="none" stroke="rgba(215,208,195,.4)" stroke-width="1.8" stroke-linecap="round"/>
+      <!-- Scalp visibility through thinning areas (darker skin showing) -->
+      <ellipse cx="38" cy="4" rx="5" ry="3" fill="rgba(200,160,110,.08)"/>
+      <ellipse cx="60" cy="2" rx="4" ry="2.5" fill="rgba(200,160,110,.07)"/>
+      <ellipse cx="50" cy="-2" rx="4" ry="2" fill="rgba(200,160,110,.06)"/>
+      <!-- Individual thin strands over scalp (root-to-tip: darker roots, lighter tips) -->
+      <path d="M36 8 Q34 -2 38 -8" fill="none" stroke="rgba(180,170,150,.3)" stroke-width=".6" stroke-linecap="round"/>
+      <path d="M62 6 Q64 -4 60 -10" fill="none" stroke="rgba(190,182,168,.25)" stroke-width=".5" stroke-linecap="round"/>
+      <path d="M44 4 Q42 -6 46 -12" fill="none" stroke="rgba(175,165,148,.25)" stroke-width=".5" stroke-linecap="round"/>
+      <path d="M56 4 Q58 -6 54 -12" fill="none" stroke="rgba(178,168,152,.22)" stroke-width=".45" stroke-linecap="round"/>
       <!-- Highlight wisps at crown -->
       <path d="M35 2 Q40 -6 50 -8 Q60 -6 65 2" fill="rgba(255,255,248,.18)" stroke="none"/>
       <!-- Hair sheen/specular band across crown -->
@@ -781,55 +897,138 @@ function createEinstein(containerId, pose='wave') {
       <path d="M46 -8 Q42 -20 48 -18" fill="none" stroke="rgba(225,220,210,.3)" stroke-width="1.5" stroke-linecap="round"/>
       <path d="M54 -8 Q58 -20 52 -18" fill="none" stroke="rgba(225,220,210,.25)" stroke-width="1.3" stroke-linecap="round"/>
       <path d="M32 0 Q26 -14 34 -12" fill="none" stroke="rgba(220,214,202,.2)" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- Static electricity strands (standing straight up) -->
+      <path d="M42 -6 Q42 -22 44 -24" fill="none" stroke="rgba(230,225,215,.2)" stroke-width=".8" stroke-linecap="round"/>
+      <path d="M50 -10 Q50 -26 51 -28" fill="none" stroke="rgba(230,225,215,.18)" stroke-width=".7" stroke-linecap="round"/>
+      <path d="M58 -6 Q58 -22 56 -24" fill="none" stroke="rgba(230,225,215,.17)" stroke-width=".7" stroke-linecap="round"/>
+      <path d="M36 0 Q34 -16 36 -20" fill="none" stroke="rgba(225,220,210,.15)" stroke-width=".6" stroke-linecap="round"/>
+      <path d="M66 -2 Q68 -18 66 -22" fill="none" stroke="rgba(225,220,210,.14)" stroke-width=".6" stroke-linecap="round"/>
+      <!-- More random-angle flyaways (chaotic Einstein look) -->
+      <path d="M20 30 Q0 18 -4 8" fill="none" stroke="rgba(215,208,195,.2)" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M80 30 Q100 18 104 8" fill="none" stroke="rgba(215,208,195,.2)" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M4 60 Q-10 55 -6 42" fill="none" stroke="rgba(200,192,178,.12)" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M96 60 Q110 55 106 42" fill="none" stroke="rgba(200,192,178,.12)" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- Hair density variation: thicker individual strand clusters at crown -->
+      <path d="M40 -4 Q38 -12 42 -14" fill="none" stroke="rgba(210,202,188,.35)" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M48 -6 Q46 -14 50 -16" fill="none" stroke="rgba(210,202,188,.3)" stroke-width="2" stroke-linecap="round"/>
+      <path d="M52 -6 Q54 -14 50 -16" fill="none" stroke="rgba(210,202,188,.3)" stroke-width="2" stroke-linecap="round"/>
+      <path d="M60 -4 Q62 -12 58 -14" fill="none" stroke="rgba(210,202,188,.35)" stroke-width="2.2" stroke-linecap="round"/>
+      <!-- Thinner strands at temples -->
+      <path d="M22 34 Q14 24 16 14" fill="none" stroke="rgba(215,208,195,.12)" stroke-width=".8" stroke-linecap="round"/>
+      <path d="M78 34 Q86 24 84 14" fill="none" stroke="rgba(215,208,195,.12)" stroke-width=".8" stroke-linecap="round"/>
     </g>
 
-    <!-- === EYES — Pixar-quality with full detail === -->
+    <!-- === EYES — Photorealistic with individual lashes, tear ducts, multi-layer iris === -->
     <g class="blink" style="transform-origin:50px 46px">
-      <!-- Eyelash suggestion (subtle top lash line) -->
-      <path d="M26,44 Q37,38 48,44" fill="none" stroke="rgba(120,80,40,.2)" stroke-width="1.2" stroke-linecap="round"/>
-      <path d="M52,44 Q63,38 74,44" fill="none" stroke="rgba(120,80,40,.2)" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- Individual top eyelashes — LEFT EYE (varying lengths and angles) -->
+      <line x1="28" y1="43" x2="26" y2="39" stroke="rgba(80,50,25,.25)" stroke-width=".5" stroke-linecap="round"/>
+      <line x1="30" y1="41.5" x2="28.5" y2="37.5" stroke="rgba(80,50,25,.3)" stroke-width=".5" stroke-linecap="round"/>
+      <line x1="32" y1="40.5" x2="31" y2="36" stroke="rgba(80,50,25,.35)" stroke-width=".55" stroke-linecap="round"/>
+      <line x1="34" y1="39.5" x2="33.5" y2="35" stroke="rgba(80,50,25,.35)" stroke-width=".6" stroke-linecap="round"/>
+      <line x1="36" y1="39" x2="36" y2="34.5" stroke="rgba(80,50,25,.3)" stroke-width=".55" stroke-linecap="round"/>
+      <line x1="38" y1="38.8" x2="38.5" y2="34.5" stroke="rgba(80,50,25,.3)" stroke-width=".5" stroke-linecap="round"/>
+      <line x1="40" y1="39" x2="41" y2="35" stroke="rgba(80,50,25,.3)" stroke-width=".5" stroke-linecap="round"/>
+      <line x1="42" y1="39.5" x2="43.5" y2="36" stroke="rgba(80,50,25,.25)" stroke-width=".45" stroke-linecap="round"/>
+      <line x1="44" y1="40.5" x2="46" y2="37.5" stroke="rgba(80,50,25,.2)" stroke-width=".4" stroke-linecap="round"/>
+      <line x1="46" y1="42" x2="48" y2="39.5" stroke="rgba(80,50,25,.15)" stroke-width=".35" stroke-linecap="round"/>
+      <!-- Individual top eyelashes — RIGHT EYE -->
+      <line x1="54" y1="42" x2="52" y2="39.5" stroke="rgba(80,50,25,.15)" stroke-width=".35" stroke-linecap="round"/>
+      <line x1="56" y1="40.5" x2="54" y2="37.5" stroke="rgba(80,50,25,.2)" stroke-width=".4" stroke-linecap="round"/>
+      <line x1="58" y1="39.5" x2="56.5" y2="36" stroke="rgba(80,50,25,.25)" stroke-width=".45" stroke-linecap="round"/>
+      <line x1="60" y1="39" x2="59" y2="35" stroke="rgba(80,50,25,.3)" stroke-width=".5" stroke-linecap="round"/>
+      <line x1="62" y1="38.8" x2="61.5" y2="34.5" stroke="rgba(80,50,25,.3)" stroke-width=".55" stroke-linecap="round"/>
+      <line x1="64" y1="39" x2="64" y2="34.5" stroke="rgba(80,50,25,.3)" stroke-width=".55" stroke-linecap="round"/>
+      <line x1="66" y1="39.5" x2="66.5" y2="35" stroke="rgba(80,50,25,.35)" stroke-width=".6" stroke-linecap="round"/>
+      <line x1="68" y1="40.5" x2="69" y2="36" stroke="rgba(80,50,25,.35)" stroke-width=".55" stroke-linecap="round"/>
+      <line x1="70" y1="41.5" x2="71.5" y2="37.5" stroke="rgba(80,50,25,.3)" stroke-width=".5" stroke-linecap="round"/>
+      <line x1="72" y1="43" x2="74" y2="39" stroke="rgba(80,50,25,.25)" stroke-width=".5" stroke-linecap="round"/>
+      <!-- Bottom eyelashes (shorter, sparser) — LEFT -->
+      <line x1="30" y1="54" x2="29" y2="56" stroke="rgba(80,50,25,.1)" stroke-width=".3" stroke-linecap="round"/>
+      <line x1="33" y1="55.5" x2="32.5" y2="57.5" stroke="rgba(80,50,25,.12)" stroke-width=".3" stroke-linecap="round"/>
+      <line x1="36" y1="56" x2="36" y2="58" stroke="rgba(80,50,25,.1)" stroke-width=".25" stroke-linecap="round"/>
+      <line x1="39" y1="56" x2="39.5" y2="58" stroke="rgba(80,50,25,.1)" stroke-width=".25" stroke-linecap="round"/>
+      <line x1="42" y1="55.5" x2="43" y2="57.5" stroke="rgba(80,50,25,.08)" stroke-width=".25" stroke-linecap="round"/>
+      <!-- Bottom eyelashes — RIGHT -->
+      <line x1="58" y1="55.5" x2="57" y2="57.5" stroke="rgba(80,50,25,.08)" stroke-width=".25" stroke-linecap="round"/>
+      <line x1="61" y1="56" x2="60.5" y2="58" stroke="rgba(80,50,25,.1)" stroke-width=".25" stroke-linecap="round"/>
+      <line x1="64" y1="56" x2="64" y2="58" stroke="rgba(80,50,25,.1)" stroke-width=".25" stroke-linecap="round"/>
+      <line x1="67" y1="55.5" x2="67.5" y2="57.5" stroke="rgba(80,50,25,.12)" stroke-width=".3" stroke-linecap="round"/>
+      <line x1="70" y1="54" x2="71" y2="56" stroke="rgba(80,50,25,.1)" stroke-width=".3" stroke-linecap="round"/>
+      <!-- Thick upper lash line -->
+      <path d="M26,44 Q37,38 48,44" fill="none" stroke="rgba(80,50,25,.25)" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M52,44 Q63,38 74,44" fill="none" stroke="rgba(80,50,25,.25)" stroke-width="1.5" stroke-linecap="round"/>
       <!-- Eye whites -->
       <ellipse cx="37" cy="47" rx="10.5" ry="12" fill="url(#eyeWhite${containerId})" stroke="rgba(140,100,60,.12)" stroke-width=".6"/>
       <ellipse cx="63" cy="47" rx="10.5" ry="12" fill="url(#eyeWhite${containerId})" stroke="rgba(140,100,60,.12)" stroke-width=".6"/>
+      <!-- Bloodshot capillaries in sclera — LEFT -->
+      <path d="M28,45 Q30,46 32,45.5" fill="none" stroke="rgba(200,50,50,.1)" stroke-width=".35"/>
+      <path d="M28.5,47 Q30.5,46.5 32,47.5" fill="none" stroke="rgba(190,55,55,.08)" stroke-width=".3"/>
+      <path d="M29,49 Q31,48.5 33,49.5" fill="none" stroke="rgba(185,60,60,.07)" stroke-width=".25"/>
+      <path d="M28,51 Q30,50.5 31.5,51.2" fill="none" stroke="rgba(195,50,50,.06)" stroke-width=".2"/>
+      <path d="M44,46 Q42.5,46.5 41,46" fill="none" stroke="rgba(200,50,50,.09)" stroke-width=".3"/>
+      <path d="M45,48 Q43,47.5 41.5,48.5" fill="none" stroke="rgba(190,55,55,.07)" stroke-width=".25"/>
+      <path d="M44,50 Q42.5,50.5 41,50" fill="none" stroke="rgba(185,60,60,.06)" stroke-width=".2"/>
+      <!-- Bloodshot capillaries — RIGHT -->
+      <path d="M68,45 Q70,46 72,45.5" fill="none" stroke="rgba(200,50,50,.1)" stroke-width=".35"/>
+      <path d="M68.5,47 Q70.5,46.5 72,47.5" fill="none" stroke="rgba(190,55,55,.08)" stroke-width=".3"/>
+      <path d="M69,49 Q71,48.5 73,49.5" fill="none" stroke="rgba(185,60,60,.07)" stroke-width=".25"/>
+      <path d="M55,46 Q57,46.5 59,46" fill="none" stroke="rgba(200,50,50,.09)" stroke-width=".3"/>
+      <path d="M56,48 Q57.5,48.5 59,48" fill="none" stroke="rgba(190,55,55,.07)" stroke-width=".25"/>
+      <!-- Tear duct detail (pink inner corner) — LEFT -->
+      <ellipse cx="27.5" cy="48" rx="2" ry="2.5" fill="rgba(220,150,140,.2)"/>
+      <ellipse cx="27.5" cy="48" rx="1.2" ry="1.5" fill="rgba(240,160,150,.15)"/>
+      <!-- Tear duct — RIGHT -->
+      <ellipse cx="72.5" cy="48" rx="2" ry="2.5" fill="rgba(220,150,140,.2)"/>
+      <ellipse cx="72.5" cy="48" rx="1.2" ry="1.5" fill="rgba(240,160,150,.15)"/>
       <!-- Upper lid shadow -->
       <ellipse cx="37" cy="42" rx="9.5" ry="5.5" fill="rgba(170,130,85,.07)"/>
       <ellipse cx="63" cy="42" rx="9.5" ry="5.5" fill="rgba(170,130,85,.07)"/>
-      <!-- Iris with gradient -->
+      <!-- Upper lid crease line -->
+      <path d="M27,40 Q37,35 47,40" fill="none" stroke="rgba(150,100,50,.08)" stroke-width=".6" stroke-linecap="round"/>
+      <path d="M53,40 Q63,35 73,40" fill="none" stroke="rgba(150,100,50,.08)" stroke-width=".6" stroke-linecap="round"/>
+      <!-- Iris with multi-layer gradient -->
       <circle cx="38" cy="48" r="6.5" fill="url(#irisGrad${containerId})"/>
       <circle cx="64" cy="48" r="6.5" fill="url(#irisGrad${containerId})"/>
+      <!-- Inner iris glow layer -->
+      <circle cx="38" cy="48" r="5" fill="url(#irisInner${containerId})"/>
+      <circle cx="64" cy="48" r="5" fill="url(#irisInner${containerId})"/>
       <!-- Limbal ring (dark ring around iris edge) -->
-      <circle cx="38" cy="48" r="6.5" fill="none" stroke="rgba(40,20,5,.3)" stroke-width=".8"/>
-      <circle cx="64" cy="48" r="6.5" fill="none" stroke="rgba(40,20,5,.3)" stroke-width=".8"/>
-      <!-- Iris detail ring -->
-      <circle cx="38" cy="48" r="5.5" fill="none" stroke="rgba(140,100,40,.25)" stroke-width=".5"/>
-      <circle cx="64" cy="48" r="5.5" fill="none" stroke="rgba(140,100,40,.25)" stroke-width=".5"/>
-      <!-- Blood vessel hints in sclera -->
-      <path d="M28,46 Q31,47 33,46.5" fill="none" stroke="rgba(180,60,60,.08)" stroke-width=".3"/>
-      <path d="M29,49 Q31,48.5 33,49.5" fill="none" stroke="rgba(180,60,60,.06)" stroke-width=".25"/>
-      <path d="M45,47 Q43,46.5 41,47" fill="none" stroke="rgba(180,60,60,.07)" stroke-width=".3"/>
-      <path d="M68,46 Q71,47 73,46.5" fill="none" stroke="rgba(180,60,60,.08)" stroke-width=".3"/>
-      <path d="M69,49 Q71,48.5 73,49.5" fill="none" stroke="rgba(180,60,60,.06)" stroke-width=".25"/>
-      <!-- Lower eyelid definition -->
-      <path d="M28,52 Q37,57 48,52" fill="none" stroke="rgba(160,110,70,.1)" stroke-width=".8" stroke-linecap="round"/>
-      <path d="M52,52 Q63,57 74,52" fill="none" stroke="rgba(160,110,70,.1)" stroke-width=".8" stroke-linecap="round"/>
-      <!-- Lower lash line hint -->
-      <path d="M30,53 Q37,56 46,53" fill="none" stroke="rgba(120,80,40,.08)" stroke-width=".5"/>
-      <path d="M54,53 Q63,56 72,53" fill="none" stroke="rgba(120,80,40,.08)" stroke-width=".5"/>
-      <!-- Iris radial spokes -->
-      ${[0,30,60,90,120,150].map(a=>`<line x1="${38+Math.cos(a*Math.PI/180)*2}" y1="${48+Math.sin(a*Math.PI/180)*2}" x2="${38+Math.cos(a*Math.PI/180)*6}" y2="${48+Math.sin(a*Math.PI/180)*6}" stroke="rgba(130,90,35,.1)" stroke-width=".4"/>
-      <line x1="${64+Math.cos(a*Math.PI/180)*2}" y1="${48+Math.sin(a*Math.PI/180)*2}" x2="${64+Math.cos(a*Math.PI/180)*6}" y2="${48+Math.sin(a*Math.PI/180)*6}" stroke="rgba(130,90,35,.1)" stroke-width=".4"/>`).join('')}
-      <!-- Pupils -->
+      <circle cx="38" cy="48" r="6.5" fill="none" stroke="rgba(40,20,5,.35)" stroke-width="1"/>
+      <circle cx="64" cy="48" r="6.5" fill="none" stroke="rgba(40,20,5,.35)" stroke-width="1"/>
+      <!-- Iris detail rings (multiple) -->
+      <circle cx="38" cy="48" r="5.5" fill="none" stroke="rgba(140,100,40,.2)" stroke-width=".4"/>
+      <circle cx="64" cy="48" r="5.5" fill="none" stroke="rgba(140,100,40,.2)" stroke-width=".4"/>
+      <circle cx="38" cy="48" r="4.5" fill="none" stroke="rgba(160,120,50,.12)" stroke-width=".3"/>
+      <circle cx="64" cy="48" r="4.5" fill="none" stroke="rgba(160,120,50,.12)" stroke-width=".3"/>
+      <!-- Iris radial spokes (denser, 12 angles) -->
+      ${[0,30,60,90,120,150,180,210,240,270,300,330].map(a=>`<line x1="${38+Math.cos(a*Math.PI/180)*2}" y1="${48+Math.sin(a*Math.PI/180)*2}" x2="${38+Math.cos(a*Math.PI/180)*6}" y2="${48+Math.sin(a*Math.PI/180)*6}" stroke="rgba(130,90,35,.08)" stroke-width=".35"/>
+      <line x1="${64+Math.cos(a*Math.PI/180)*2}" y1="${48+Math.sin(a*Math.PI/180)*2}" x2="${64+Math.cos(a*Math.PI/180)*6}" y2="${48+Math.sin(a*Math.PI/180)*6}" stroke="rgba(130,90,35,.08)" stroke-width=".35"/>`).join('')}
+      <!-- Iris collarette (jagged inner ring) -->
+      <circle cx="38" cy="48" r="3.8" fill="none" stroke="rgba(180,140,60,.15)" stroke-width=".3" stroke-dasharray=".8,.5"/>
+      <circle cx="64" cy="48" r="3.8" fill="none" stroke="rgba(180,140,60,.15)" stroke-width=".3" stroke-dasharray=".8,.5"/>
+      <!-- Pupils — slight asymmetry for realism -->
       <circle cx="38" cy="48" r="3.2" fill="#0e0802"/>
-      <circle cx="64" cy="48" r="3.2" fill="#0e0802"/>
-      <!-- PRIMARY highlight (elongated window reflection) -->
-      <ellipse cx="41" cy="45" rx="2" ry="3.2" fill="white" opacity=".9" transform="rotate(-10,41,45)"/>
-      <ellipse cx="67" cy="45" rx="2" ry="3.2" fill="white" opacity=".9" transform="rotate(-10,67,45)"/>
+      <circle cx="64" cy="48" r="3.0" fill="#0e0802"/>
+      <!-- Pupil environment reflection (not just white dots — window shape) -->
+      <ellipse cx="41" cy="45" rx="2" ry="3.2" fill="white" opacity=".85" transform="rotate(-10,41,45)"/>
+      <ellipse cx="67" cy="45" rx="2" ry="3.2" fill="white" opacity=".85" transform="rotate(-10,67,45)"/>
+      <!-- Window frame crossbar in reflection -->
+      <line x1="40" y1="45" x2="42" y2="45" stroke="rgba(200,200,200,.3)" stroke-width=".4"/>
+      <line x1="41" y1="43.5" x2="41" y2="46.5" stroke="rgba(200,200,200,.25)" stroke-width=".3"/>
+      <line x1="66" y1="45" x2="68" y2="45" stroke="rgba(200,200,200,.3)" stroke-width=".4"/>
+      <line x1="67" y1="43.5" x2="67" y2="46.5" stroke="rgba(200,200,200,.25)" stroke-width=".3"/>
       <!-- SECONDARY highlight (small, lower-left) -->
-      <circle cx="36" cy="51" r="1.3" fill="white" opacity=".58"/>
-      <circle cx="62" cy="51" r="1.3" fill="white" opacity=".58"/>
+      <circle cx="36" cy="51" r="1.3" fill="white" opacity=".55"/>
+      <circle cx="62" cy="51" r="1.3" fill="white" opacity=".55"/>
       <!-- Warm lamplight reflection -->
       <circle cx="40" cy="49" r=".9" fill="#ffd080" opacity=".4"/>
       <circle cx="66" cy="49" r=".9" fill="#ffd080" opacity=".4"/>
+      <!-- Lower eyelid definition with margin detail -->
+      <path d="M28,52 Q37,57 48,52" fill="none" stroke="rgba(160,110,70,.12)" stroke-width=".9" stroke-linecap="round"/>
+      <path d="M52,52 Q63,57 74,52" fill="none" stroke="rgba(160,110,70,.12)" stroke-width=".9" stroke-linecap="round"/>
+      <!-- Lower lid margin (waterline — pink/red) -->
+      <path d="M29,52.5 Q37,56.5 47,52.5" fill="none" stroke="rgba(200,140,130,.08)" stroke-width=".5" stroke-linecap="round"/>
+      <path d="M53,52.5 Q63,56.5 71,52.5" fill="none" stroke="rgba(200,140,130,.08)" stroke-width=".5" stroke-linecap="round"/>
     </g>
 
     <!-- Eyebrows — thick, expressive, crisp -->
@@ -888,9 +1087,15 @@ function createEinstein(containerId, pose='wave') {
     <ellipse cx="46.5" cy="60" rx="2" ry="1.2" fill="rgba(140,80,30,.22)"/>
     <ellipse cx="53.5" cy="60" rx="2" ry="1.2" fill="rgba(140,80,30,.22)"/>
 
-    <!-- Laugh/nasolabial lines -->
-    <path d="M29,56 Q27,62 29,68" fill="none" stroke="rgba(170,115,60,.12)" stroke-width=".9" stroke-linecap="round"/>
-    <path d="M71,56 Q73,62 71,68" fill="none" stroke="rgba(170,115,60,.12)" stroke-width=".9" stroke-linecap="round"/>
+    <!-- Laugh/nasolabial lines — more pronounced, doubled for depth -->
+    <path d="M29,54 Q26,60 28,68 Q29,72 32,74" fill="none" stroke="rgba(170,115,60,.15)" stroke-width="1.1" stroke-linecap="round"/>
+    <path d="M71,54 Q74,60 72,68 Q71,72 68,74" fill="none" stroke="rgba(170,115,60,.15)" stroke-width="1.1" stroke-linecap="round"/>
+    <!-- Shadow side of nasolabial fold -->
+    <path d="M30,55 Q27.5,61 29.5,68" fill="none" stroke="rgba(150,95,40,.06)" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M70,55 Q72.5,61 70.5,68" fill="none" stroke="rgba(150,95,40,.06)" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Marionette lines (mouth to chin) -->
+    <path d="M36,72 Q34,76 35,80" fill="none" stroke="rgba(160,105,50,.06)" stroke-width=".5" stroke-linecap="round"/>
+    <path d="M64,72 Q66,76 65,80" fill="none" stroke="rgba(160,105,50,.06)" stroke-width=".5" stroke-linecap="round"/>
 
     <!-- === MUSTACHE — full, volumetric, crisp === -->
     <path d="M32,66 Q40,62 50,68 Q60,62 68,66 Q60,70 50,65 Q40,70 32,66Z" fill="rgba(170,160,142,.9)" stroke="rgba(120,108,88,.5)" stroke-width=".7"/>
@@ -907,9 +1112,37 @@ function createEinstein(containerId, pose='wave') {
     <path d="M36,66 Q43,64 50,66 Q57,64 64,66" fill="rgba(150,80,50,.06)" stroke="none"/>
     <!-- Mouth -->
     ${mouthPath}
-    <!-- Lip creases/texture -->
-    <path d="M40,68 Q44,67.5 48,68" fill="none" stroke="rgba(160,90,55,.06)" stroke-width=".3"/>
-    <path d="M52,68 Q56,67.5 60,68" fill="none" stroke="rgba(160,90,55,.06)" stroke-width=".3"/>
+    <!-- Lip vertical texture lines (7 lines for realistic lip texture) -->
+    <path d="M38,67 L38,69.5" fill="none" stroke="rgba(160,90,55,.05)" stroke-width=".25"/>
+    <path d="M40,66.8 L40,69.8" fill="none" stroke="rgba(160,90,55,.06)" stroke-width=".25"/>
+    <path d="M42,66.5 L42,70" fill="none" stroke="rgba(160,90,55,.06)" stroke-width=".3"/>
+    <path d="M44,66.5 L44.2,70" fill="none" stroke="rgba(160,90,55,.05)" stroke-width=".25"/>
+    <path d="M46,66.8 L46,69.8" fill="none" stroke="rgba(160,90,55,.06)" stroke-width=".25"/>
+    <path d="M48,67 L48,69.5" fill="none" stroke="rgba(160,90,55,.05)" stroke-width=".25"/>
+    <path d="M50,67 L50,69" fill="none" stroke="rgba(160,90,55,.04)" stroke-width=".2"/>
+    <path d="M52,67 L52,69.5" fill="none" stroke="rgba(160,90,55,.05)" stroke-width=".25"/>
+    <path d="M54,66.8 L54,69.8" fill="none" stroke="rgba(160,90,55,.06)" stroke-width=".25"/>
+    <path d="M56,66.5 L56,70" fill="none" stroke="rgba(160,90,55,.06)" stroke-width=".3"/>
+    <path d="M58,66.5 L58.2,70" fill="none" stroke="rgba(160,90,55,.05)" stroke-width=".25"/>
+    <path d="M60,66.8 L60,69.8" fill="none" stroke="rgba(160,90,55,.06)" stroke-width=".25"/>
+    <path d="M62,67 L62,69.5" fill="none" stroke="rgba(160,90,55,.05)" stroke-width=".25"/>
+    <!-- Saliva shine on lower lip -->
+    <ellipse cx="48" cy="69" rx="4" ry="1" fill="rgba(255,255,255,.1)"/>
+    <ellipse cx="52" cy="68.5" rx="3" ry=".8" fill="rgba(255,255,255,.08)"/>
+    <!-- Corner-of-mouth shadows -->
+    <circle cx="34" cy="68" r="2" fill="rgba(140,80,30,.06)"/>
+    <circle cx="66" cy="68" r="2" fill="rgba(140,80,30,.06)"/>
+    <!-- Teeth hint (subtle gum and tooth shapes when mouth open) -->
+    ${p.mouthFill ? `
+    <path d="M42,67 L42,69.5 L44.5,69.5 L44.5,67" fill="rgba(255,252,245,.12)" stroke="rgba(200,195,185,.06)" stroke-width=".2"/>
+    <path d="M45,67 L45,69.5 L47.5,69.5 L47.5,67" fill="rgba(255,252,245,.11)" stroke="rgba(200,195,185,.06)" stroke-width=".2"/>
+    <path d="M48,67 L48,69.5 L50,69.5 L50,67" fill="rgba(255,252,245,.12)" stroke="rgba(200,195,185,.06)" stroke-width=".2"/>
+    <path d="M50.5,67 L50.5,69.5 L53,69.5 L53,67" fill="rgba(255,252,245,.11)" stroke="rgba(200,195,185,.06)" stroke-width=".2"/>
+    <path d="M53.5,67 L53.5,69.5 L56,69.5 L56,67" fill="rgba(255,252,245,.12)" stroke="rgba(200,195,185,.06)" stroke-width=".2"/>
+    <path d="M56.5,67 L56.5,69.5 L58.5,69.5 L58.5,67" fill="rgba(255,252,245,.1)" stroke="rgba(200,195,185,.06)" stroke-width=".2"/>
+    <!-- Gum line -->
+    <path d="M41,67 Q50,65.5 59,67" fill="none" stroke="rgba(200,120,120,.08)" stroke-width=".4"/>
+    ` : ''}
     </g><!-- end charOutline group -->
   </svg>`;
 }
@@ -1081,20 +1314,40 @@ function initCanvas1(){
 
   function drawGrass(){
     const half=W/2;
-    // Main grass
+    // Main grass base
     const g=ctx.createLinearGradient(0,groundY,0,H);
     g.addColorStop(0,'#5a9e3a');g.addColorStop(.3,'#4a8a2e');g.addColorStop(1,'#3a7020');
     ctx.fillStyle=g;ctx.fillRect(0,groundY,half,H-groundY);
-    // Grass tufts with wind sway
-    ctx.lineWidth=1.5;
-    for(let i=0;i<30;i++){
-      const gx=((i*37+13)%Math.floor(half));const gy=groundY;
-      const sway=Math.sin(time*1.8+i*.7)*3;
-      const h=grassTufts[i]?grassTufts[i].h:10;
-      ctx.strokeStyle=`rgba(${100+i%30},${180+i%20},72,.7)`;
-      ctx.beginPath();ctx.moveTo(gx,gy);ctx.quadraticCurveTo(gx-3+sway,gy-h*.6,gx-2+sway*1.2,gy-h);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(gx,gy);ctx.quadraticCurveTo(gx+4+sway,gy-h*.5,gx+3+sway*1.2,gy-h*.9);ctx.stroke();
+    // Ground texture: dirt, pebbles, debris
+    for(let i=0;i<15;i++){
+      const px=((i*67+11)%Math.floor(half));const py=groundY+6+((i*41)%20);
+      ctx.beginPath();ctx.ellipse(px,py,1.5+i%2,1+i%2*.5,(i*.3),0,Math.PI*2);
+      ctx.fillStyle=`rgba(90,70,40,${.06+i%3*.02})`;ctx.fill();
     }
+    // Scattered debris (tiny twigs)
+    ctx.strokeStyle='rgba(80,50,20,.08)';ctx.lineWidth=.8;
+    ctx.beginPath();ctx.moveTo(half*.3,groundY+4);ctx.lineTo(half*.3+8,groundY+5);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(half*.6,groundY+8);ctx.lineTo(half*.6+6,groundY+7);ctx.stroke();
+    // Individual grass blades (denser, more detailed)
+    for(let i=0;i<50;i++){
+      const gx=((i*29+7)%Math.floor(half));const gy=groundY;
+      const sway=Math.sin(time*1.8+i*.7)*3;
+      const h=(grassTufts[i%30]?grassTufts[i%30].h:10)*(0.7+i%5*0.15);
+      const shade=i%4;
+      const colors=['rgba(90,170,55,.6)','rgba(110,190,72,.7)','rgba(80,160,45,.5)','rgba(100,180,65,.65)'];
+      ctx.strokeStyle=colors[shade];ctx.lineWidth=shade<2?1.2:1.6;
+      ctx.beginPath();ctx.moveTo(gx,gy);ctx.quadraticCurveTo(gx-3+sway,gy-h*.6,gx-2+sway*1.2,gy-h);ctx.stroke();
+      if(i<30){
+        ctx.strokeStyle=colors[(shade+1)%4];ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(gx+1,gy);ctx.quadraticCurveTo(gx+4+sway,gy-h*.5,gx+3+sway*1.2,gy-h*.9);ctx.stroke();
+      }
+    }
+    // Dandelion/wildflower
+    ctx.fillStyle='rgba(255,255,200,.4)';
+    const flowerX=half*.4,flowerY=groundY-12;
+    ctx.beginPath();ctx.arc(flowerX,flowerY,2,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='rgba(80,150,40,.4)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(flowerX,flowerY+2);ctx.lineTo(flowerX+1,groundY);ctx.stroke();
   }
 
   function drawTree(){
@@ -1120,6 +1373,19 @@ function initCanvas1(){
     // Knot
     ctx.beginPath();ctx.ellipse(treeX+3,treeTrunkTop+25,3,4,0,0,Math.PI*2);
     ctx.strokeStyle='rgba(40,20,5,.15)';ctx.lineWidth=.8;ctx.stroke();
+    // Moss patches on bark
+    ctx.fillStyle='rgba(80,140,60,.15)';
+    ctx.beginPath();ctx.ellipse(treeX-6,treeTrunkTop+35,4,2.5,.2,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(treeX+5,treeTrunkTop+50,3,2,-.1,0,Math.PI*2);ctx.fill();
+    // Lichen spots
+    ctx.fillStyle='rgba(180,190,140,.1)';
+    ctx.beginPath();ctx.arc(treeX-4,treeTrunkTop+15,2,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(treeX+6,treeTrunkTop+40,1.5,0,Math.PI*2);ctx.fill();
+    // Insect holes
+    ctx.fillStyle='rgba(20,10,0,.2)';
+    ctx.beginPath();ctx.arc(treeX+2,treeTrunkTop+18,.8,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(treeX-3,treeTrunkTop+42,.6,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(treeX+4,treeTrunkTop+55,.7,0,Math.PI*2);ctx.fill();
     // Branch stubs
     ctx.strokeStyle='#5a3a1a';ctx.lineWidth=4;
     ctx.beginPath();ctx.moveTo(treeX-4,treeTrunkTop+15);ctx.quadraticCurveTo(treeX-25,treeTrunkTop+5,treeX-30,treeTrunkTop-5);ctx.stroke();
@@ -1152,6 +1418,13 @@ function initCanvas1(){
     const g=ctx.createRadialGradient(-3,-3,1,0,0,10);
     g.addColorStop(0,'#ff6655');g.addColorStop(.3,'#ee3322');g.addColorStop(.7,'#cc1111');g.addColorStop(1,'#880000');
     ctx.fillStyle=g;ctx.fill();
+    // Apple skin texture — tiny speckles
+    for(let i=0;i<20;i++){
+      const ax=(Math.sin(i*73.1)*.8)*8,ay=(Math.cos(i*137.3)*.8)*8;
+      if(ax*ax+ay*ay<81){ctx.beginPath();ctx.arc(ax,ay,.4+Math.random()*.3,0,Math.PI*2);ctx.fillStyle=`rgba(180,20,0,${.05+Math.random()*.08})`;ctx.fill();}
+    }
+    // Bruise imperfection
+    ctx.beginPath();ctx.ellipse(4,3,2.5,1.8,.3,0,Math.PI*2);ctx.fillStyle='rgba(100,30,10,.08)';ctx.fill();
     // Primary highlight (large)
     ctx.beginPath();ctx.arc(-3,-3,4,0,Math.PI*2);ctx.fillStyle='rgba(255,210,210,.4)';ctx.fill();
     // Secondary highlight (small, lower)
@@ -1161,13 +1434,17 @@ function initCanvas1(){
     ctx.strokeStyle='rgba(255,120,120,.15)';ctx.lineWidth=1;ctx.stroke();
     // Stem with wood grain
     ctx.beginPath();ctx.moveTo(0,-10);ctx.quadraticCurveTo(2,-16,3,-14);ctx.strokeStyle='#5a3a1a';ctx.lineWidth=1.8;ctx.stroke();
-    // Stem wood grain lines
     ctx.beginPath();ctx.moveTo(.5,-10);ctx.quadraticCurveTo(1.5,-14,2,-13);ctx.strokeStyle='rgba(80,50,20,.3)';ctx.lineWidth=.3;ctx.stroke();
     ctx.beginPath();ctx.moveTo(-.3,-10);ctx.quadraticCurveTo(1,-15,2.5,-14.5);ctx.strokeStyle='rgba(70,40,15,.2)';ctx.lineWidth=.25;ctx.stroke();
-    // Leaf on stem with vein
-    ctx.beginPath();ctx.moveTo(1,-12);ctx.quadraticCurveTo(6,-14,7,-10);ctx.fillStyle='#3a8a22';ctx.fill();
-    // Leaf vein
+    // Leaf on stem with vein + serrated edge
+    ctx.beginPath();ctx.moveTo(1,-12);ctx.quadraticCurveTo(3,-14,5,-13);ctx.quadraticCurveTo(6.5,-13.5,7,-10);ctx.quadraticCurveTo(5,-10.5,3,-11);ctx.closePath();
+    ctx.fillStyle='#3a8a22';ctx.fill();
     ctx.beginPath();ctx.moveTo(2,-12);ctx.quadraticCurveTo(4.5,-12.5,6,-10.5);ctx.strokeStyle='rgba(30,70,15,.3)';ctx.lineWidth=.4;ctx.stroke();
+    // Leaf veins (secondary)
+    ctx.beginPath();ctx.moveTo(3,-11.8);ctx.lineTo(4.5,-11);ctx.strokeStyle='rgba(30,70,15,.15)';ctx.lineWidth=.2;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(4,-12);ctx.lineTo(5.5,-11.2);ctx.stroke();
+    // Calyx (bottom indent)
+    ctx.beginPath();ctx.moveTo(-1.5,9);ctx.quadraticCurveTo(0,8,1.5,9);ctx.strokeStyle='rgba(60,30,10,.15)';ctx.lineWidth=.5;ctx.stroke();
     ctx.restore();
   }
 
@@ -1506,6 +1783,28 @@ function initCanvas1(){
     // === DIVIDER ===
     drawDivider();
 
+    // Volumetric atmosphere — warm golden hour haze on left side
+    ctx.save();ctx.globalAlpha=.03;
+    const haze=ctx.createLinearGradient(0,0,W/2,0);
+    haze.addColorStop(0,'rgba(255,220,150,.0)');haze.addColorStop(.5,'rgba(255,200,120,.15)');
+    haze.addColorStop(1,'rgba(255,180,100,0)');
+    ctx.fillStyle=haze;ctx.fillRect(0,0,W/2,H);
+    ctx.restore();
+
+    // Depth-of-field: subtle blur at edges (vignette-like soft focus)
+    ctx.save();ctx.globalAlpha=.06;
+    const dofG=ctx.createRadialGradient(W*.35,H*.5,W*.15,W*.35,H*.5,W*.5);
+    dofG.addColorStop(0,'rgba(0,0,0,0)');dofG.addColorStop(.7,'rgba(0,0,0,0)');
+    dofG.addColorStop(1,'rgba(0,0,0,.3)');
+    ctx.fillStyle=dofG;ctx.fillRect(0,0,W/2,H);
+    ctx.restore();
+
+    // Ambient occlusion shadow at ground/tree junction
+    ctx.save();ctx.globalAlpha=.08;
+    ctx.beginPath();ctx.ellipse(treeX,groundY,20,4,0,0,Math.PI*2);
+    ctx.fillStyle='rgba(20,40,10,.5)';ctx.fill();
+    ctx.restore();
+
   }catch(err){console.error('Ch1:',err);return;}
     requestAnimationFrame(animate);
   }
@@ -1806,6 +2105,28 @@ function initCanvas3(){
     ctx.quadraticCurveTo(cx-radius*.3,cy-radius*.5,cx+radius*.3,cy-radius*.8);
     ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=radius*.15;ctx.stroke();
     ctx.restore();
+    // Scratches on clock face glass
+    ctx.save();ctx.globalAlpha=.04;ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=.4;
+    ctx.beginPath();ctx.moveTo(cx-radius*.4,cy-radius*.3);ctx.lineTo(cx+radius*.1,cy+radius*.2);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx+radius*.2,cy-radius*.5);ctx.lineTo(cx+radius*.35,cy-radius*.1);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx-radius*.2,cy+radius*.1);ctx.lineTo(cx+radius*.15,cy+radius*.35);ctx.stroke();
+    ctx.restore();
+    // Metal patina/oxidation on frame
+    ctx.save();ctx.globalAlpha=.05;
+    ctx.beginPath();ctx.arc(cx-radius*.7,cy+radius*.6,radius*.15,0,Math.PI*2);
+    ctx.fillStyle='rgba(100,140,120,.3)';ctx.fill();
+    ctx.beginPath();ctx.arc(cx+radius*.8,cy-radius*.4,radius*.12,0,Math.PI*2);
+    ctx.fillStyle='rgba(90,130,110,.25)';ctx.fill();
+    ctx.restore();
+    // Condensation droplets on glass
+    ctx.save();ctx.globalAlpha=.03;
+    for(let d=0;d<5;d++){
+      const dx=cx+Math.cos(d*1.8+.5)*radius*.6;
+      const dy=cy+Math.sin(d*2.3+1)*radius*.5;
+      ctx.beginPath();ctx.arc(dx,dy,1+d*.3,0,Math.PI*2);
+      ctx.fillStyle='rgba(200,220,255,.4)';ctx.fill();
+    }
+    ctx.restore();
     // Beveled metal edge (gradient ring around clock)
     ctx.beginPath();ctx.arc(cx,cy,radius+2,0,Math.PI*2);
     const bevelG=ctx.createLinearGradient(cx-radius,cy-radius,cx+radius,cy+radius);
@@ -1877,6 +2198,20 @@ function initCanvas3(){
     const wellG=ctx.createRadialGradient(W*.75,H*.48,r+5,W*.75,H*.48,r+60);
     wellG.addColorStop(0,'rgba(180,120,40,.08)');wellG.addColorStop(1,'rgba(0,0,0,0)');
     ctx.beginPath();ctx.arc(W*.75,H*.48,r+60,0,Math.PI*2);ctx.fillStyle=wellG;ctx.fill();
+    // Dust particles floating in air
+    for(let d=0;d<12;d++){
+      const dx=(Math.sin(d*73.1+time*.3)*.5+.5)*W;
+      const dy=(Math.cos(d*137.3+time*.2)*.5+.5)*H;
+      const da=.5+.5*Math.sin(time*.8+d*2.1);
+      ctx.beginPath();ctx.arc(dx,dy,.5+d%2*.3,0,Math.PI*2);
+      ctx.fillStyle=`rgba(200,180,140,${da*.06})`;ctx.fill();
+    }
+    // Volumetric atmosphere (subtle warm fog)
+    ctx.save();ctx.globalAlpha=.02;
+    const fogG=ctx.createLinearGradient(0,H*.7,0,H);
+    fogG.addColorStop(0,'rgba(180,140,80,0)');fogG.addColorStop(1,'rgba(180,140,80,.3)');
+    ctx.fillStyle=fogG;ctx.fillRect(0,0,W,H);
+    ctx.restore();
     requestAnimationFrame(animate);
   }
   animate();
@@ -2066,9 +2401,32 @@ function initCanvas7(){
       ctx.beginPath();ctx.arc(-8,ry,0.8,0,Math.PI*2);ctx.fillStyle='rgba(120,120,120,.25)';ctx.fill();
       ctx.beginPath();ctx.arc(-8-.3,ry-.3,0.25,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.15)';ctx.fill();
     }
-    // Antenna
+    // Heat discoloration on hull near exhaust
+    ctx.save();ctx.globalAlpha=.08;
+    const hdG=ctx.createLinearGradient(-25,0,-10,0);
+    hdG.addColorStop(0,'rgba(180,140,60,1)');hdG.addColorStop(.5,'rgba(160,120,80,.5)');hdG.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=hdG;ctx.fillRect(-25,-10,20,20);ctx.restore();
+    // Control surface flaps
+    ctx.fillStyle='rgba(160,160,170,.4)';
+    ctx.beginPath();ctx.moveTo(-22,-10);ctx.lineTo(-18,-10);ctx.lineTo(-18,-12);ctx.lineTo(-22,-11);ctx.fill();
+    ctx.beginPath();ctx.moveTo(-22,10);ctx.lineTo(-18,10);ctx.lineTo(-18,12);ctx.lineTo(-22,11);ctx.fill();
+    // Vents on hull
+    ctx.strokeStyle='rgba(80,80,80,.15)';ctx.lineWidth=.3;
+    for(let v=0;v<3;v++){ctx.beginPath();ctx.moveTo(-15+v*4,-8);ctx.lineTo(-15+v*4,-6);ctx.stroke();}
+    // Antenna with guy-wires
     ctx.beginPath();ctx.moveTo(35,-12);ctx.lineTo(38,-18);ctx.strokeStyle='rgba(180,180,180,.6)';ctx.lineWidth=1;ctx.stroke();
     ctx.beginPath();ctx.arc(38,-18,1.5,0,Math.PI*2);ctx.fillStyle='#ff4444';ctx.fill();
+    // Guy-wires from antenna tip
+    ctx.strokeStyle='rgba(160,160,160,.15)';ctx.lineWidth=.3;
+    ctx.beginPath();ctx.moveTo(38,-18);ctx.lineTo(30,-10);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(38,-18);ctx.lineTo(25,-11);ctx.stroke();
+    // Thruster bell interior detail
+    ctx.save();ctx.globalAlpha=.3;
+    ctx.beginPath();ctx.ellipse(-25,0,3,7,0,0,Math.PI*2);
+    ctx.fillStyle='rgba(60,40,30,.5)';ctx.fill();
+    ctx.beginPath();ctx.ellipse(-25,0,2,5,0,0,Math.PI*2);
+    ctx.fillStyle='rgba(40,25,15,.4)';ctx.fill();
+    ctx.restore();
     // Window with pilot silhouette
     ctx.beginPath();ctx.arc(15,0,5,0,Math.PI*2);
     const wg=ctx.createRadialGradient(14,-1,1,15,0,5);wg.addColorStop(0,'#aaddff');wg.addColorStop(1,'#4488cc');
@@ -2333,6 +2691,65 @@ function initCanvas8(){
           ctx.fillStyle=rg2;ctx.fill();
         }
         ctx.globalCompositeOperation='source-over';ctx.restore();
+      }
+      // Debris fragments with individual shapes
+      const debrisCount=Math.min(15,Math.floor(phaseTime*5));
+      for(let d=0;d<debrisCount;d++){
+        const da=d*Math.PI*2/debrisCount+time*.2;
+        const dd=20+phaseTime*30+d*8;
+        const dx=cx+Math.cos(da)*dd;
+        const dy=cy+Math.sin(da)*dd-phaseTime*d*.5;
+        const ds=2+d%3;
+        ctx.save();ctx.translate(dx,dy);ctx.rotate(time*3+d);
+        ctx.fillStyle=`rgba(${80+d*10},${40+d*5},${20+d*3},${clamp(.6-phaseTime*.1,0,.6)})`;
+        // Random polygon shapes for debris
+        ctx.beginPath();
+        const sides=3+d%3;
+        for(let s=0;s<=sides;s++){
+          const sa=s*Math.PI*2/sides;
+          const sr=ds*(0.7+((s*d*17)%10)/10*0.6);
+          s===0?ctx.moveTo(Math.cos(sa)*sr,Math.sin(sa)*sr):ctx.lineTo(Math.cos(sa)*sr,Math.sin(sa)*sr);
+        }
+        ctx.fill();ctx.restore();
+      }
+      // Heat distortion effect (wavy lines near center)
+      if(phaseTime<3){
+        ctx.save();ctx.globalAlpha=.04;ctx.strokeStyle='rgba(255,200,100,.3)';ctx.lineWidth=1;
+        for(let h=0;h<5;h++){
+          ctx.beginPath();
+          for(let hx=-40;hx<=40;hx+=2){
+            const hy=cy-20-h*12+Math.sin(hx*.2+time*8+h)*3*(1-phaseTime/3);
+            hx===-40?ctx.moveTo(cx+hx,hy):ctx.lineTo(cx+hx,hy);
+          }
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+      // Smoke tendrils with turbulence
+      if(phaseTime>.5){
+        ctx.save();ctx.globalAlpha=clamp(.15-phaseTime*.02,0,.15);
+        for(let s=0;s<4;s++){
+          const sa=s*Math.PI/2+Math.sin(time+s)*0.3;
+          const sd=30+phaseTime*20;
+          ctx.beginPath();
+          ctx.moveTo(cx,cy);
+          for(let st=0;st<10;st++){
+            const sx=cx+Math.cos(sa+Math.sin(st*.5+time*2)*0.4)*sd*st/10;
+            const sy=cy+Math.sin(sa+Math.cos(st*.3+time*1.5)*0.3)*sd*st/10-st*3;
+            ctx.lineTo(sx,sy);
+          }
+          ctx.strokeStyle='rgba(100,80,60,.5)';ctx.lineWidth=3+s;ctx.lineCap='round';ctx.stroke();
+        }
+        ctx.restore();
+      }
+      // Ground scorch patterns (bottom of canvas)
+      if(phaseTime>.3){
+        const scorchAlpha=clamp(phaseTime*.1,.01,.3);
+        const scorchG=ctx.createRadialGradient(cx,H,10,cx,H,80+phaseTime*20);
+        scorchG.addColorStop(0,`rgba(40,20,0,${scorchAlpha})`);
+        scorchG.addColorStop(.5,`rgba(60,30,5,${scorchAlpha*.5})`);
+        scorchG.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=scorchG;ctx.fillRect(cx-120,H-30,240,30);
       }
       // Center glow fading
       const glow=clamp(1-phaseTime/3,0,1);
@@ -2663,6 +3080,45 @@ function initCanvas10(){
       ctx.strokeStyle='rgba(200,110,70,.65)';
     }
     ctx.lineWidth=1.6;ctx.lineCap='round';ctx.stroke();
+    // Lip texture lines
+    ctx.strokeStyle=`rgba(160,90,55,${.03+age*.02})`;ctx.lineWidth=.2;
+    for(let l=-5;l<=5;l+=2){ctx.beginPath();ctx.moveTo(l,age>.5?14.5:13.5);ctx.lineTo(l,age>.5?16:17);ctx.stroke();}
+
+    // Age spots on face
+    if(age>.3){
+      ctx.fillStyle=`rgba(150,100,50,${age*.1})`;
+      ctx.beginPath();ctx.arc(-10,4,1.5,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(12,6,1.2,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(-6,18,1,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(8,-12,1.3,0,Math.PI*2);ctx.fill();
+    }
+    // Hand wrinkle lines and veins
+    [-20,20].forEach(hx=>{
+      const hy=70;
+      if(age>.2){
+        // Knuckle wrinkles
+        ctx.strokeStyle=`rgba(140,90,50,${age*.15})`;ctx.lineWidth=.4;
+        ctx.beginPath();ctx.moveTo(hx-2,hy-1);ctx.lineTo(hx+2,hy-1);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(hx-1.5,hy+1);ctx.lineTo(hx+1.5,hy+1);ctx.stroke();
+        // Hand veins
+        ctx.strokeStyle=`rgba(80,120,110,${age*.06})`;ctx.lineWidth=.35;
+        ctx.beginPath();ctx.moveTo(hx-1,hy-3);ctx.quadraticCurveTo(hx,hy,hx+1,hy+3);ctx.stroke();
+      }
+      // Age spots on hands
+      if(age>.4){
+        ctx.fillStyle=`rgba(150,100,50,${age*.08})`;
+        ctx.beginPath();ctx.arc(hx+1,hy-2,.8,0,Math.PI*2);ctx.fill();
+      }
+    });
+    // Fabric texture on clothing
+    ctx.save();ctx.globalAlpha=.03;
+    for(let fy=30;fy<80;fy+=3){
+      ctx.beginPath();ctx.moveTo(-22,fy);ctx.lineTo(22,fy);
+      ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=.2;ctx.stroke();
+    }
+    ctx.restore();
+    // Posture: slight hunch if aging
+    // (Expressed through the whole body transform already)
 
     ctx.restore();
     // Label with glow
