@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+<!-- -->
 <title>Einstein's Relativity — A Pixar-Quality Interactive Journey</title>
 <style>
 /* ============================================================
@@ -247,7 +247,7 @@ body{font-family:'Georgia','Times New Roman',serif;background:#12051f;color:#f0e
     <span class="chapter-number">Chapter IV</span>
     <h2>Light Bends</h2>
     <h3>Gravitational lensing & Einstein rings</h3>
-    <div class="anim-canvas" id="tc4" style="position:relative;overflow:hidden"></div>
+    <canvas class="anim-canvas" id="canvas4"></canvas>
     <div class="speech-bubble">
       <div class="typewriter" data-text="Even light follows the curves of spacetime! When light from a distant star passes near a massive object, it bends — creating beautiful rings and arcs. This effect, called gravitational lensing, was the first proof of General Relativity!"></div>
     </div>
@@ -263,7 +263,7 @@ body{font-family:'Georgia','Times New Roman',serif;background:#12051f;color:#f0e
     <span class="chapter-number">Chapter V</span>
     <h2>Black Holes</h2>
     <h3>Where spacetime curves to infinity</h3>
-    <div class="anim-canvas" id="tc5" style="position:relative;overflow:hidden"></div>
+    <canvas class="anim-canvas" id="canvas5"></canvas>
     <div class="speech-bubble">
       <div class="typewriter" data-text="When a massive star collapses, it creates a region where gravity is so strong that nothing — not even light — can escape. The boundary is called the event horizon. Beyond it, the known laws of physics break down entirely!"></div>
     </div>
@@ -1431,22 +1431,228 @@ function initCanvas3(){
 }
 
 /* ============================================================
-   CHAPTER 4: LIGHT BENDS — Three.js GPU-accelerated with Bloom
-   Vanilla params: GRID=21, GRID_EXTENT=280, depress(), GM=150,
-   PHOTON_SPEED=2.5, MINIMALIST (grid + sun + one beam)
+   CHAPTER 4: LIGHT BENDS — 3D Perspective Gravitational Lensing
    ============================================================ */
 function initCanvas4(){
-  /* Deferred to module script — see initThreeChapter4() below */
+  const canvas=document.getElementById('canvas4');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  let W,H;
+
+  // 3D config
+  const GRID=21; // grid lines each direction
+  const GRID_EXTENT=280; // half-size of grid in world units
+  const DEPRESSION_DEPTH=90;
+  const DEPRESSION_RADIUS=250;
+  const CAM_DIST=500;
+  const CAM_PITCH=0.55; // radians (~32 degrees)
+  const cosPitch=Math.cos(CAM_PITCH), sinPitch=Math.sin(CAM_PITCH);
+
+  // Sun position in 3D world (center of grid, slight offset)
+  const sunX3=0, sunZ3=0;
+
+  // Pre-computed projected grids
+  let gridRows=[], gridCols=[], beamScreen=[], sunScreen={x:0,y:0};
+  let fov;
+
+  function depress(x3,z3){
+    const dx=x3-sunX3, dz=z3-sunZ3;
+    const d=Math.sqrt(dx*dx+dz*dz);
+    if(d>DEPRESSION_RADIUS) return 0;
+    const f=1-d/DEPRESSION_RADIUS;
+    return DEPRESSION_DEPTH*f*f;
+  }
+
+  function project(x3,y3,z3){
+    // Rotate around X axis (pitch)
+    const yr=y3*cosPitch-z3*sinPitch;
+    const zr=y3*sinPitch+z3*cosPitch;
+    const scale=fov/(zr+CAM_DIST);
+    return {x:W/2+x3*scale, y:H*0.4+yr*scale};
+  }
+
+  function rebuild(){
+    W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;
+    fov=Math.min(W,H)*0.9;
+
+    // Build grid rows (constant z, varying x)
+    gridRows=[];
+    for(let r=0;r<GRID;r++){
+      const z3=(r/(GRID-1)-0.5)*GRID_EXTENT*2;
+      const row=[];
+      for(let c=0;c<GRID*3;c++){
+        const x3=(c/(GRID*3-1)-0.5)*GRID_EXTENT*2;
+        const y3=depress(x3,z3);
+        row.push(project(x3,y3,z3));
+      }
+      gridRows.push(row);
+    }
+    // Build grid cols (constant x, varying z)
+    gridCols=[];
+    for(let c=0;c<GRID;c++){
+      const x3=(c/(GRID-1)-0.5)*GRID_EXTENT*2;
+      const col=[];
+      for(let r=0;r<GRID*3;r++){
+        const z3=(r/(GRID*3-1)-0.5)*GRID_EXTENT*2;
+        const y3=depress(x3,z3);
+        col.push(project(x3,y3,z3));
+      }
+      gridCols.push(col);
+    }
+
+    // Sun screen position (at bottom of depression)
+    sunScreen=project(sunX3,DEPRESSION_DEPTH,sunZ3);
+
+    // Light beam path via gravitational simulation — photon curves around mass
+    beamScreen=[];
+    {
+      // LAW: Photon must stay within grid bounds and ride the grid surface
+      const dt=0.005;
+      const MAX_STEPS=200000;
+      const PHOTON_SPEED=2.5;
+      const GM=150;
+      const MIN_DIST=80;
+      const GRID_BOUND=GRID_EXTENT; // photon cannot leave the grid
+      // Start at center-bottom of grid, slight offset to curve around mass, exit center-top
+      let px=MIN_DIST*1.2, pz=-GRID_BOUND*0.95;
+      let vx=0, vz=PHOTON_SPEED;
+      let exited=false;
+      for(let i=0;i<MAX_STEPS;i++){
+        const dx=sunX3-px, dz=sunZ3-pz;
+        const d=Math.sqrt(dx*dx+dz*dz);
+        const ed=Math.max(d, MIN_DIST);
+        const accel=GM/(ed*ed);
+        vx+=dx/d*accel*dt;
+        vz+=dz/d*accel*dt;
+        const ns=Math.sqrt(vx*vx+vz*vz);
+        vx=vx/ns*PHOTON_SPEED;
+        vz=vz/ns*PHOTON_SPEED;
+        px+=vx*dt;
+        pz+=vz*dt;
+        // CLAMP: photon must stay within grid bounds
+        if(px<-GRID_BOUND) px=-GRID_BOUND;
+        if(px>GRID_BOUND) px=GRID_BOUND;
+        if(pz<-GRID_BOUND) pz=-GRID_BOUND;
+        if(pz>GRID_BOUND){exited=true;} // reached far edge = exit
+        // Photon Y always equals grid surface (rides on the grid)
+        if(i%40===0){
+          const py=depress(px,pz);
+          beamScreen.push(project(px,py,pz));
+        }
+        if(exited) break;
+      }
+    }
+  }
+  rebuild();window.addEventListener('resize',rebuild);
+
+  let time=0;
+  function animate(){
+    time+=.016;
+    ctx.fillStyle='#12051f';ctx.fillRect(0,0,W,H);
+
+    // Draw grid — horizontal lines (rows)
+    ctx.lineWidth=0.8;ctx.strokeStyle='rgba(140,150,220,0.20)';
+    for(let i=0;i<gridRows.length;i++){
+      const row=gridRows[i];ctx.beginPath();ctx.moveTo(row[0].x,row[0].y);
+      for(let j=1;j<row.length;j++) ctx.lineTo(row[j].x,row[j].y);
+      ctx.stroke();
+    }
+    // Vertical lines (cols)
+    for(let i=0;i<gridCols.length;i++){
+      const col=gridCols[i];ctx.beginPath();ctx.moveTo(col[0].x,col[0].y);
+      for(let j=1;j<col.length;j++) ctx.lineTo(col[j].x,col[j].y);
+      ctx.stroke();
+    }
+
+    // Faint beam path
+    const len=beamScreen.length;
+    ctx.beginPath();ctx.moveTo(beamScreen[0].x,beamScreen[0].y);
+    for(let i=1;i<len;i++) ctx.lineTo(beamScreen[i].x,beamScreen[i].y);
+    ctx.strokeStyle='rgba(232,200,64,0.07)';ctx.lineWidth=2.5;ctx.stroke();
+
+    // Photon moving along path
+    const photonT=((time*.15)%1);
+    const idx=Math.floor(photonT*(len-1));
+    const px=beamScreen[idx].x, py=beamScreen[idx].y;
+
+    // Glowing trail
+    const trailLen=55;const trailStart=Math.max(0,idx-trailLen);
+    ctx.beginPath();ctx.moveTo(beamScreen[trailStart].x,beamScreen[trailStart].y);
+    for(let i=trailStart+1;i<=idx;i++) ctx.lineTo(beamScreen[i].x,beamScreen[i].y);
+    ctx.strokeStyle='rgba(255,215,80,0.45)';ctx.lineWidth=2.5;
+    ctx.shadowColor='#e8c840';ctx.shadowBlur=10;ctx.stroke();ctx.shadowBlur=0;
+
+    // Photon dot
+    ctx.beginPath();ctx.arc(px,py,4,0,6.283);
+    ctx.fillStyle='#fff0c0';ctx.shadowColor='#e8c840';ctx.shadowBlur=15;ctx.fill();ctx.shadowBlur=0;
+
+    // Sun at bottom of depression
+    const sunR=40;
+    const sg=ctx.createRadialGradient(sunScreen.x,sunScreen.y,0,sunScreen.x,sunScreen.y,sunR);
+    sg.addColorStop(0,'rgba(255,250,230,0.95)');
+    sg.addColorStop(.25,'rgba(255,215,0,0.7)');
+    sg.addColorStop(.6,'rgba(255,180,60,0.15)');
+    sg.addColorStop(1,'rgba(200,120,40,0)');
+    ctx.beginPath();ctx.arc(sunScreen.x,sunScreen.y,sunR,0,6.283);ctx.fillStyle=sg;ctx.fill();
+
+    requestAnimationFrame(animate);
+  }
+  animate();
 }
 
 /* ============================================================
-   CHAPTER 5: BLACK HOLES — Three.js GPU-accelerated with Bloom
-   Vanilla params: 14 accretion rings, 50 stars, stretch cap 3,
-   warm star colors (240,220,200), gold photon ring (#f0be50),
-   softer trail clear (#050210), NO jets
+   CHAPTER 5: BLACK HOLES — Dramatic
    ============================================================ */
 function initCanvas5(){
-  /* Deferred to module script — see initThreeChapter5() below */
+  const canvas=document.getElementById('canvas5');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  let W,H;function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight}
+  resize();window.addEventListener('resize',resize);
+  let time=0;
+  const stars=Array.from({length:50},()=>({x:rand(0,1),y:rand(0,1),vx:0,vy:0,r:rand(.5,1.8),brightness:rand(.3,.9)}));
+  function animate(){
+    time+=.016;ctx.fillStyle='rgba(5,2,10,.18)';ctx.fillRect(0,0,W,H);
+    const cx=W/2,cy=H/2;
+    // Stars being pulled toward center
+    stars.forEach(s=>{
+      const sx=s.x*W,sy=s.y*H;
+      const d=dist(sx,sy,cx,cy);
+      const pull=.00006/Math.max(d/W,.01);
+      s.vx+=(cx/W-s.x)*pull;s.vy+=(cy/H-s.y)*pull;
+      s.x+=s.vx;s.y+=s.vy;
+      if(d<30){s.x=rand(0,1);s.y=rand(0,1);s.vx=0;s.vy=0}
+      // Gentle stretch near center
+      const stretch=d<120?clamp(120/d,1,3):1;
+      const angle=Math.atan2(cy-sy,cx-sx);
+      ctx.save();ctx.translate(sx,sy);ctx.rotate(angle);ctx.scale(stretch,1/Math.sqrt(stretch));
+      ctx.beginPath();ctx.arc(0,0,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(240,220,200,${s.brightness})`;ctx.fill();
+      ctx.restore();
+    });
+    // Accretion disk — clean, fewer rings
+    for(let ring=0;ring<14;ring++){
+      const ringR=38+ring*5.5;
+      const hue=50-ring*2.5;const lightness=75-ring*3;
+      ctx.beginPath();
+      for(let a=0;a<Math.PI*2;a+=.06){
+        const wobble=1.5*Math.sin(a*4+time*2.5+ring*.4);
+        const rx=ringR+wobble;const ry=ringR*.28+wobble*.28;
+        const x=cx+Math.cos(a+time*.4+ring*.015)*rx;
+        const y=cy+Math.sin(a+time*.4+ring*.015)*ry;
+        a<.06?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle=`hsla(${hue},80%,${lightness}%,${.5-ring*.025})`;
+      ctx.lineWidth=2.5;ctx.stroke();
+    }
+    // Event horizon
+    ctx.beginPath();ctx.arc(cx,cy,30,0,Math.PI*2);ctx.fillStyle='#000';ctx.fill();
+    // Photon ring — warm gold glow
+    ctx.beginPath();ctx.arc(cx,cy,32,0,Math.PI*2);
+    ctx.strokeStyle='rgba(240,190,80,.35)';ctx.lineWidth=1.5;
+    ctx.shadowColor='rgba(240,190,80,.5)';ctx.shadowBlur=15;ctx.stroke();ctx.shadowBlur=0;
+    requestAnimationFrame(animate);
+  }
+  ctx.fillStyle='#050210';ctx.fillRect(0,0,W,H);
+  animate();
 }
 
 /* ============================================================
@@ -2177,7 +2383,7 @@ function initEinsteins(){
 function initCanvasAnimations(){
   const inits={
     canvas1:initCanvas1,canvas2:initCanvas2,canvas3:initCanvas3,
-    canvas6:initCanvas6,
+    canvas4:initCanvas4,canvas5:initCanvas5,canvas6:initCanvas6,
     canvas7:initCanvas7,canvas8:initCanvas8,canvas9:initCanvas9,canvas10:initCanvas10
   };
   const started=new Set();
@@ -2214,266 +2420,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   initCanvasAnimations();
 /* canvas1 direct init removed */
 });
-</script>
-
-<!-- Three.js GPU-accelerated chapters (4 & 5) -->
-<script type="module">
-import * as THREE from 'three';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-
-/* ===== HELPER: create Three.js scene kit ===== */
-function createKit(containerId, opts={}) {
-  const el = document.getElementById(containerId);
-  if (!el) return null;
-  const w = el.clientWidth || 700, h = el.clientHeight || 400;
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(opts.bg || 0x12051f);
-  const camera = new THREE.PerspectiveCamera(opts.fov || 50, w/h, 0.1, 1000);
-  camera.position.set(opts.cx||0, opts.cy||0, opts.cz||10);
-  if (opts.lookAt) camera.lookAt(...opts.lookAt);
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(w, h);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.domElement.style.borderRadius = '16px';
-  el.appendChild(renderer.domElement);
-  let composer = null;
-  if (opts.bloom) {
-    composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    composer.addPass(new UnrealBloomPass(
-      new THREE.Vector2(w, h),
-      opts.bloomStr || 1.2, opts.bloomRad || 0.4, opts.bloomThr || 0.2
-    ));
-  }
-  return { scene, camera, renderer, composer, el, w, h };
-}
-
-/* ===== CHAPTER 4: LIGHT BENDING — 3D grid + sun + photon beam with bloom =====
-   Matches vanilla: depress() grid, GM-based photon simulation, minimalist style */
-function initThreeChapter4() {
-  const kit = createKit('tc4', {
-    bg: 0x12051f, fov: 45, cx: 0, cy: 6, cz: 18,
-    lookAt: [0, -1, 0],
-    bloom: true, bloomStr: 1.0, bloomRad: 0.5, bloomThr: 0.25
-  });
-  if (!kit) return;
-  const { scene, camera, composer } = kit;
-
-  // 3D grid matching vanilla: 21 lines, extent maps to ~10 units in Three.js
-  const GRID = 21, EXT = 10, DEP_DEPTH = 3, DEP_RAD = 8;
-
-  function depress(x, z) {
-    const d = Math.sqrt(x*x + z*z);
-    if (d > DEP_RAD) return 0;
-    const f = 1 - d / DEP_RAD;
-    return -DEP_DEPTH * f * f; // negative = downward
-  }
-
-  // Build grid lines as LineSegments
-  const gridPts = [];
-  // Horizontal (constant z)
-  for (let r = 0; r < GRID; r++) {
-    const z = (r/(GRID-1) - 0.5) * EXT * 2;
-    for (let c = 0; c < GRID*3 - 1; c++) {
-      const x1 = (c/(GRID*3-1) - 0.5) * EXT * 2;
-      const x2 = ((c+1)/(GRID*3-1) - 0.5) * EXT * 2;
-      gridPts.push(x1, depress(x1,z), z, x2, depress(x2,z), z);
-    }
-  }
-  // Vertical (constant x)
-  for (let c = 0; c < GRID; c++) {
-    const x = (c/(GRID-1) - 0.5) * EXT * 2;
-    for (let r = 0; r < GRID*3 - 1; r++) {
-      const z1 = (r/(GRID*3-1) - 0.5) * EXT * 2;
-      const z2 = ((r+1)/(GRID*3-1) - 0.5) * EXT * 2;
-      gridPts.push(x, depress(x,z1), z1, x, depress(x,z2), z2);
-    }
-  }
-  const gridGeo = new THREE.BufferGeometry();
-  gridGeo.setAttribute('position', new THREE.Float32BufferAttribute(gridPts, 3));
-  const gridMesh = new THREE.LineSegments(gridGeo,
-    new THREE.LineBasicMaterial({ color: 0x8c96dc, transparent: true, opacity: 0.2 })
-  );
-  scene.add(gridMesh);
-
-  // Sun at depression center
-  const sunGeo = new THREE.SphereGeometry(0.6, 24, 24);
-  const sunMat = new THREE.MeshBasicMaterial({ color: 0xffcc44 });
-  const sun = new THREE.Mesh(sunGeo, sunMat);
-  sun.position.set(0, depress(0,0), 0);
-  scene.add(sun);
-  // Sun glow
-  const glowMat = new THREE.MeshBasicMaterial({ color: 0xffaa22, transparent: true, opacity: 0.15 });
-  const glow = new THREE.Mesh(new THREE.SphereGeometry(1.2, 24, 24), glowMat);
-  glow.position.copy(sun.position);
-  scene.add(glow);
-
-  // Photon path — simulate with vanilla-matching physics (scaled to Three.js units)
-  // GM=10, dt=0.01, PHOTON_SPEED=2.5, IMPACT_PARAM=EXT*0.5
-  const photonPts = [];
-  {
-    const GM = 10, dt = 0.01, PS = 2.5, MAX = 80000;
-    let px = EXT * 0.5, pz = -EXT * 0.95;
-    let vx = 0, vz = PS;
-    for (let i = 0; i < MAX; i++) {
-      const dx = -px, dz = -pz;
-      const d = Math.sqrt(dx*dx + dz*dz);
-      if (d < 0.5) break;
-      const a = GM / (d*d*d);
-      vx += dx * a * dt;
-      vz += dz * a * dt;
-      const spd = Math.sqrt(vx*vx + vz*vz);
-      vx = vx/spd * PS; vz = vz/spd * PS;
-      px += vx * dt; pz += vz * dt;
-      if (pz > EXT) break;
-      if (i % 10 === 0) {
-        photonPts.push(new THREE.Vector3(px, depress(px, pz) + 0.05, pz));
-      }
-    }
-  }
-  const beamCurve = new THREE.CatmullRomCurve3(photonPts);
-  // Faint full path
-  const pathGeo = new THREE.TubeGeometry(beamCurve, 200, 0.02, 4, false);
-  const pathMat = new THREE.MeshBasicMaterial({ color: 0xe8c840, transparent: true, opacity: 0.07 });
-  scene.add(new THREE.Mesh(pathGeo, pathMat));
-  // Bright trail tube (animated via opacity)
-  const trailGeo = new THREE.TubeGeometry(beamCurve, 200, 0.035, 6, false);
-  const trailMat = new THREE.MeshBasicMaterial({ color: 0xffd750, transparent: true, opacity: 0.45 });
-  const trail = new THREE.Mesh(trailGeo, trailMat);
-  scene.add(trail);
-  // Photon dot
-  const photon = new THREE.Mesh(
-    new THREE.SphereGeometry(0.12, 12, 12),
-    new THREE.MeshBasicMaterial({ color: 0xfff0c0 })
-  );
-  scene.add(photon);
-
-  let time = 0;
-  const ch4Obs = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting && !ch4Running) { ch4Running = true; animateCh4(); }
-    else if (!entries[0].isIntersecting) ch4Running = false;
-  }, { threshold: 0.05 });
-  let ch4Running = false;
-  ch4Obs.observe(kit.el);
-
-  function animateCh4() {
-    if (!ch4Running) return;
-    requestAnimationFrame(animateCh4);
-    time += 0.016;
-    const t = (time * 0.15) % 1;
-    const pt = beamCurve.getPointAt(t);
-    photon.position.copy(pt);
-    glow.scale.setScalar(1 + 0.1 * Math.sin(time * 3));
-    composer.render();
-  }
-}
-
-/* ===== CHAPTER 5: BLACK HOLES — GPU bloom =====
-   Vanilla params: 14 rings, 50 stars, stretch cap 3, warm (240,220,200),
-   gold photon ring #f0be50, softer trail #050210, NO jets */
-function initThreeChapter5() {
-  const kit = createKit('tc5', {
-    bg: 0x050210, fov: 50, cx: 0, cy: 0, cz: 10,
-    bloom: true, bloomStr: 1.5, bloomRad: 0.6, bloomThr: 0.15
-  });
-  if (!kit) return;
-  const { scene, camera, composer } = kit;
-
-  // Event horizon
-  scene.add(new THREE.Mesh(
-    new THREE.SphereGeometry(1, 32, 32),
-    new THREE.MeshBasicMaterial({ color: 0x000000 })
-  ));
-
-  // Photon ring (gold) — vanilla #f0be50
-  const photonRing = new THREE.Mesh(
-    new THREE.RingGeometry(1.05, 1.15, 64),
-    new THREE.MeshBasicMaterial({ color: 0xf0be50, side: THREE.DoubleSide, transparent: true, opacity: 0.7 })
-  );
-  scene.add(photonRing);
-
-  // 14 accretion rings — wider spacing, lower opacity (vanilla: 38+ring*5.5 px → scaled)
-  for (let i = 0; i < 14; i++) {
-    const inner = 1.4 + i * 0.28;
-    const outer = inner + 0.18;
-    const hue = 0.14 - i * 0.007; // warm → cooler
-    const c = new THREE.Color().setHSL(hue, 0.8, 0.52 + i * 0.02);
-    const ring = new THREE.Mesh(
-      new THREE.RingGeometry(inner, outer, 64),
-      new THREE.MeshBasicMaterial({ color: c, side: THREE.DoubleSide, transparent: true, opacity: 0.5 - i * 0.025 })
-    );
-    ring.rotation.x = Math.PI * 0.42;
-    scene.add(ring);
-  }
-
-  // 50 stars with warm colors (240,220,200) and stretch cap 3
-  const stars = [];
-  for (let i = 0; i < 50; i++) {
-    const s = new THREE.Mesh(
-      new THREE.SphereGeometry(0.04, 6, 6),
-      new THREE.MeshBasicMaterial({ color: new THREE.Color(240/255, 220/255, 200/255), transparent: true })
-    );
-    const angle = Math.random() * Math.PI * 2;
-    const radius = 3 + Math.random() * 5;
-    s.userData = {
-      angle, radius,
-      speed: 0.001 + Math.random() * 0.004,
-      z: (Math.random() - 0.5) * 4,
-      brightness: 0.3 + Math.random() * 0.6
-    };
-    s.material.opacity = s.userData.brightness;
-    scene.add(s);
-    stars.push(s);
-  }
-
-  let time = 0;
-  const ch5Obs = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting && !ch5Running) { ch5Running = true; animateCh5(); }
-    else if (!entries[0].isIntersecting) ch5Running = false;
-  }, { threshold: 0.05 });
-  let ch5Running = false;
-  ch5Obs.observe(kit.el);
-
-  function animateCh5() {
-    if (!ch5Running) return;
-    requestAnimationFrame(animateCh5);
-    time += 0.016;
-
-    stars.forEach(s => {
-      s.userData.angle += s.userData.speed;
-      let r = s.userData.radius;
-      // Slow spiral inward
-      s.userData.radius -= 0.0005;
-      if (s.userData.radius < 1.2) {
-        s.userData.radius = 3 + Math.random() * 5;
-        s.userData.angle = Math.random() * Math.PI * 2;
-      }
-      s.position.x = Math.cos(s.userData.angle) * r;
-      s.position.y = Math.sin(s.userData.angle) * r * 0.4;
-      s.position.z = s.userData.z;
-      // Spaghettification with cap at 3 (vanilla)
-      const stretch = r < 2.5 ? Math.min(1 + (2.5 - r) * 2, 3) : 1;
-      s.scale.set(1, stretch, 1);
-    });
-
-    photonRing.rotation.z += 0.005;
-    composer.render();
-  }
-}
-
-/* ===== INIT Three.js chapters ===== */
-const tc4Obs = new IntersectionObserver(entries => {
-  if (entries[0].isIntersecting) { tc4Obs.disconnect(); initThreeChapter4(); }
-}, { threshold: 0.05 });
-const tc5Obs = new IntersectionObserver(entries => {
-  if (entries[0].isIntersecting) { tc5Obs.disconnect(); initThreeChapter5(); }
-}, { threshold: 0.05 });
-const tc4El = document.getElementById('tc4');
-const tc5El = document.getElementById('tc5');
-if (tc4El) tc4Obs.observe(tc4El);
-if (tc5El) tc5Obs.observe(tc5El);
 </script>
 </body>
 </html>
