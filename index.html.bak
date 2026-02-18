@@ -826,11 +826,6 @@ function initCanvas1(){
   const apple={x:0,y:0,vy:0,phase:'hanging',timer:0,squashX:1,squashY:1};
   let newtonExpr=0;
 
-  // Hyper-realistic additions
-  const clouds=Array.from({length:4},(_,i)=>({x:i*80+Math.random()*60,y:20+Math.random()*40,w:50+Math.random()*40,speed:.08+Math.random()*.06}));
-  const leaves=[];
-  const grassTufts=Array.from({length:30},(_,i)=>({x:((i*31+7)%200),phase:Math.random()*Math.PI*2,h:8+Math.random()*6}));
-
   function resetApple(){
     apple.x=treeX+12;apple.y=appleStartY;apple.vy=0;apple.phase='hanging';apple.timer=0;apple.squashX=1;apple.squashY=1;newtonExpr=0;
   }
@@ -851,52 +846,18 @@ function initCanvas1(){
     ctx.fillStyle=g;ctx.fillRect(0,0,half,H);
   }
 
-  function drawClouds(){
-    const half=W/2;
-    ctx.save();ctx.beginPath();ctx.rect(0,0,half,groundY);ctx.clip();
-    clouds.forEach(c=>{
-      c.x+=c.speed;if(c.x>half+60)c.x=-c.w-20;
-      ctx.globalAlpha=.18;ctx.fillStyle='#ffffff';
-      ctx.beginPath();ctx.ellipse(c.x,c.y,c.w*.5,8,0,0,Math.PI*2);ctx.fill();
-      ctx.beginPath();ctx.ellipse(c.x+c.w*.25,c.y-5,c.w*.35,7,0,0,Math.PI*2);ctx.fill();
-      ctx.beginPath();ctx.ellipse(c.x-c.w*.2,c.y+2,c.w*.3,6,0,0,Math.PI*2);ctx.fill();
-    });
-    ctx.globalAlpha=1;ctx.restore();
-  }
-
-  function spawnLeaf(){
-    if(leaves.length<8&&Math.random()<.02){
-      leaves.push({x:treeX+rand(-25,25),y:canopyY+rand(-15,5),vx:rand(-.3,.5),vy:rand(.2,.6),rot:0,rotV:rand(-.05,.05),life:1,size:rand(2,4)});
-    }
-  }
-
-  function drawLeaves(){
-    for(let i=leaves.length-1;i>=0;i--){
-      const l=leaves[i];
-      l.x+=l.vx+Math.sin(time*2+i)*.3;l.y+=l.vy;l.rot+=l.rotV;l.life-=.003;
-      if(l.life<=0||l.y>groundY){leaves.splice(i,1);continue}
-      ctx.save();ctx.translate(l.x,l.y);ctx.rotate(l.rot);
-      ctx.fillStyle=`rgba(80,160,40,${l.life*.7})`;
-      ctx.beginPath();ctx.ellipse(0,0,l.size,l.size*.5,0,0,Math.PI*2);ctx.fill();
-      ctx.restore();
-    }
-  }
-
   function drawGrass(){
     const half=W/2;
     // Main grass
     const g=ctx.createLinearGradient(0,groundY,0,H);
     g.addColorStop(0,'#5a9e3a');g.addColorStop(.3,'#4a8a2e');g.addColorStop(1,'#3a7020');
     ctx.fillStyle=g;ctx.fillRect(0,groundY,half,H-groundY);
-    // Grass tufts with wind sway
-    ctx.lineWidth=1.5;
-    for(let i=0;i<30;i++){
+    // Grass tufts
+    ctx.strokeStyle='#6ab848';ctx.lineWidth=1.5;
+    for(let i=0;i<20;i++){
       const gx=((i*37+13)%Math.floor(half));const gy=groundY;
-      const sway=Math.sin(time*1.8+i*.7)*3;
-      const h=grassTufts[i]?grassTufts[i].h:10;
-      ctx.strokeStyle=`rgba(${100+i%30},${180+i%20},72,.7)`;
-      ctx.beginPath();ctx.moveTo(gx,gy);ctx.quadraticCurveTo(gx-3+sway,gy-h*.6,gx-2+sway*1.2,gy-h);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(gx,gy);ctx.quadraticCurveTo(gx+4+sway,gy-h*.5,gx+3+sway*1.2,gy-h*.9);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(gx,gy);ctx.quadraticCurveTo(gx-3,gy-8-((i*7)%6),gx-2,gy-12-((i*5)%5));ctx.stroke();
+      ctx.beginPath();ctx.moveTo(gx,gy);ctx.quadraticCurveTo(gx+4,gy-9-((i*3)%5),gx+3,gy-11-((i*11)%4));ctx.stroke();
     }
   }
 
@@ -944,15 +905,10 @@ function initCanvas1(){
     ctx.save();ctx.translate(x,y);ctx.scale(sx,sy);
     ctx.beginPath();ctx.arc(0,0,10,0,Math.PI*2);
     const g=ctx.createRadialGradient(-3,-3,1,0,0,10);
-    g.addColorStop(0,'#ff6655');g.addColorStop(.3,'#ee3322');g.addColorStop(.7,'#cc1111');g.addColorStop(1,'#880000');
+    g.addColorStop(0,'#ff5555');g.addColorStop(.5,'#dd2222');g.addColorStop(1,'#990000');
     ctx.fillStyle=g;ctx.fill();
-    // Primary highlight (large)
-    ctx.beginPath();ctx.arc(-3,-3,4,0,Math.PI*2);ctx.fillStyle='rgba(255,210,210,.4)';ctx.fill();
-    // Secondary highlight (small, lower)
-    ctx.beginPath();ctx.arc(2,2,2,0,Math.PI*2);ctx.fillStyle='rgba(255,180,180,.2)';ctx.fill();
-    // Rim light
-    ctx.beginPath();ctx.arc(0,0,10,0,Math.PI*2);
-    ctx.strokeStyle='rgba(255,120,120,.15)';ctx.lineWidth=1;ctx.stroke();
+    // Highlight
+    ctx.beginPath();ctx.arc(-3,-3,4,0,Math.PI*2);ctx.fillStyle='rgba(255,200,200,.35)';ctx.fill();
     // Stem
     ctx.beginPath();ctx.moveTo(0,-10);ctx.quadraticCurveTo(2,-16,3,-14);ctx.strokeStyle='#5a3a1a';ctx.lineWidth=1.5;ctx.stroke();
     // Leaf on stem
@@ -1095,20 +1051,15 @@ function initCanvas1(){
     bg.addColorStop(0,'#12051f');bg.addColorStop(.5,'#1a0a2e');bg.addColorStop(1,'#0a0312');
     ctx.fillStyle=bg;ctx.fillRect(half,0,rW,H);
 
-    // Stars with varying sizes and slow twinkle
+    // Stars
     ctx.save();ctx.beginPath();ctx.rect(half,0,rW,H);ctx.clip();
     for(let i=0;i<80;i++){
       const sx=half+(Math.sin(i*127.1+i*311.7)*.5+.5)*rW;
       const sy=(Math.sin(i*269.5+i*183.3)*.5+.5)*H;
-      const twinkle=.3+.7*Math.sin(time*.8+i*2.3);
-      const sr=.4+1.8*(i%7===0?1:i%3===0?.6:.3);
-      ctx.beginPath();ctx.arc(sx,sy,sr*(.7+twinkle*.3),0,Math.PI*2);
-      ctx.fillStyle=`rgba(200,210,255,${twinkle*.5})`;ctx.fill();
-      // Glow on brighter stars
-      if(i%5===0&&twinkle>.6){
-        ctx.beginPath();ctx.arc(sx,sy,sr*3,0,Math.PI*2);
-        ctx.fillStyle=`rgba(180,200,255,${(twinkle-.6)*.12})`;ctx.fill();
-      }
+      const twinkle=.3+.7*Math.sin(time*1.5+i*2.3);
+      const sr=.5+1.2*(i%4===0?1:.4);
+      ctx.beginPath();ctx.arc(sx,sy,sr,0,Math.PI*2);
+      ctx.fillStyle=`rgba(200,200,255,${twinkle*.4})`;ctx.fill();
     }
     ctx.restore();
 
@@ -1160,11 +1111,6 @@ function initCanvas1(){
     const pg=ctx.createRadialGradient(gridCx-4,gridCy-4,3,gridCx,gridCy,pR+8);
     pg.addColorStop(0,'#aaccff');pg.addColorStop(.3,'#6688cc');pg.addColorStop(.7,'#3355aa');pg.addColorStop(1,'rgba(30,40,80,0)');
     ctx.beginPath();ctx.arc(gridCx,gridCy,pR+8,0,Math.PI*2);ctx.fillStyle=pg;ctx.fill();
-    // Ambient glow around mass
-    const ambG=ctx.createRadialGradient(gridCx,gridCy,pR,gridCx,gridCy,pR+45);
-    ambG.addColorStop(0,'rgba(120,160,255,.12)');ambG.addColorStop(.5,`rgba(100,140,240,${.04+.03*Math.sin(time*1.2)})`);ambG.addColorStop(1,'rgba(60,80,180,0)');
-    ctx.beginPath();ctx.arc(gridCx,gridCy,pR+45,0,Math.PI*2);ctx.fillStyle=ambG;ctx.fill();
-
     ctx.beginPath();ctx.arc(gridCx,gridCy,pR,0,Math.PI*2);
     const pg2=ctx.createRadialGradient(gridCx-5,gridCy-5,2,gridCx,gridCy,pR);
     pg2.addColorStop(0,'#ddeeff');pg2.addColorStop(.5,'#8899cc');pg2.addColorStop(1,'#445588');
@@ -1249,13 +1195,6 @@ function initCanvas1(){
       }
     }
 
-    // Soft ambient shadow under Newton
-    ctx.beginPath();ctx.ellipse(treeX+20,groundY+2,35,5,0,0,Math.PI*2);
-    ctx.fillStyle='rgba(0,0,0,.1)';ctx.fill();
-
-    drawClouds();
-    spawnLeaf();
-    drawLeaves();
     drawApple(apple.x,apple.y,apple.squashX,apple.squashY);
     drawNewton();
 
@@ -1347,29 +1286,16 @@ function initCanvas2(){
   },{threshold:0.05});
   ch2Observer.observe(canvas);
 
-  // Floating dust particles
-  const ch2Dust=Array.from({length:30},()=>({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*.001,vy:(Math.random()-.5)*.001,r:Math.random()*1.5+.5,a:Math.random()*.4+.1}));
-  // Ripple rings
-  const ch2Ripples=[];
-  let ch2Time=0;
-  let lastRippleTime=0;
-
   function animate(){
     animId=null;
     if(!grid) {if(ch2Visible) animId=requestAnimationFrame(animate); return;}
     ctx.clearRect(0,0,W,H);
-    ch2Time+=.016;
 
     // Lerp smoothing on warp position (0.3 = fast but smooth)
     if(touching){
       warpX+=(rawTouchX-warpX)*0.3;
       warpY+=(rawTouchY-warpY)*0.3;
       warpStrength+=(1-warpStrength)*0.3;
-      // Spawn ripple on touch
-      if(ch2Time-lastRippleTime>.3){
-        ch2Ripples.push({x:warpX,y:warpY,r:0,a:1});
-        lastRippleTime=ch2Time;
-      }
     } else {
       warpStrength*=0.92;
     }
@@ -1379,9 +1305,9 @@ function initCanvas2(){
     const wx=warpX, wy=warpY;
 
     // Compute warped Y offsets into a flat array for speed
+    // offsets[r*LINES+c] = offsetY for that point
     const N=LINES*LINES;
     const offY=new Float32Array(N);
-    const warpIntensity=new Float32Array(N);// for gradient coloring
     if(doWarp){
       for(let r=0;r<LINES;r++){
         const row=grid[r];
@@ -1392,80 +1318,35 @@ function initCanvas2(){
           if(d2<R2){
             const f=1-d2/R2;
             offY[base+c]=str*f*f*40;
-            warpIntensity[base+c]=f*str;
           }
         }
       }
     }
 
-    // Draw grid lines with gradient coloring (gold → purple based on warp)
+    // Draw all grid lines — single color, single stroke
+    ctx.strokeStyle='rgba(140,150,220,0.25)';
     ctx.lineWidth=1;
-    // Horizontal lines
+
+    // Horizontal lines (along columns for each row)
+    ctx.beginPath();
     for(let r=0;r<LINES;r++){
       const row=grid[r], base=r*LINES;
-      for(let c=0;c<LINES-1;c++){
-        const wi=(warpIntensity[base+c]+warpIntensity[base+c+1])*.5;
-        const rr=Math.floor(140+100*wi);
-        const gg=Math.floor(150-10*wi);
-        const bb=Math.floor(220-120*wi);
-        ctx.strokeStyle=`rgba(${rr},${gg},${bb},${.2+wi*.3})`;
-        ctx.beginPath();
-        ctx.moveTo(row[c].x, row[c].y+offY[base+c]);
-        ctx.lineTo(row[c+1].x, row[c+1].y+offY[base+c+1]);
-        ctx.stroke();
+      ctx.moveTo(row[0].x, row[0].y+offY[base]);
+      for(let c=1;c<LINES;c++){
+        ctx.lineTo(row[c].x, row[c].y+offY[base+c]);
       }
     }
-    // Vertical lines
+    ctx.stroke();
+
+    // Vertical lines (along rows for each column)
+    ctx.beginPath();
     for(let c=0;c<LINES;c++){
-      for(let r=0;r<LINES-1;r++){
-        const wi=(warpIntensity[r*LINES+c]+warpIntensity[(r+1)*LINES+c])*.5;
-        const rr=Math.floor(140+100*wi);
-        const gg=Math.floor(150-10*wi);
-        const bb=Math.floor(220-120*wi);
-        ctx.strokeStyle=`rgba(${rr},${gg},${bb},${.2+wi*.3})`;
-        ctx.beginPath();
-        ctx.moveTo(grid[r][c].x, grid[r][c].y+offY[r*LINES+c]);
-        ctx.lineTo(grid[r+1][c].x, grid[r+1][c].y+offY[(r+1)*LINES+c]);
-        ctx.stroke();
+      ctx.moveTo(grid[0][c].x, grid[0][c].y+offY[c]);
+      for(let r=1;r<LINES;r++){
+        ctx.lineTo(grid[r][c].x, grid[r][c].y+offY[r*LINES+c]);
       }
     }
-
-    // Glow/pulse at warp center
-    if(doWarp&&str>.05){
-      const glowR=20+15*Math.sin(ch2Time*4);
-      const gg=ctx.createRadialGradient(wx,wy,2,wx,wy+offY[0],glowR);
-      gg.addColorStop(0,`rgba(240,192,96,${str*.5})`);
-      gg.addColorStop(.5,`rgba(200,160,220,${str*.2})`);
-      gg.addColorStop(1,'rgba(140,100,200,0)');
-      ctx.beginPath();ctx.arc(wx,wy,glowR,0,Math.PI*2);ctx.fillStyle=gg;ctx.fill();
-    }
-
-    // Floating dust particles warped by touch
-    ch2Dust.forEach(p=>{
-      p.x+=p.vx;p.y+=p.vy;
-      if(p.x<0||p.x>1)p.vx*=-1;
-      if(p.y<0||p.y>1)p.vy*=-1;
-      let px=p.x*W,py=p.y*H;
-      if(doWarp){
-        const dx=px-wx,dy=py-wy;
-        const d2=dx*dx+dy*dy;
-        if(d2<R2){
-          const f=1-d2/R2;
-          py+=str*f*f*40;
-        }
-      }
-      ctx.beginPath();ctx.arc(px,py,p.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(200,180,240,${p.a*(.5+str*.5)})`;ctx.fill();
-    });
-
-    // Ripple rings radiating outward
-    for(let i=ch2Ripples.length-1;i>=0;i--){
-      const rp=ch2Ripples[i];
-      rp.r+=2;rp.a*=.97;
-      if(rp.a<.01){ch2Ripples.splice(i,1);continue}
-      ctx.beginPath();ctx.arc(rp.x,rp.y,rp.r,0,Math.PI*2);
-      ctx.strokeStyle=`rgba(240,192,96,${rp.a*.3})`;ctx.lineWidth=1.5;ctx.stroke();
-    }
+    ctx.stroke();
 
     if(ch2Visible) animId=requestAnimationFrame(animate);
   }
@@ -1482,53 +1363,26 @@ function initCanvas3(){
   resize();window.addEventListener('resize',resize);
   let time=0;
   const roman=['XII','I','II','III','IV','V','VI','VII','VIII','IX','X','XI'];
-  // Pendulum state
-  const pendulums={left:{angle:0,vel:0},right:{angle:0,vel:0}};
-
-  function drawClock(cx,cy,radius,speed,label,bgColor,isRight){
-    // Clock face with metallic sheen
-    const bg=ctx.createRadialGradient(cx-radius*.15,cy-radius*.15,radius*.05,cx,cy,radius);
-    bg.addColorStop(0,isRight?'#2a1a10':'#2a2218');
-    bg.addColorStop(.3,bgColor);
-    bg.addColorStop(.7,'rgba(20,15,10,.85)');
-    bg.addColorStop(1,'rgba(0,0,0,.95)');
+  function drawClock(cx,cy,radius,speed,label,bgColor){
+    // Clock face
+    const bg=ctx.createRadialGradient(cx,cy,radius*.1,cx,cy,radius);
+    bg.addColorStop(0,bgColor);bg.addColorStop(1,'rgba(0,0,0,.8)');
     ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.fillStyle=bg;ctx.fill();
-    // Metallic rim
-    const rimG=ctx.createLinearGradient(cx-radius,cy-radius,cx+radius,cy+radius);
-    rimG.addColorStop(0,'rgba(200,180,140,.5)');rimG.addColorStop(.3,'rgba(255,240,200,.3)');
-    rimG.addColorStop(.5,'rgba(200,180,140,.5)');rimG.addColorStop(.7,'rgba(255,240,200,.3)');
-    rimG.addColorStop(1,'rgba(200,180,140,.5)');
-    ctx.strokeStyle=rimG;ctx.lineWidth=3;ctx.stroke();
-    // Inner rim
-    ctx.beginPath();ctx.arc(cx,cy,radius-4,0,Math.PI*2);ctx.strokeStyle='rgba(160,140,100,.2)';ctx.lineWidth=1;ctx.stroke();
-
-    // Second hand angle for glow detection
-    const secAngle=time*speed*Math.PI*2/60-Math.PI/2;
-    const secNorm=((time*speed*Math.PI*2/60)%(Math.PI*2));
-
-    // Tick marks with glow when second hand passes
+    ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=2;ctx.stroke();
+    // Tick marks & numerals
     for(let i=0;i<12;i++){
       const a=i*Math.PI/6-Math.PI/2;
-      const tickAngle=((i*Math.PI/6)%(Math.PI*2));
-      const angleDiff=Math.abs(secNorm-tickAngle);
-      const glowFactor=angleDiff<.3?1-angleDiff/.3:0;
-      const x1=cx+Math.cos(a)*(radius-4);const y1=cy+Math.sin(a)*(radius-4);
+      const x1=cx+Math.cos(a)*(radius-.8);const y1=cy+Math.sin(a)*(radius-8);
       const x2=cx+Math.cos(a)*(radius-18);const y2=cy+Math.sin(a)*(radius-18);
-      if(glowFactor>0){
-        ctx.shadowColor=`rgba(240,200,100,${glowFactor*.6})`;ctx.shadowBlur=8;
-      }
-      ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
-      ctx.strokeStyle=`rgba(255,${220+Math.floor(glowFactor*35)},${180+Math.floor(glowFactor*75)},${.5+glowFactor*.4})`;
-      ctx.lineWidth=i%3===0?2.5:1;ctx.stroke();
-      ctx.shadowBlur=0;
+      ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=i%3===0?2.5:1;ctx.stroke();
       const tx=cx+Math.cos(a)*(radius-32);const ty=cy+Math.sin(a)*(radius-32);
       ctx.fillStyle='rgba(255,255,255,.7)';ctx.font=`${radius*.13}px Georgia`;ctx.textAlign='center';ctx.textBaseline='middle';
       ctx.fillText(roman[i],tx,ty);
     }
     // Minute marks
     for(let i=0;i<60;i++){const a=i*Math.PI/30-Math.PI/2;const x1=cx+Math.cos(a)*(radius-4);const y1=cy+Math.sin(a)*(radius-4);const x2=cx+Math.cos(a)*(radius-10);const y2=cy+Math.sin(a)*(radius-10);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=.5;ctx.stroke()}
-
     // Hands
+    const secAngle=time*speed*Math.PI*2/60-Math.PI/2;
     const minAngle=time*speed*Math.PI*2/3600-Math.PI/2;
     const hrAngle=time*speed*Math.PI*2/43200-Math.PI/2;
     // Hour
@@ -1537,65 +1391,25 @@ function initCanvas3(){
     // Minute
     ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(minAngle)*radius*.7,cy+Math.sin(minAngle)*radius*.7);
     ctx.strokeStyle='#f0e0c8';ctx.lineWidth=2.5;ctx.stroke();
-    // Second hand trailing afterimage
-    for(let t=3;t>=0;t--){
-      const trailAngle=secAngle-t*.04*speed;
-      const trailAlpha=.08*(3-t);
-      ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(trailAngle)*radius*.8,cy+Math.sin(trailAngle)*radius*.8);
-      ctx.strokeStyle=`rgba(192,96,64,${trailAlpha})`;ctx.lineWidth=1.2;ctx.stroke();
-    }
-    // Second hand
+    // Second
     ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(secAngle)*radius*.8,cy+Math.sin(secAngle)*radius*.8);
     ctx.strokeStyle='#c06040';ctx.lineWidth=1.5;ctx.stroke();
-    // Center dot with metallic sheen
-    const cdG=ctx.createRadialGradient(cx-1,cy-1,1,cx,cy,5);
-    cdG.addColorStop(0,'#fff0c0');cdG.addColorStop(.5,'#e0b050');cdG.addColorStop(1,'#806020');
-    ctx.beginPath();ctx.arc(cx,cy,5,0,Math.PI*2);ctx.fillStyle=cdG;ctx.fill();
-
-    // Pendulum below clock
-    const pend=isRight?pendulums.right:pendulums.left;
-    const pendLen=radius*.6;
-    const pendX=cx+Math.sin(pend.angle)*pendLen;
-    const pendY=cy+radius+8+Math.cos(pend.angle)*pendLen;
-    ctx.beginPath();ctx.moveTo(cx,cy+radius+4);ctx.lineTo(pendX,pendY);
-    ctx.strokeStyle='rgba(200,180,140,.4)';ctx.lineWidth=1;ctx.stroke();
-    // Pendulum bob
-    const pbG=ctx.createRadialGradient(pendX-2,pendY-2,1,pendX,pendY,6);
-    pbG.addColorStop(0,'#ffd080');pbG.addColorStop(1,'#a08040');
-    ctx.beginPath();ctx.arc(pendX,pendY,6,0,Math.PI*2);ctx.fillStyle=pbG;ctx.fill();
-
+    // Center dot
+    ctx.beginPath();ctx.arc(cx,cy,4,0,Math.PI*2);ctx.fillStyle='#e0b050';ctx.fill();
     // Label
-    ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='14px Georgia';ctx.textAlign='center';ctx.fillText(label,cx,cy+radius+pendLen+25);
+    ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='14px Georgia';ctx.textAlign='center';ctx.fillText(label,cx,cy+radius+25);
   }
   function animate(){
     time+=.016;ctx.clearRect(0,0,W,H);
     drawStars(ctx,W,H,50,time);drawWarmVignette(ctx,W,H);
-
-    // Update pendulums
-    const gravity=9.8;const pLen=60;
-    pendulums.left.vel+=(-gravity/pLen)*Math.sin(pendulums.left.angle)*.016;
-    pendulums.left.vel*=.999;pendulums.left.angle+=pendulums.left.vel*.016*60;
-    if(Math.abs(pendulums.left.angle)<.001&&Math.abs(pendulums.left.vel)<.01)pendulums.left.angle=.3;
-    pendulums.right.vel+=(-gravity/pLen)*Math.sin(pendulums.right.angle)*.016*.3;
-    pendulums.right.vel*=.999;pendulums.right.angle+=pendulums.right.vel*.016*60;
-    if(Math.abs(pendulums.right.angle)<.001&&Math.abs(pendulums.right.vel)<.01)pendulums.right.angle=.3;
-
     // Divider
     ctx.beginPath();ctx.moveTo(W/2,20);ctx.lineTo(W/2,H-20);ctx.strokeStyle='rgba(240,200,140,.1)';ctx.lineWidth=1;ctx.setLineDash([5,5]);ctx.stroke();ctx.setLineDash([]);
     // Earth side label
     ctx.fillStyle='rgba(220,180,120,.4)';ctx.font='12px Georgia';ctx.textAlign='center';ctx.fillText('🌍 Earth Surface',W*.25,30);
     ctx.fillStyle='rgba(200,160,100,.4)';ctx.fillText('🕳️ Near Black Hole',W*.75,30);
-
-    // Animated distortion rings around right clock
     const r=Math.min(W*.18,H*.35);
-    for(let i=0;i<3;i++){
-      const ringR=r+15+i*12+5*Math.sin(time*1.5+i);
-      ctx.beginPath();ctx.arc(W*.75,H*.48,ringR,0,Math.PI*2);
-      ctx.strokeStyle=`rgba(180,120,40,${.06-.015*i})`;ctx.lineWidth=1;ctx.stroke();
-    }
-
-    drawClock(W*.25,H*.48,r,1,'Normal Time','#1a1410',false);
-    drawClock(W*.75,H*.48,r,.3,'Dilated Time','#1a1210',true);
+    drawClock(W*.25,H*.48,r,1,'Normal Time','#1a1410');
+    drawClock(W*.75,H*.48,r,.3,'Dilated Time','#1a1210');
     // Time particles - fast around left clock, slow around right
     for(let i=0;i<4;i++){
       const a=time*2+i*Math.PI/2;const pr=r+20+8*Math.sin(time*3+i);
@@ -1643,44 +1457,30 @@ function initCanvas6(){
   const ctx=canvas.getContext('2d');
   let W,H;function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight}
   resize();window.addEventListener('resize',resize);
-  let time=0;let mergePhase=0;
+  let time=0;let mergePhase=0;// 0=spiral, 1=flash, 2=rings
   let spiralDist=120,flashAlpha=0;
-  let shakeX=0,shakeY=0;
   const trails1=[],trails2=[];
   const ripples=[];
-  const afterglowParticles=[];
   function animate(){
     time+=.016;ctx.clearRect(0,0,W,H);
-    // Screen shake decay
-    shakeX*=.9;shakeY*=.9;
-    ctx.save();
-    ctx.translate(shakeX,shakeY);
     drawStars(ctx,W,H,70,time);drawWarmVignette(ctx,W,H);
     const cx=W/2,cy=H/2;
-    // Spacetime grid with interference
+    // Spacetime grid
     const spacing=40;
+    ctx.strokeStyle='rgba(200,160,100,.12)';ctx.lineWidth=.5;
     for(let r=0;r<H/spacing;r++){
       ctx.beginPath();
       for(let c=0;c<=W/spacing;c++){
         let gx=c*spacing,gy=r*spacing;
-        let totalDisp=0;
+        // Ripple displacement
         ripples.forEach(rp=>{
           const d=dist(gx,gy,cx,cy);
           const wave=Math.sin((d-rp.r)*.05)*rp.amp*Math.exp(-.001*(d-rp.r)*(d-rp.r));
-          totalDisp+=wave;
-          // Interference: second wave offset
-          const wave2=Math.sin((d-rp.r)*.08+1)*rp.amp*.5*Math.exp(-.0015*(d-rp.r)*(d-rp.r));
-          totalDisp+=wave2;
+          gy+=wave;
         });
-        gy+=totalDisp;
-        // Color shifting based on displacement
-        if(c===0)ctx.moveTo(gx,gy);else ctx.lineTo(gx,gy);
+        c===0?ctx.moveTo(gx,gy):ctx.lineTo(gx,gy);
       }
-      const intensity=Math.abs(Math.sin(time+r*.3))*.15;
-      const rVal=Math.floor(100+140*intensity);
-      const gVal=Math.floor(160-60*intensity);
-      const bVal=Math.floor(200-100*intensity);
-      ctx.strokeStyle=`rgba(${rVal},${gVal},${bVal},.15)`;ctx.lineWidth=.5;ctx.stroke();
+      ctx.stroke();
     }
     if(mergePhase===0){
       spiralDist=Math.max(5,spiralDist-.15);
@@ -1690,46 +1490,28 @@ function initCanvas6(){
       const x2=cx+Math.cos(a2)*spiralDist;const y2=cy+Math.sin(a2)*spiralDist;
       trails1.push({x:x1,y:y1,a:1});trails2.push({x:x2,y:y2,a:1});
       if(trails1.length>80)trails1.shift();if(trails2.length>80)trails2.shift();
+      // Draw trails
       [trails1,trails2].forEach((trail,idx)=>{
         ctx.beginPath();trail.forEach((p,i)=>{p.a*=.97;i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y)});
         ctx.strokeStyle=idx===0?'rgba(240,180,80,.35)':'rgba(210,130,60,.35)';ctx.lineWidth=2;ctx.stroke();
       });
-      // Draw objects with gravity wells
+      // Draw objects — warm amber tones
       [[x1,y1,'#e8a040'],[x2,y2,'#d07030']].forEach(([ox,oy,col])=>{
-        // Gravity well
-        const gwG=ctx.createRadialGradient(ox,oy,6,ox,oy,30);
-        gwG.addColorStop(0,`rgba(240,180,80,.15)`);gwG.addColorStop(1,'rgba(0,0,0,0)');
-        ctx.beginPath();ctx.arc(ox,oy,30,0,Math.PI*2);ctx.fillStyle=gwG;ctx.fill();
-        // Mass
         ctx.beginPath();ctx.arc(ox,oy,8+2*Math.sin(time*5),0,Math.PI*2);
         ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=20;ctx.fill();ctx.shadowBlur=0;
       });
-      if(spiralDist<=5){mergePhase=1;flashAlpha=1;ripples.push({r:0,amp:20});
-        shakeX=(Math.random()-.5)*12;shakeY=(Math.random()-.5)*12;
-        for(let i=0;i<20;i++)afterglowParticles.push({x:cx,y:cy,vx:(Math.random()-.5)*3,vy:(Math.random()-.5)*3,life:1,r:1+Math.random()*2});
-      }
+      if(spiralDist<=5){mergePhase=1;flashAlpha=1;ripples.push({r:0,amp:20})}
     }else if(mergePhase===1){
-      flashAlpha*=.92;
-      shakeX+=(Math.random()-.5)*flashAlpha*8;shakeY+=(Math.random()-.5)*flashAlpha*8;
+      flashAlpha*=.95;
       ctx.fillStyle=`rgba(255,255,220,${flashAlpha})`;ctx.fillRect(0,0,W,H);
       if(flashAlpha<.01){mergePhase=2}
     }else{
+      // Expanding rings
       ripples.forEach(rp=>{rp.r+=2;rp.amp*=.995});
       ripples.forEach(rp=>{
         for(let i=0;i<3;i++){
-          const ringR=rp.r+i*15;
-          const t=ringR/(Math.max(W,H));
-          const r2=Math.floor(100+140*t);const g2=Math.floor(180-80*t);const b2=Math.floor(240-180*t);
-          ctx.beginPath();ctx.arc(cx,cy,ringR,0,Math.PI*2);
-          ctx.strokeStyle=`rgba(${r2},${g2},${b2},${rp.amp*.035})`;ctx.lineWidth=2;ctx.stroke();
-        }
-      });
-      // Afterglow particles following wave fronts
-      afterglowParticles.forEach(p=>{
-        p.x+=p.vx;p.y+=p.vy;p.life*=.99;p.vx*=.99;p.vy*=.99;
-        if(p.life>.01){
-          ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);
-          ctx.fillStyle=`rgba(240,200,100,${p.life*.5})`;ctx.shadowColor='rgba(240,200,100,.3)';ctx.shadowBlur=6;ctx.fill();ctx.shadowBlur=0;
+          ctx.beginPath();ctx.arc(cx,cy,rp.r+i*15,0,Math.PI*2);
+          ctx.strokeStyle=`rgba(240,200,120,${rp.amp*.03})`;ctx.lineWidth=2;ctx.stroke();
         }
       });
       // Merged object
@@ -1737,10 +1519,9 @@ function initCanvas6(){
       const mg=ctx.createRadialGradient(cx,cy,2,cx,cy,14);mg.addColorStop(0,'#ffffff');mg.addColorStop(.5,'#ffd090');mg.addColorStop(1,'rgba(240,180,80,0)');
       ctx.fillStyle=mg;ctx.shadowColor='#ffd090';ctx.shadowBlur=25;ctx.fill();ctx.shadowBlur=0;
       if(ripples.length&&ripples[0].r>Math.max(W,H)){
-        mergePhase=0;spiralDist=120;trails1.length=0;trails2.length=0;ripples.length=0;afterglowParticles.length=0;
+        mergePhase=0;spiralDist=120;trails1.length=0;trails2.length=0;ripples.length=0;
       }
     }
-    ctx.restore();
     requestAnimationFrame(animate);
   }
   animate();
@@ -1758,101 +1539,44 @@ function initCanvas7(){
   const bgStars=Array.from({length:80},()=>({x:rand(0,1),y:rand(0,1),z:rand(.5,2)}));
   function drawRocket(x,y,s){
     ctx.save();ctx.translate(x,y);
-    // Motion blur at high speeds
-    if(s>.5){
-      ctx.globalAlpha=.15;
-      for(let b=1;b<=3;b++){
-        ctx.save();ctx.translate(-b*s*8,0);
-        ctx.beginPath();ctx.moveTo(40,0);ctx.quadraticCurveTo(45,-12,20,-12);ctx.lineTo(-25,-10);ctx.lineTo(-25,10);ctx.lineTo(20,12);ctx.quadraticCurveTo(45,12,40,0);ctx.closePath();
-        ctx.fillStyle='rgba(200,200,220,.3)';ctx.fill();
-        ctx.restore();
-      }
-      ctx.globalAlpha=1;
-    }
     // Main body
     ctx.beginPath();ctx.moveTo(40,0);ctx.quadraticCurveTo(45,-12,20,-12);ctx.lineTo(-25,-10);ctx.lineTo(-25,10);ctx.lineTo(20,12);ctx.quadraticCurveTo(45,12,40,0);ctx.closePath();
-    const rg=ctx.createLinearGradient(-25,-12,40,12);rg.addColorStop(0,'#bbbbbb');rg.addColorStop(.3,'#e8e8e8');rg.addColorStop(.5,'#ffffff');rg.addColorStop(.7,'#dddddd');rg.addColorStop(1,'#999999');
+    const rg=ctx.createLinearGradient(-25,-12,40,12);rg.addColorStop(0,'#cccccc');rg.addColorStop(.5,'#ffffff');rg.addColorStop(1,'#aaaaaa');
     ctx.fillStyle=rg;ctx.fill();ctx.strokeStyle='#888';ctx.lineWidth=.5;ctx.stroke();
-    // Panel lines (rivets)
-    ctx.strokeStyle='rgba(100,100,100,.2)';ctx.lineWidth=.4;
-    ctx.beginPath();ctx.moveTo(0,-12);ctx.lineTo(0,12);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(-12,-11);ctx.lineTo(-12,11);ctx.stroke();
-    for(let i=0;i<4;i++){const ry=-9+i*6;ctx.beginPath();ctx.arc(5,ry,0.7,0,Math.PI*2);ctx.fillStyle='rgba(120,120,120,.3)';ctx.fill();}
-    // Antenna
-    ctx.beginPath();ctx.moveTo(35,-12);ctx.lineTo(38,-18);ctx.strokeStyle='rgba(180,180,180,.6)';ctx.lineWidth=1;ctx.stroke();
-    ctx.beginPath();ctx.arc(38,-18,1.5,0,Math.PI*2);ctx.fillStyle='#ff4444';ctx.fill();
     // Window
     ctx.beginPath();ctx.arc(15,0,5,0,Math.PI*2);
     const wg=ctx.createRadialGradient(14,-1,1,15,0,5);wg.addColorStop(0,'#aaddff');wg.addColorStop(1,'#4488cc');
-    ctx.fillStyle=wg;ctx.fill();ctx.strokeStyle='rgba(100,100,100,.3)';ctx.lineWidth=.5;ctx.stroke();
-    // Fins with gradient
-    const finG=ctx.createLinearGradient(-35,-22,-20,-10);finG.addColorStop(0,'#dd4444');finG.addColorStop(1,'#992222');
-    ctx.beginPath();ctx.moveTo(-25,-10);ctx.lineTo(-35,-22);ctx.lineTo(-20,-10);ctx.fillStyle=finG;ctx.fill();
-    ctx.beginPath();ctx.moveTo(-25,10);ctx.lineTo(-35,22);ctx.lineTo(-20,10);ctx.fillStyle=finG;ctx.fill();
-    // Turbulent exhaust with inner/outer cone
+    ctx.fillStyle=wg;ctx.fill();
+    // Fins
+    ctx.beginPath();ctx.moveTo(-25,-10);ctx.lineTo(-35,-22);ctx.lineTo(-20,-10);ctx.fillStyle='#cc3333';ctx.fill();
+    ctx.beginPath();ctx.moveTo(-25,10);ctx.lineTo(-35,22);ctx.lineTo(-20,10);ctx.fillStyle='#cc3333';ctx.fill();
+    // Flame
     const flameLen=20+s*60+10*Math.sin(time*20);
-    // Outer cone (redder)
-    const fg2=ctx.createLinearGradient(-25,0,-25-flameLen*1.1,0);
-    fg2.addColorStop(0,'rgba(255,100,30,.5)');fg2.addColorStop(.5,'rgba(255,30,0,.2)');fg2.addColorStop(1,'rgba(200,0,0,0)');
-    ctx.beginPath();ctx.moveTo(-25,-8);
-    ctx.quadraticCurveTo(-25-flameLen*.6,-5+6*Math.sin(time*12),-25-flameLen*1.1,0);
-    ctx.quadraticCurveTo(-25-flameLen*.6,5+6*Math.sin(time*12+2),-25,8);ctx.fillStyle=fg2;ctx.fill();
-    // Inner cone (white-hot)
-    const fg=ctx.createLinearGradient(-25,0,-25-flameLen*.7,0);fg.addColorStop(0,'rgba(255,255,230,.95)');fg.addColorStop(.3,'rgba(255,200,80,.7)');fg.addColorStop(.7,'rgba(255,100,20,.3)');fg.addColorStop(1,'rgba(255,50,0,0)');
-    ctx.beginPath();ctx.moveTo(-25,-4);
-    ctx.quadraticCurveTo(-25-flameLen*.5,-2+3*Math.sin(time*18),-25-flameLen*.7,0);
-    ctx.quadraticCurveTo(-25-flameLen*.5,2+3*Math.sin(time*18+1),-25,4);ctx.fillStyle=fg;ctx.fill();
-    // Cherenkov radiation ring when approaching c
-    if(s>.85){
-      const cherenkovAlpha=(s-.85)*6;
-      ctx.beginPath();ctx.ellipse(30,0,8+s*5,20+s*10,0,0,Math.PI*2);
-      ctx.strokeStyle=`rgba(100,180,255,${cherenkovAlpha*.3})`;ctx.lineWidth=2;
-      ctx.shadowColor=`rgba(100,180,255,${cherenkovAlpha*.4})`;ctx.shadowBlur=10;ctx.stroke();ctx.shadowBlur=0;
-    }
+    const fg=ctx.createLinearGradient(-25,0,-25-flameLen,0);fg.addColorStop(0,'rgba(255,255,200,.9)');fg.addColorStop(.3,'rgba(255,150,50,.7)');fg.addColorStop(.7,'rgba(255,50,0,.3)');fg.addColorStop(1,'rgba(255,0,0,0)');
+    ctx.beginPath();ctx.moveTo(-25,-6);ctx.quadraticCurveTo(-25-flameLen*.7,-3+4*Math.sin(time*15),-25-flameLen,0);
+    ctx.quadraticCurveTo(-25-flameLen*.7,3+4*Math.sin(time*15+1),-25,6);ctx.fillStyle=fg;ctx.fill();
     ctx.restore();
   }
   function animate(){
     time+=.016;
     speed=(.5+.5*Math.sin(time*.4))*.95;// oscillate speed
     ctx.fillStyle='rgba(18,5,31,.3)';ctx.fillRect(0,0,W,H);
-    // Star streaks with red/blueshift
+    // Star streaks
     bgStars.forEach(s=>{
       const streak=1+speed*50*s.z;
       const sx=s.x*W;const sy=s.y*H;
       s.x-=(.001+speed*.02)*s.z;
       if(s.x<0)s.x=1;
       ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx+streak,sy);
-      // Blueshift ahead (right), redshift behind (left)
-      const rocketX=W*.35;
-      if(speed>.3){
-        const shift=(sx>rocketX)?1:-1;
-        const shiftAmt=speed*.7;
-        if(shift>0){
-          ctx.strokeStyle=`rgba(${Math.floor(180-80*shiftAmt)},${Math.floor(200-40*shiftAmt)},255,${.25+speed*.45})`;
-        }else{
-          ctx.strokeStyle=`rgba(255,${Math.floor(200-80*shiftAmt)},${Math.floor(160-100*shiftAmt)},${.25+speed*.45})`;
-        }
-      }else{
-        ctx.strokeStyle=`rgba(255,230,180,${.25+speed*.45})`;
-      }
-      ctx.lineWidth=s.z;ctx.stroke();
+      ctx.strokeStyle=`rgba(255,230,180,${.25+speed*.45})`;ctx.lineWidth=s.z;ctx.stroke();
     });
-    // Speed gauge with illuminated tick marks
+    // Speed gauge
     const gaugeX=W-80,gaugeY=40,gaugeH=H-80;
-    ctx.fillStyle='rgba(255,255,255,.07)';ctx.fillRect(gaugeX,gaugeY,20,gaugeH);
+    ctx.fillStyle='rgba(255,255,255,.1)';ctx.fillRect(gaugeX,gaugeY,20,gaugeH);
     const fillH=speed*gaugeH;
     const gg=ctx.createLinearGradient(gaugeX,gaugeY+gaugeH-fillH,gaugeX,gaugeY+gaugeH);
     gg.addColorStop(0,'#c84030');gg.addColorStop(.5,'#e0a040');gg.addColorStop(1,'#a0c060');
     ctx.fillStyle=gg;ctx.fillRect(gaugeX,gaugeY+gaugeH-fillH,20,fillH);
-    // Illuminated tick marks
-    for(let t=0;t<=10;t++){
-      const ty=gaugeY+gaugeH-t/10*gaugeH;
-      const lit=speed>=t/10;
-      ctx.beginPath();ctx.moveTo(gaugeX-3,ty);ctx.lineTo(gaugeX+23,ty);
-      ctx.strokeStyle=lit?`rgba(255,220,120,.6)`:'rgba(255,255,255,.15)';ctx.lineWidth=1;ctx.stroke();
-      if(lit&&t>0){ctx.shadowColor='rgba(255,220,120,.5)';ctx.shadowBlur=4;
-        ctx.beginPath();ctx.moveTo(gaugeX-3,ty);ctx.lineTo(gaugeX+23,ty);ctx.stroke();ctx.shadowBlur=0;}
-    }
     ctx.strokeStyle='rgba(255,255,255,.3)';ctx.strokeRect(gaugeX,gaugeY,20,gaugeH);
     ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='11px Georgia';ctx.textAlign='center';
     ctx.fillText(`${(speed*100).toFixed(0)}% c`,gaugeX+10,gaugeY+gaugeH+18);
@@ -1892,15 +1616,8 @@ function initCanvas8(){
   resize();window.addEventListener('resize',resize);
   let time=0;let phase=0;// 0=equation, 1=converge, 2=explode
   let phaseTime=0;
-  let screenFlash=0;
   const particles=[];
   const shockwaves=[];
-  // Orbiting electrons
-  const electrons=[
-    {angle:0,speed:3,radius:35,size:3},
-    {angle:Math.PI*.67,speed:4.2,radius:28,size:2.5},
-    {angle:Math.PI*1.33,speed:2.5,radius:42,size:2.8}
-  ];
   function animate(){
     time+=.016;phaseTime+=.016;
     ctx.fillStyle='rgba(15,5,5,.12)';ctx.fillRect(0,0,W,H);
@@ -1923,27 +1640,9 @@ function initCanvas8(){
       }
       if(phaseTime>4){phase=1;phaseTime=0}
     }else if(phase===1){
-      // Mass particle converging with orbiting electrons
+      // Mass particle converging
       const shrink=clamp(1-phaseTime/2,0,1);
       const r=30*shrink+3;
-      // Orbiting electrons with trails
-      electrons.forEach(e=>{
-        e.angle+=e.speed*.016;
-        const eR=r+e.radius*shrink;
-        const ex=cx+Math.cos(e.angle)*eR;
-        const ey=cy+Math.sin(e.angle)*eR*.6;
-        // Trail
-        for(let t=5;t>=0;t--){
-          const ta=e.angle-t*.15;
-          const tx=cx+Math.cos(ta)*eR;
-          const ty=cy+Math.sin(ta)*eR*.6;
-          ctx.beginPath();ctx.arc(tx,ty,e.size*(1-t*.12),0,Math.PI*2);
-          ctx.fillStyle=`rgba(100,180,255,${.05*(5-t)})`;ctx.fill();
-        }
-        ctx.beginPath();ctx.arc(ex,ey,e.size,0,Math.PI*2);
-        ctx.fillStyle='rgba(120,200,255,.8)';ctx.shadowColor='rgba(100,180,255,.6)';ctx.shadowBlur=8;ctx.fill();ctx.shadowBlur=0;
-      });
-      // Nucleus
       ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
       const g=ctx.createRadialGradient(cx,cy,1,cx,cy,r);g.addColorStop(0,'#ffffff');g.addColorStop(.5,'#ffdd66');g.addColorStop(1,'rgba(255,100,0,.5)');
       ctx.fillStyle=g;ctx.shadowColor='#ffdd66';ctx.shadowBlur=30;ctx.fill();ctx.shadowBlur=0;
@@ -1951,54 +1650,30 @@ function initCanvas8(){
       ctx.font='bold 60px Georgia';ctx.textAlign='center';ctx.fillStyle=`rgba(240,190,80,${.3+.7*Math.sin(time*10)})`;
       ctx.shadowColor='rgba(240,180,80,.6)';ctx.shadowBlur=30;ctx.fillText('E = mc²',cx,cy-80);ctx.shadowBlur=0;
       if(phaseTime>2){
-        phase=2;phaseTime=0;screenFlash=1;
-        for(let i=0;i<120;i++){const a=rand(0,Math.PI*2);const sp=rand(1,8);particles.push({x:cx,y:cy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,hue:rand(20,60),r:rand(1,4),glow:rand(.3,1)})}
-        shockwaves.push({r:0,a:1});shockwaves.push({r:0,a:.7});
+        phase=2;phaseTime=0;
+        for(let i=0;i<80;i++){const a=rand(0,Math.PI*2);const sp=rand(1,7);particles.push({x:cx,y:cy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,hue:rand(25,55),r:rand(1,3.5)})}
+        shockwaves.push({r:0,a:1});
       }
     }else{
-      // Screen flash on detonation
-      if(screenFlash>.01){
-        ctx.fillStyle=`rgba(255,255,255,${screenFlash})`;ctx.fillRect(0,0,W,H);
-        screenFlash*=.9;
-      }
-      // Explosion particles with varying glow
+      // Explosion!
       particles.forEach(p=>{
         p.x+=p.vx;p.y+=p.vy;p.vx*=.98;p.vy*=.98;p.life*=.985;
         if(p.life>.01){
-          const glowI=p.glow||.5;
           ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);
-          ctx.fillStyle=`hsla(${p.hue},90%,${40+glowI*30}%,${p.life*glowI})`;
-          ctx.shadowColor=`hsla(${p.hue},90%,60%,${glowI*.5})`;ctx.shadowBlur=6+glowI*6;ctx.fill();ctx.shadowBlur=0;
+          ctx.fillStyle=`hsla(${p.hue},90%,60%,${p.life})`;ctx.shadowColor=`hsla(${p.hue},90%,60%,.5)`;ctx.shadowBlur=8;ctx.fill();ctx.shadowBlur=0;
         }
       });
-      // Multiple shockwave rings
-      shockwaves.forEach((sw,idx)=>{
-        sw.r+=4-idx*1;sw.a*=.98;
-        ctx.beginPath();ctx.arc(cx,cy,sw.r,0,Math.PI*2);
-        ctx.strokeStyle=`rgba(255,${200-idx*40},${100-idx*30},${sw.a})`;ctx.lineWidth=3-idx;
-        ctx.shadowColor=`rgba(255,200,100,${sw.a*.4})`;ctx.shadowBlur=10;ctx.stroke();ctx.shadowBlur=0;
+      shockwaves.forEach(sw=>{
+        sw.r+=4;sw.a*=.98;
+        ctx.beginPath();ctx.arc(cx,cy,sw.r,0,Math.PI*2);ctx.strokeStyle=`rgba(255,200,100,${sw.a})`;ctx.lineWidth=3;ctx.shadowColor='rgba(255,200,100,.4)';ctx.shadowBlur=10;ctx.stroke();ctx.shadowBlur=0;
       });
-      // Mushroom cloud silhouette forming
-      const cloudProgress=clamp(phaseTime/3,0,1);
-      if(cloudProgress>.1){
-        const ca=cloudProgress*.4;
-        // Stem
-        ctx.beginPath();ctx.moveTo(cx-8,cy);ctx.lineTo(cx-12,cy-40*cloudProgress);
-        ctx.lineTo(cx+12,cy-40*cloudProgress);ctx.lineTo(cx+8,cy);ctx.closePath();
-        ctx.fillStyle=`rgba(80,40,20,${ca})`;ctx.fill();
-        // Cap
-        ctx.beginPath();ctx.ellipse(cx,cy-45*cloudProgress,30*cloudProgress,18*cloudProgress,0,0,Math.PI*2);
-        ctx.fillStyle=`rgba(100,50,20,${ca*.8})`;ctx.fill();
-        ctx.beginPath();ctx.ellipse(cx,cy-50*cloudProgress,22*cloudProgress,12*cloudProgress,0,0,Math.PI*2);
-        ctx.fillStyle=`rgba(140,70,30,${ca*.6})`;ctx.fill();
-      }
       // Center glow fading
       const glow=clamp(1-phaseTime/3,0,1);
       if(glow>.01){
         const eg=ctx.createRadialGradient(cx,cy,5,cx,cy,80*glow);eg.addColorStop(0,`rgba(255,255,200,${glow})`);eg.addColorStop(1,'rgba(255,100,0,0)');
         ctx.beginPath();ctx.arc(cx,cy,80*glow,0,Math.PI*2);ctx.fillStyle=eg;ctx.fill();
       }
-      if(phaseTime>5){phase=0;phaseTime=0;particles.length=0;shockwaves.length=0;screenFlash=0;ctx.clearRect(0,0,W,H)}
+      if(phaseTime>5){phase=0;phaseTime=0;particles.length=0;shockwaves.length=0;ctx.clearRect(0,0,W,H)}
     }
     requestAnimationFrame(animate);
   }
@@ -2061,29 +1736,18 @@ function initCanvas9(){
     const speed=.5+.45*Math.sin(time*.5);
     const gamma=1/Math.sqrt(1-speed*speed);
     const contraction=1/gamma;
-    // Speed streaks on right side — dramatic with aberration
+    // Speed streaks on right side
     streakStars.forEach(s=>{
       const sx=W*.5+s.x*W*.5;const sy=s.y*H;
-      const streak=1+speed*45*s.z;
-      // Relativistic aberration: stars cluster ahead (rightward)
-      const aberration=speed>.3?s.x*(1+speed*.4):0;
-      const ax=sx+aberration*20;
-      ctx.beginPath();ctx.moveTo(ax,sy);ctx.lineTo(ax+streak,sy);
-      const brightness=.1+speed*.35+aberration*.15;
-      ctx.strokeStyle=`rgba(240,200,140,${Math.min(brightness,.7)})`;ctx.lineWidth=s.z*(.7+speed*.5);ctx.stroke();
-      s.x-=(.002+speed*.02)*s.z;if(s.x<0)s.x=1;
+      const streak=1+speed*25*s.z;
+      ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx+streak,sy);
+      ctx.strokeStyle=`rgba(240,200,140,${.1+speed*.25})`;ctx.lineWidth=s.z*.7;ctx.stroke();
+      s.x-=(.002+speed*.015)*s.z;if(s.x<0)s.x=1;
     });
     // Labels
     ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='13px Georgia';ctx.textAlign='center';
     ctx.fillText('At Rest (v = 0)',W*.25,35);
     ctx.fillText(`At ${(speed*100).toFixed(0)}% Speed of Light`,W*.75,35);
-    // Measurement ruler grid on right side
-    const rulerY=H*.45-35;
-    ctx.strokeStyle=`rgba(240,200,140,${.08+speed*.1})`;ctx.lineWidth=.5;
-    for(let i=-5;i<=5;i++){
-      const rx=W*.75+i*16*contraction;
-      ctx.beginPath();ctx.moveTo(rx,rulerY);ctx.lineTo(rx,rulerY+70);ctx.stroke();
-    }
     // Divider with glow
     ctx.beginPath();ctx.moveTo(W/2,20);ctx.lineTo(W/2,H-20);
     ctx.strokeStyle='rgba(240,200,140,.12)';ctx.lineWidth=1;ctx.setLineDash([5,5]);ctx.shadowColor='rgba(240,200,140,.15)';ctx.shadowBlur=5;ctx.stroke();ctx.shadowBlur=0;ctx.setLineDash([]);
@@ -2376,37 +2040,16 @@ function initCanvas10(){
     ctx.moveTo(W*.7,cy+75);
     ctx.quadraticCurveTo(W*.85,cy-80,W*.7,cy-75);
     ctx.strokeStyle='rgba(240,200,140,.12)';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
-    // Tiny rocket on path with light trail
+    // Tiny rocket on path
     const rocketAngle=time*.8;const rocketT=.5+.5*Math.sin(rocketAngle);
     const rocketX=W*.7+35*Math.cos(rocketAngle);
     const rocketY=cy-75+150*rocketT;
-    // Light trail
-    ctx.beginPath();
-    for(let t=0;t<20;t++){
-      const ta=rocketAngle-t*.08;const tt=.5+.5*Math.sin(ta);
-      const tx=W*.7+35*Math.cos(ta);const ty=cy-75+150*tt;
-      t===0?ctx.moveTo(tx,ty):ctx.lineTo(tx,ty);
-    }
-    ctx.strokeStyle='rgba(100,180,255,.15)';ctx.lineWidth=3;ctx.stroke();
-    ctx.strokeStyle='rgba(200,220,255,.08)';ctx.lineWidth=6;ctx.stroke();
-    // Doppler-shifted stars along travel path
-    for(let i=0;i<8;i++){
-      const sa=rocketAngle+i*.4;const sDir=Math.cos(sa);
-      const starCol=sDir>0?`rgba(100,150,255,.3)`:`rgba(255,150,100,.3)`;
-      const stx=W*.7+50*Math.cos(sa);const sty=cy+60*Math.sin(sa);
-      ctx.beginPath();ctx.arc(stx,sty,1.5,0,Math.PI*2);ctx.fillStyle=starCol;ctx.fill();
-    }
     ctx.save();ctx.translate(rocketX,rocketY);ctx.rotate(Math.sin(rocketAngle)*0.3);
     ctx.font='16px sans-serif';ctx.textAlign='center';ctx.fillText('🚀',0,0);
     ctx.restore();
     // Divider
     ctx.beginPath();ctx.moveTo(cx,30);ctx.lineTo(cx,H-30);
     ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
-    // Slowly rotating Earth icon
-    ctx.save();ctx.translate(W*.3,cy+85);ctx.rotate(time*.1);
-    ctx.font='20px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🌍',0,0);
-    ctx.restore();
-
     // Earth twin (ages)
     drawTwin(W*.3,cy-15,ageFactor,'🌍 Earth Twin',false);
     // Traveler twin (stays young)
@@ -2417,26 +2060,14 @@ function initCanvas10(){
     ctx.fillText(`Age: ${(25+ageFactor*50).toFixed(0)} years`,W*.3,cy+110);
     ctx.fillText(`Age: ${(25+ageFactor*5).toFixed(0)} years`,W*.7,cy+110);
     ctx.shadowBlur=0;
-    // Timeline visualization: proper time vs coordinate time
-    const barY=H-48,barW=W*.6,barX=(W-barW)/2;
-    ctx.fillStyle='rgba(255,255,255,.04)';ctx.fillRect(barX,barY-2,barW,22);
+    // Time difference bar at bottom
+    const barY=H-40,barW=W*.6,barX=(W-barW)/2;
+    ctx.fillStyle='rgba(255,255,255,.05)';ctx.fillRect(barX,barY,barW,12);
     const earthFill=barW*(.5+ageFactor*.5);const travelFill=barW*(.5+ageFactor*.05);
-    // Earth proper time (gold)
-    ctx.fillStyle='rgba(255,180,80,.5)';ctx.fillRect(barX,barY,earthFill,6);
-    ctx.shadowColor='rgba(255,180,80,.3)';ctx.shadowBlur=4;
-    ctx.fillRect(barX,barY,earthFill,6);ctx.shadowBlur=0;
-    // Traveler proper time (blue)
-    ctx.fillStyle='rgba(100,180,255,.5)';ctx.fillRect(barX,barY+10,travelFill,6);
-    ctx.shadowColor='rgba(100,180,255,.3)';ctx.shadowBlur=4;
-    ctx.fillRect(barX,barY+10,travelFill,6);ctx.shadowBlur=0;
-    // Labels
-    ctx.fillStyle='rgba(255,200,100,.5)';ctx.font='9px Georgia';ctx.textAlign='left';
-    ctx.fillText('Coordinate time (Earth)',barX,barY-5);
-    ctx.fillStyle='rgba(100,180,255,.5)';
-    ctx.fillText('Proper time (Traveler)',barX,barY+24);
-    ctx.textAlign='center';
-    ctx.fillStyle='rgba(255,255,255,.3)';ctx.font='10px Georgia';
-    ctx.fillText(`Δτ = ${((ageFactor*.5-ageFactor*.05)*50).toFixed(0)} years difference`,W/2,barY+36);
+    ctx.fillStyle='rgba(255,180,80,.4)';ctx.fillRect(barX,barY,earthFill,5);
+    ctx.fillStyle='rgba(100,180,255,.4)';ctx.fillRect(barX,barY+7,travelFill,5);
+    ctx.fillStyle='rgba(255,255,255,.3)';ctx.font='9px Georgia';
+    ctx.fillText('Earth time elapsed',W/2,barY-4);
     requestAnimationFrame(animate);
   }
   animate();
