@@ -1268,7 +1268,7 @@ function initCanvas1(){
   function resize(){
     W=canvas.offsetWidth||700;H=canvas.offsetHeight||400;
     canvas.width=W;canvas.height=H;
-    groundY=H*.78;treeX=W*.25;treeTrunkTop=groundY-90;canopyY=treeTrunkTop-30;appleStartY=canopyY+18;resetApple();
+    groundY=H*.78;treeX=W*.25;treeTrunkTop=groundY-180;canopyY=treeTrunkTop-40;appleStartY=canopyY+18;resetApple();
   }
   resize();window.addEventListener('resize',resize);
 
@@ -1739,7 +1739,7 @@ function initCanvas1(){
       apple.y=appleStartY+Math.sin(time*3)*.5;
       if(apple.timer>2.0){apple.phase='fall';apple.timer=0;apple.vy=0;}
     } else if(apple.phase==='fall'){
-      apple.vy+=.25; // gravity acceleration
+      apple.vy+=.18; // gravity acceleration (slower for taller tree)
       apple.y+=apple.vy;
       if(apple.y>=headHitY){
         apple.y=headHitY;
