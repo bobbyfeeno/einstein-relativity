@@ -1739,7 +1739,7 @@ function initCanvas1(){
       apple.y=appleStartY+Math.sin(time*3)*.5;
       if(apple.timer>2.0){apple.phase='fall';apple.timer=0;apple.vy=0;}
     } else if(apple.phase==='fall'){
-      apple.vy+=.18; // gravity acceleration (slower for taller tree)
+      apple.vy+=.08; // gravity acceleration (slow dramatic fall)
       apple.y+=apple.vy;
       if(apple.y>=headHitY){
         apple.y=headHitY;
